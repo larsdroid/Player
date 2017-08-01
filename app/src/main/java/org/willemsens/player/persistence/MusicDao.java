@@ -1,7 +1,14 @@
 package org.willemsens.player.persistence;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import org.willemsens.player.model.Directory;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.willemsens.player.persistence.MusicContract.DirectoryEntry;
 
 public class MusicDao {
     private final SQLiteDatabase database;
@@ -16,23 +23,23 @@ public class MusicDao {
         dbHelper.close();
     }
 
-    public void/*ToDoList*/ getAllDirectories() {
-        /*ToDoList toDoList = new ToDoList();
+    public List<Directory> getAllDirectories() {
+        ArrayList<Directory> directories = new ArrayList<>();
 
-        Cursor cursor = database.query(ToDoContract.ToDoEntry.TABLE_NAME, ToDoContract.ToDoEntry.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor = database.query(DirectoryEntry.TABLE_NAME, DirectoryEntry.ALL_COLUMNS, null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            ToDoItem item = cursorToToDoItem(cursor);
-            toDoList.addItem(item);
+            Directory directory = cursorToDirectory(cursor);
+            directories.add(directory);
             cursor.moveToNext();
         }
         cursor.close();
 
-        return toDoList;*/
+        return directories;
     }
 
-    /*private ToDoItem cursorToToDoItem(Cursor cursor) {
-        return new ToDoItem(cursor.getLong(0), cursor.getString(1));
-    }*/
+    private Directory cursorToDirectory(Cursor cursor) {
+        return new Directory(cursor.getString(1), cursor.isNull(2) ? null : cursor.getString(2));
+    }
 }

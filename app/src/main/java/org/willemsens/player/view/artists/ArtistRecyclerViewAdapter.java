@@ -1,4 +1,4 @@
-package org.willemsens.player.songs;
+package org.willemsens.player.view.artists;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
-import org.willemsens.player.songs.SongsFragment.OnListFragmentInteractionListener;
-import org.willemsens.player.songs.dummy.DummyContent.DummyItem;
+import org.willemsens.player.view.artists.ArtistsFragment.OnListFragmentInteractionListener;
+import org.willemsens.player.view.artists.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
@@ -17,12 +17,12 @@ import java.util.List;
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
+public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
 
     private final List<DummyItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public SongRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public ArtistRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -30,7 +30,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_song, parent, false);
+                .inflate(R.layout.fragment_artist, parent, false);
         return new ViewHolder(view);
     }
 

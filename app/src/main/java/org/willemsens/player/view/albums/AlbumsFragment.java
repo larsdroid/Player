@@ -1,4 +1,4 @@
-package org.willemsens.player.albums;
+package org.willemsens.player.view.albums;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.willemsens.player.R;
-import org.willemsens.player.albums.dummy.DummyContent;
-import org.willemsens.player.albums.dummy.DummyContent.DummyItem;
+import org.willemsens.player.view.albums.dummy.DummyContent;
+import org.willemsens.player.view.albums.dummy.DummyContent.DummyItem;
 
 /**
  * A fragment representing a list of Items.

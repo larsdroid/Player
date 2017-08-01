@@ -1,4 +1,4 @@
-package org.willemsens.player.albums;
+package org.willemsens.player.view.albums;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,8 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
-import org.willemsens.player.albums.AlbumsFragment.OnListFragmentInteractionListener;
-import org.willemsens.player.albums.dummy.DummyContent.DummyItem;
+import org.willemsens.player.view.albums.AlbumsFragment.OnListFragmentInteractionListener;
+import org.willemsens.player.view.albums.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 

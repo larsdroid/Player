@@ -1,4 +1,4 @@
-package org.willemsens.player.main;
+package org.willemsens.player.view.main;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

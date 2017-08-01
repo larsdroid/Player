@@ -1,17 +1,20 @@
-package org.willemsens.player.main;
+package org.willemsens.player.view.main;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 import org.willemsens.player.R;
-import org.willemsens.player.albums.AlbumsFragment;
-import org.willemsens.player.artists.ArtistsFragment;
-import org.willemsens.player.settings.SettingsFragment;
-import org.willemsens.player.songs.SongsFragment;
+import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.view.albums.AlbumsFragment;
+import org.willemsens.player.view.artists.ArtistsFragment;
+import org.willemsens.player.view.settings.SettingsFragment;
+import org.willemsens.player.view.songs.SongsFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,11 +28,18 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     private MenuItem previousMenuItem;
 
+    private MusicDao musicDao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        this.musicDao = new MusicDao(getApplicationContext());
+        for (Directory dir : this.musicDao.getAllDirectories()) {
+            Log.d(getClass().getName(), dir.getPath());
+        }
 
         addEventHandlers();
         setupViewPager();

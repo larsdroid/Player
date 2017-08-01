@@ -1,4 +1,4 @@
-package org.willemsens.player.settings;
+package org.willemsens.player.view.settings;
 
 import android.content.Context;
 import android.net.Uri;

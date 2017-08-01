@@ -1,4 +1,4 @@
-package org.willemsens.player.songs;
+package org.willemsens.player.view.artists;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.willemsens.player.R;
-import org.willemsens.player.songs.dummy.DummyContent;
-import org.willemsens.player.songs.dummy.DummyContent.DummyItem;
+import org.willemsens.player.view.artists.dummy.DummyContent;
+import org.willemsens.player.view.artists.dummy.DummyContent.DummyItem;
 
 /**
  * A fragment representing a list of Items.
@@ -20,7 +20,7 @@ import org.willemsens.player.songs.dummy.DummyContent.DummyItem;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class SongsFragment extends Fragment {
+public class ArtistsFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -32,13 +32,13 @@ public class SongsFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SongsFragment() {
+    public ArtistsFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static SongsFragment newInstance(int columnCount) {
-        SongsFragment fragment = new SongsFragment();
+    public static ArtistsFragment newInstance(int columnCount) {
+        ArtistsFragment fragment = new ArtistsFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -57,7 +57,7 @@ public class SongsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_songs_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_artists_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -68,7 +68,7 @@ public class SongsFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new SongRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(new ArtistRecyclerViewAdapter(DummyContent.ITEMS, mListener));
         }
         return view;
     }

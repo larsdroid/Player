@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.willemsens.player.main.MainActivity">
+    tools:context=".view.main.MainActivity">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager"

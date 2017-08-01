@@ -1,4 +1,4 @@
-package org.willemsens.player.songs.dummy;
+package org.willemsens.player.view.albums.dummy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
