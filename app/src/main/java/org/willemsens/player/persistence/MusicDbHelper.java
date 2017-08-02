@@ -3,20 +3,15 @@ package org.willemsens.player.persistence;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
-import android.util.Log;
-
-import java.io.File;
 
 import static org.willemsens.player.persistence.MusicContract.AlbumEntry;
 import static org.willemsens.player.persistence.MusicContract.ArtistEntry;
 import static org.willemsens.player.persistence.MusicContract.DirectoryEntry;
 import static org.willemsens.player.persistence.MusicContract.SongEntry;
 
-public class MusicDbHelper extends SQLiteOpenHelper {
+class MusicDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Music.db";
-    private final Context context;
 
     private static final String[] SQL_CREATE_STATEMENTS = {
             "CREATE TABLE " + ArtistEntry.TABLE_NAME + " (" +
@@ -56,7 +51,6 @@ public class MusicDbHelper extends SQLiteOpenHelper {
 
     MusicDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.context = context;
     }
 
     @Override
@@ -65,14 +59,10 @@ public class MusicDbHelper extends SQLiteOpenHelper {
             db.execSQL(createStatement);
         }
 
-        File musicDirectory = this.context.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        if (musicDirectory != null) {
-            db.execSQL("INSERT INTO " + DirectoryEntry.TABLE_NAME +
-                    " (" + DirectoryEntry.COLUMN_NAME_PATH + ", " + DirectoryEntry.COLUMN_NAME_SCAN_TIMESTAMP + ")" +
-                    " VALUES ('" + musicDirectory.getAbsolutePath() + "', NULL)");
-        } else {
-            Log.d(getClass().getName(), "Default music directory is NULL.");
-        }
+        db.execSQL("INSERT INTO " + DirectoryEntry.TABLE_NAME +
+                " (" + DirectoryEntry.COLUMN_NAME_PATH +
+                ", " + DirectoryEntry.COLUMN_NAME_SCAN_TIMESTAMP + ")" +
+                " VALUES ('/storage/sdcard/Music', NULL)");
     }
 
     @Override
