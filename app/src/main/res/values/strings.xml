@@ -5,8 +5,6 @@
     <string name="title_songs">Songs</string>
     <string name="title_settings">Settings</string>
 
-    <string name="key_scan_directory">org.willemsens.player.SCANNER_DIR</string>
-
     <string name="scanner_service_description">Scans a select number of directories (listed in settings) for music files.</string>
     <string name="purging_service_description">Updates the list of songs, albums and artists in case music files are removed from storage.</string>
 

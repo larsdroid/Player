@@ -5,7 +5,8 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.willemsens.player.R;
+import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,18 +16,19 @@ import java.io.IOException;
  * updates the file's information in the music DB.
  */
 public class FileScannerService extends IntentService {
+    private MusicDao musicDao;
+
     public FileScannerService() {
         super(FileScannerService.class.getName());
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        if (intent != null && intent.getStringExtra(getString(R.string.key_scan_directory)) != null) {
-            final String directoryPath = intent.getStringExtra(getString(R.string.key_scan_directory));
+        checkMusicDao();
 
-            File root = new File(directoryPath);
+        for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
-                root = root.getCanonicalFile();
+                File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
                     processDirectory(root);
                 } else {
@@ -50,6 +52,12 @@ public class FileScannerService extends IntentService {
                     Log.d(getClass().getName(), "Found " + canonicalFile.getAbsolutePath());
                 }
             }
+        }
+    }
+
+    private void checkMusicDao() {
+        if (this.musicDao == null) {
+            this.musicDao = new MusicDao(getApplicationContext());
         }
     }
 }
