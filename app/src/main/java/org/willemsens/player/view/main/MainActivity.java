@@ -1,23 +1,22 @@
 package org.willemsens.player.view.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
+import org.willemsens.player.files.FileScannerService;
 import org.willemsens.player.model.Directory;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.view.albums.AlbumsFragment;
 import org.willemsens.player.view.artists.ArtistsFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.SongsFragment;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.viewpager)
@@ -38,7 +37,9 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         this.musicDao = new MusicDao(getApplicationContext());
         for (Directory dir : this.musicDao.getAllDirectories()) {
-            Log.d(getClass().getName(), dir.getPath());
+            Intent intent = new Intent(this, FileScannerService.class);
+            intent.putExtra(getString(R.string.key_scan_directory), dir.getPath());
+            startService(intent);
         }
 
         addEventHandlers();

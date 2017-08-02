@@ -39,13 +39,16 @@ public class FileScannerService extends IntentService {
     }
 
     private void processDirectory(File currentRoot) throws IOException {
-        for (File file : currentRoot.listFiles()) {
-            final File canonicalFile = file.getCanonicalFile();
-            if (canonicalFile.isDirectory()) {
-                processDirectory(canonicalFile);
-            } else {
-                // TODO: process file: ID3 tag and submit to directory
-                Log.d(getClass().getName(), "Found " + canonicalFile.getAbsolutePath());
+        File[] files = currentRoot.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                final File canonicalFile = file.getCanonicalFile();
+                if (canonicalFile.isDirectory()) {
+                    processDirectory(canonicalFile);
+                } else {
+                    // TODO: process file: ID3 tag and submit to directory
+                    Log.d(getClass().getName(), "Found " + canonicalFile.getAbsolutePath());
+                }
             }
         }
     }
