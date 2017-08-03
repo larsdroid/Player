@@ -10,6 +10,8 @@ import android.view.MenuItem;
 
 import org.willemsens.player.R;
 import org.willemsens.player.files.FileScannerService;
+import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.albums.AlbumsFragment;
 import org.willemsens.player.view.artists.ArtistsFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
@@ -18,7 +20,9 @@ import org.willemsens.player.view.songs.SongsFragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements BottomNavigationView.OnNavigationItemSelectedListener,
+        DataAccessProvider {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
     BottomNavigationView navigation;
 
     private MenuItem previousMenuItem;
+
+    private MusicDao musicDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         Intent intent = new Intent(this, FileScannerService.class);
         startService(intent);
+
+        this.musicDao = new MusicDao(getApplicationContext());
 
         addEventHandlers();
         setupViewPager();
@@ -91,10 +99,15 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
     private void setupViewPager() {
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(AlbumsFragment.newInstance(2));
+        adapter.addFragment(AlbumsFragment.newInstance());
         adapter.addFragment(ArtistsFragment.newInstance(2));
         adapter.addFragment(SongsFragment.newInstance(2));
         adapter.addFragment(SettingsFragment.newInstance("", ""));
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    public MusicDao getMusicDao() {
+        return this.musicDao;
     }
 }

@@ -4,7 +4,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
 import org.willemsens.player.model.Directory;
 import org.willemsens.player.persistence.MusicDao;
 
@@ -48,8 +50,14 @@ public class FileScannerService extends IntentService {
                 if (canonicalFile.isDirectory()) {
                     processDirectory(canonicalFile);
                 } else {
-                    // TODO: process file: ID3 tag and submit to directory
-                    Log.d(getClass().getName(), "Found " + canonicalFile.getAbsolutePath());
+                    try {
+                        AudioFile audioFile = AudioFileIO.read(file);
+
+                        String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
+                        Log.d(getClass().getName(), "ALBUM: " + albumName);
+
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }

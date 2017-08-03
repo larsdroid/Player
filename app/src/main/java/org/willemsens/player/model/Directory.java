@@ -14,15 +14,12 @@ public class Directory {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
+    private final long id;
     private final String path;
     private Date scanTimestamp;
 
-    public Directory(String path, Date scanTimestamp) {
-        this.path = path;
-        this.scanTimestamp = scanTimestamp;
-    }
-
-    public Directory(String path, String txtStamp) {
+    public Directory(long id, String path, String txtStamp) {
+        this.id = id;
         this.path = path;
         this.scanTimestamp = null;
         if (txtStamp != null) {
