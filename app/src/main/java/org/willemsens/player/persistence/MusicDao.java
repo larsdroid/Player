@@ -48,7 +48,8 @@ public class MusicDao {
     public List<Album> getAllAlbums() {
         ArrayList<Album> albums = new ArrayList<>();
 
-        Cursor cursor = database.query(AlbumEntry.TABLE_NAME, AlbumEntry.ALL_COLUMNS, null, null, null, null, null);
+        Cursor cursor = database.query(AlbumEntry.TABLE_NAME, AlbumEntry.ALL_COLUMNS, null, null,
+                null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -64,5 +65,16 @@ public class MusicDao {
     private Album cursorToAlbum(Cursor cursor) {
         // TODO: FK, refer to Album (or its ID?)
         return new Album(cursor.getLong(0), cursor.getString(1), null, cursor.getInt(3), cursor.getInt(4));
+    }
+
+    public boolean albumExists(Album album) {
+        final Cursor cursor = database.query(AlbumEntry.TABLE_NAME, AlbumEntry.ALL_COLUMNS,
+                AlbumEntry.COLUMN_NAME_NAME + " = ? AND " +
+                AlbumEntry.COLUMN_NAME_ARTIST + " = ?",
+                new String[] {album.getName(), String.valueOf(album.getArtist().getId())},
+                null, null, null);
+        final boolean exists = cursor.getCount() != 0;
+        cursor.close();
+        return exists;
     }
 }

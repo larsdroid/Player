@@ -29,8 +29,9 @@ class MusicContract {
         static final String COLUMN_NAME_ARTIST = "artist";
         static final String COLUMN_NAME_ALBUM = "album";
         static final String COLUMN_NAME_LENGTH = "length";
+        static final String COLUMN_NAME_FILE = "file";
 
-        static final String[] ALL_COLUMNS = { _ID, COLUMN_NAME_NAME, COLUMN_NAME_ARTIST, COLUMN_NAME_ALBUM, COLUMN_NAME_LENGTH };
+        static final String[] ALL_COLUMNS = { _ID, COLUMN_NAME_NAME, COLUMN_NAME_ARTIST, COLUMN_NAME_ALBUM, COLUMN_NAME_LENGTH, COLUMN_NAME_FILE };
     }
 
     static class DirectoryEntry implements BaseColumns {
