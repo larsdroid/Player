@@ -5,8 +5,8 @@ import android.support.annotation.NonNull;
 public class Song implements Comparable<Song> {
     private final Long id;
     private final String name;
-    private final Artist artist;
-    private final Album album;
+    private Artist artist;
+    private Album album;
     private final int length; // In seconds
     private final String file;
 
@@ -46,6 +46,14 @@ public class Song implements Comparable<Song> {
 
     public String getFile() {
         return file;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
+    }
+
+    public void setAlbum(Album album) {
+        this.album = album;
     }
 
     @Override

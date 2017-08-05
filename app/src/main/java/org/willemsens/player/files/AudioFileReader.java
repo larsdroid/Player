@@ -27,7 +27,8 @@ class AudioFileReader {
             final Artist albumArtist = new Artist(albumArtistName);
 
             final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
-            final int albumYear = Integer.parseInt(audioFile.getTag().getFirst(FieldKey.YEAR));
+            final String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
+            final Integer albumYear = yearString != null && !yearString.isEmpty() ? Integer.parseInt(yearString) : null;
             final Album album = new Album(albumName, albumArtist, albumYear, 0);
 
             final String songArtistName = audioFile.getTag().getFirst(FieldKey.ARTIST);

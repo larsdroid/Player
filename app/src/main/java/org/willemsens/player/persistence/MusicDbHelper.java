@@ -21,7 +21,7 @@ class MusicDbHelper extends SQLiteOpenHelper {
                     AlbumEntry._ID + " INTEGER PRIMARY KEY," +
                     AlbumEntry.COLUMN_NAME_NAME + " TEXT NOT NULL," +
                     AlbumEntry.COLUMN_NAME_ARTIST + " INTEGER NOT NULL," +
-                    AlbumEntry.COLUMN_NAME_YEAR + " INTEGER NOT NULL," +
+                    AlbumEntry.COLUMN_NAME_YEAR + " INTEGER," + // TODO: NOT NULL???
                     AlbumEntry.COLUMN_NAME_LENGTH + " INTEGER NOT NULL," +   // In seconds
                     "FOREIGN KEY (" + AlbumEntry.COLUMN_NAME_ARTIST + ") REFERENCES " +
                         ArtistEntry.TABLE_NAME + "(" + ArtistEntry._ID + "))",

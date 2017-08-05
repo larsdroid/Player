@@ -3,7 +3,7 @@ package org.willemsens.player.model;
 import android.support.annotation.NonNull;
 
 public class Artist implements Comparable<Artist> {
-    private final Long id;
+    private Long id;
     private final String name;
 
     public Artist(Long id, String name) {
@@ -16,12 +16,24 @@ public class Artist implements Comparable<Artist> {
         this.name = name;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String toString() {
+        return "Artist{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     @Override

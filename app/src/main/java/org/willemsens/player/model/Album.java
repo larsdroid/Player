@@ -3,13 +3,13 @@ package org.willemsens.player.model;
 import android.support.annotation.NonNull;
 
 public class Album implements Comparable<Album> {
-    private final Long id;
+    private Long id;
     private final String name;
-    private final Artist artist;
-    private final int year;
+    private Artist artist;
+    private final Integer year;
     private final int length;
 
-    public Album(long id, String name, Artist artist, int year, int length) {
+    public Album(long id, String name, Artist artist, Integer year, int length) {
         this.id = id;
         this.name = name;
         this.artist = artist;
@@ -17,12 +17,20 @@ public class Album implements Comparable<Album> {
         this.length = length;
     }
 
-    public Album(String name, Artist artist, int year, int length) {
+    public Album(String name, Artist artist, Integer year, int length) {
         this.id = null;
         this.name = name;
         this.artist = artist;
         this.year = year;
         this.length = length;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -33,12 +41,16 @@ public class Album implements Comparable<Album> {
         return artist;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
     public int getLength() {
         return length;
+    }
+
+    public void setArtist(Artist artist) {
+        this.artist = artist;
     }
 
     @Override
