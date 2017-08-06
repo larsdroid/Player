@@ -38,6 +38,14 @@ class AudioFileReader {
             final int songLength = audioFile.getAudioHeader().getTrackLength();
             final Song song = new Song(songName, songArtist, album, songLength, file.getCanonicalPath());
 
+            if ((albumArtistName == null || albumArtistName.trim().isEmpty()) && songArtistName != null && !songArtistName.trim().isEmpty()) {
+                song.getAlbum().setArtist(songArtist);
+            }
+
+            if ((songArtistName == null || songArtistName.trim().isEmpty()) && albumArtistName != null && !albumArtistName.trim().isEmpty()) {
+                song.setArtist(albumArtist);
+            }
+
             Log.d(AudioFileReader.class.getName(), "SONG: " + song);
 
             return song;

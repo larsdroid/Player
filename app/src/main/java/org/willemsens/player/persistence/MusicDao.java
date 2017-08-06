@@ -8,6 +8,7 @@ import android.util.Log;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
+import org.willemsens.player.model.Song;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Set;
 import static org.willemsens.player.persistence.MusicContract.AlbumEntry;
 import static org.willemsens.player.persistence.MusicContract.ArtistEntry;
 import static org.willemsens.player.persistence.MusicContract.DirectoryEntry;
+import static org.willemsens.player.persistence.MusicContract.SongEntry;
 
 public class MusicDao {
     private final SQLiteDatabase database;
@@ -67,7 +69,7 @@ public class MusicDao {
         return albums;
     }
 
-    public List<Artist> getAllArtists() {
+    private List<Artist> getAllArtists() {
         ArrayList<Artist> artists = new ArrayList<>();
 
         Cursor cursor = database.query(ArtistEntry.TABLE_NAME, ArtistEntry.ALL_COLUMNS, null, null,
@@ -86,11 +88,16 @@ public class MusicDao {
 
     private Album cursorToAlbum(Cursor cursor) {
         // TODO: FK, refer to Album (or its ID?)
-        return new Album(cursor.getLong(0), cursor.getString(1), null, cursor.getInt(3), cursor.getInt(4));
+        return new Album(cursor.getLong(0), cursor.getString(1), null/*artist*/, cursor.getInt(3), cursor.getInt(4));
     }
 
     private Artist cursorToArtist(Cursor cursor) {
         return new Artist(cursor.getLong(0), cursor.getString(1));
+    }
+
+    private Song cursorToSong(Cursor cursor) {
+        // TODO: FK, refer to Album (or its ID?)
+        return new Song(cursor.getLong(0), cursor.getString(1), null/*artist*/, null/*album*/, cursor.getInt(4), cursor.getString(5));
     }
 
     /**
@@ -164,5 +171,59 @@ public class MusicDao {
 
             Log.d(getClass().getName(), "Inserted Artist: " + artist);
         }
+    }
+
+    /**
+     * Checks songs in the DB. If a song exists, its ID is updated in the POJO. If the song doesn't
+     * exist, it's inserted in the DB and the new ID is set in the POJO.
+     * @param songs The set of songs to check for in the DB.
+     */
+    public void checkSongsSelectInsert(Set<Song> songs) {
+        Song dbSong;
+        for (Song song : songs) {
+            dbSong = findSong(song);
+            if (dbSong == null) {
+                insertSong(song);
+            } else {
+                song.setId(dbSong.getId());
+            }
+        }
+    }
+
+    private Song findSong(Song song) {
+        Song result = null;
+
+        Cursor cursor = database.query(SongEntry.TABLE_NAME, SongEntry.ALL_COLUMNS,
+                SongEntry.COLUMN_NAME_FILE + " = ?", new String[] { song.getFile() },
+                null, null, null);
+
+        cursor.moveToFirst();
+        if (!cursor.isAfterLast()) {
+            result = cursorToSong(cursor);
+        }
+        cursor.close();
+
+        return result;
+    }
+
+    /**
+     * Inserts the Song in the DB and sets the Song object's ID to the new ID from the DB.
+     * @param song The song to insert.
+     */
+    private void insertSong(Song song) {
+        ContentValues values = new ContentValues();
+        values.put(SongEntry.COLUMN_NAME_NAME, song.getName());
+        values.put(SongEntry.COLUMN_NAME_ARTIST, song.getArtist().getId());
+        if (song.getAlbum() == null) {
+            values.putNull(SongEntry.COLUMN_NAME_ALBUM);
+        } else {
+            values.put(SongEntry.COLUMN_NAME_ALBUM, song.getAlbum().getId());
+        }
+        values.put(SongEntry.COLUMN_NAME_LENGTH, song.getLength());
+        values.put(SongEntry.COLUMN_NAME_FILE, song.getFile());
+        long id = database.insert(SongEntry.TABLE_NAME, null, values);
+        song.setId(id);
+
+        Log.d(getClass().getName(), "Inserted Song: " + song);
     }
 }

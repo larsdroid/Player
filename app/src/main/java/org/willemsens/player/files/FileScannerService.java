@@ -54,8 +54,7 @@ public class FileScannerService extends IntentService {
                     //       simply iterate all songs and sum those with an equal album (Album::equals)
                     this.musicDao.insertAlbums(albums);
 
-                    // TODO: filter songs here
-                    // TODO: add songs here
+                    this.musicDao.checkSongsSelectInsert(songs);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }

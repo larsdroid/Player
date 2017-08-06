@@ -3,7 +3,7 @@ package org.willemsens.player.model;
 import android.support.annotation.NonNull;
 
 public class Song implements Comparable<Song> {
-    private final Long id;
+    private Long id;
     private final String name;
     private Artist artist;
     private Album album;
@@ -28,6 +28,10 @@ public class Song implements Comparable<Song> {
         this.file = file;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
@@ -48,6 +52,10 @@ public class Song implements Comparable<Song> {
         return file;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setArtist(Artist artist) {
         this.artist = artist;
     }
@@ -64,6 +72,7 @@ public class Song implements Comparable<Song> {
                 ", artist=" + artist +
                 ", album=" + album +
                 ", length=" + length +
+                ", file=" + file +
                 '}';
     }
 
