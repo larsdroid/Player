@@ -100,8 +100,8 @@ public class MainActivity extends AppCompatActivity
     private void setupViewPager() {
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(AlbumsFragment.newInstance());
-        adapter.addFragment(ArtistsFragment.newInstance(2));
-        adapter.addFragment(SongsFragment.newInstance(2));
+        adapter.addFragment(ArtistsFragment.newInstance());
+        adapter.addFragment(SongsFragment.newInstance());
         adapter.addFragment(SettingsFragment.newInstance("", ""));
         viewPager.setAdapter(adapter);
     }

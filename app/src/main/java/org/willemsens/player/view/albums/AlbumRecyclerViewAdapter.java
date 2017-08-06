@@ -14,10 +14,10 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
  */
 public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.ViewHolder> {
-    private final List<Album> mValues;
+    private final List<Album> albums;
 
-    public AlbumRecyclerViewAdapter(List<Album> items) {
-        mValues = items;
+    public AlbumRecyclerViewAdapter(List<Album> albums) {
+        this.albums = albums;
     }
 
     @Override
@@ -29,14 +29,14 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(String.valueOf(mValues.get(position).getYear()));
-        holder.mContentView.setText(mValues.get(position).getName());
+        holder.mItem = albums.get(position);
+        holder.mIdView.setText(String.valueOf(albums.get(position).getYear()));
+        holder.mContentView.setText(albums.get(position).getName());
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return albums.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

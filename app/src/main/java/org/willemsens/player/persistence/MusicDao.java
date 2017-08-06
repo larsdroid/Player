@@ -86,7 +86,7 @@ public class MusicDao {
         return albums;
     }
 
-    private List<Artist> getAllArtists() {
+    public List<Artist> getAllArtists() {
         ArrayList<Artist> artists = new ArrayList<>();
 
         Cursor cursor = database.query(ArtistEntry.TABLE_NAME, ArtistEntry.ALL_COLUMNS, null, null,
@@ -238,7 +238,7 @@ public class MusicDao {
         }
     }
 
-    private List<Song> getAllSongs() {
+    public List<Song> getAllSongs() {
         ArrayList<Song> songs = new ArrayList<>();
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();

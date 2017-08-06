@@ -7,24 +7,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
-import org.willemsens.player.view.artists.ArtistsFragment.OnListFragmentInteractionListener;
-import org.willemsens.player.view.artists.dummy.DummyContent.DummyItem;
+import org.willemsens.player.model.Artist;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
+ * {@link RecyclerView.Adapter} that can display an {@link Artist}.
  */
 public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
+    private final List<Artist> artists;
 
-    private final List<DummyItem> mValues;
-    private final OnListFragmentInteractionListener mListener;
-
-    public ArtistRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
-        mListener = listener;
+    public ArtistRecyclerViewAdapter(List<Artist> artists) {
+        this.artists = artists;
     }
 
     @Override
@@ -36,32 +30,21 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+        holder.mItem = artists.get(position);
+        holder.mIdView.setText(String.valueOf(artists.get(position).getId()));
+        holder.mContentView.setText(artists.get(position).getName());
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return artists.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public Artist mItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -75,4 +58,10 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
+
+    // http://musicbrainz.org/ws/2/artist/?query=artist:wilco
+    // http://musicbrainz.org/ws/2/artist/9e53f84d-ef44-4c16-9677-5fd4d78cbd7d?inc=url-rels
+
+    // http://musicbrainz.org/ws/2/release/?query=release:Being%20There%20AND%20artist:Wilco
+    //     Multiple results, first one has no art, second one does
 }
