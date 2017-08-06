@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -55,8 +56,24 @@ public class MusicDao {
     public List<Album> getAllAlbums() {
         ArrayList<Album> albums = new ArrayList<>();
 
-        Cursor cursor = database.query(AlbumEntry.TABLE_NAME, AlbumEntry.ALL_COLUMNS, null, null,
-                null, null, null);
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        queryBuilder
+                .setTables(AlbumEntry.TABLE_NAME
+                        + " LEFT OUTER JOIN "
+                        + ArtistEntry.TABLE_NAME
+                        + " ON ("
+                        + AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_ARTIST
+                        + " = "
+                        + ArtistEntry.TABLE_NAME + "." + ArtistEntry._ID + ")");
+
+        Cursor cursor = queryBuilder.query(database, new String[] {
+                AlbumEntry.TABLE_NAME + "." + AlbumEntry._ID,
+                AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_NAME,
+                AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_YEAR,
+                AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_LENGTH,
+                ArtistEntry.TABLE_NAME + "." + ArtistEntry._ID,
+                ArtistEntry.TABLE_NAME + "." + ArtistEntry.COLUMN_NAME_NAME },
+                null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -87,90 +104,121 @@ public class MusicDao {
     }
 
     private Album cursorToAlbum(Cursor cursor) {
-        // TODO: FK, refer to Album (or its ID?)
-        return new Album(cursor.getLong(0), cursor.getString(1), null/*artist*/, cursor.getInt(3), cursor.getInt(4));
+        final Artist albumArtist = new Artist(
+                cursor.getLong(4),
+                cursor.getString(5));
+        return new Album(
+                cursor.getLong(0),
+                cursor.getString(1),
+                albumArtist, cursor.isNull(2) ? null : cursor.getInt(2),
+                cursor.getInt(3));
     }
 
     private Artist cursorToArtist(Cursor cursor) {
         return new Artist(cursor.getLong(0), cursor.getString(1));
     }
 
-    private Song cursorToSong(Cursor cursor) {
-        // TODO: FK, refer to Album (or its ID?)
+    private Song cursorToSongLazy(Cursor cursor) {
         return new Song(cursor.getLong(0), cursor.getString(1), null/*artist*/, null/*album*/, cursor.getInt(4), cursor.getString(5));
     }
 
-    /**
-     * TODO: merge 'removeExistingAlbums' and 'insertAlbums' into a single method that handles NEW AND EXISTING Albums.
-     *       The new method can work internally with private methods.
-     * TODO: same for Artists
-     *
-     * Removes the albums that exist in the DB from the given set. Also updates the ID of the removed Album.
-     * @param albums The set to remove albums from in case they exist in the DB.
-     */
-    public void removeExistingAlbums(Set<Album> albums) {
-        for (Album databaseAlbum : getAllAlbums()) {
-            if (albums.contains(databaseAlbum)) {
-                for (Album setAlbum : albums) {
-                    if (setAlbum.equals(databaseAlbum)) {
-                        setAlbum.setId(databaseAlbum.getId());
-                        break;
-                    }
-                }
-                albums.remove(databaseAlbum);
-            }
-        }
+    private Song cursorToSongEager(Cursor cursor) {
+        final Artist albumArtist = new Artist(
+                cursor.getLong(10),
+                cursor.getString(11));
+        final Album album = new Album(
+                cursor.getLong(6),
+                cursor.getString(7),
+                albumArtist,
+                cursor.isNull(8) ? null : cursor.getInt(8),
+                cursor.getInt(9));
+        final Artist songArtist = new Artist(
+                cursor.getLong(4),
+                cursor.getString(5));
+        return new Song(
+                cursor.getLong(0),
+                cursor.getString(1),
+                songArtist,
+                album,
+                cursor.getInt(2),
+                cursor.getString(3));
     }
 
-    public void insertAlbums(Set<Album> albums) {
+    /**
+     * Checks albums in the DB. If an album exists, its ID is updated in the POJO. If the album doesn't
+     * exist, it's inserted in the DB and the new ID is set in the POJO.
+     * @param albums The set of albums to check for in the DB.
+     */
+    public void checkAlbumsSelectInsert(Set<Album> albums) {
+        final List<Album> databaseAlbums = getAllAlbums();
         for (Album album : albums) {
-            ContentValues values = new ContentValues();
-            values.put(AlbumEntry.COLUMN_NAME_NAME, album.getName());
-            if (album.getArtist() == null) {
-                values.putNull(AlbumEntry.COLUMN_NAME_ARTIST);
+            if (databaseAlbums.contains(album)) {
+                for (Album databaseAlbum : databaseAlbums) {
+                    if (album.equals(databaseAlbum)) {
+                        album.setId(databaseAlbum.getId());
+                        break;
+                    }
+                }
             } else {
-                values.put(AlbumEntry.COLUMN_NAME_ARTIST, album.getArtist().getId());
+                // TODO: calculate total length for all songs in 'album'
+                //       simply iterate all songs and
+                insertAlbum(album);
             }
-            if (album.getYear() == null) {
-                values.putNull(AlbumEntry.COLUMN_NAME_YEAR);
-            } else {
-                values.put(AlbumEntry.COLUMN_NAME_YEAR, album.getYear());
-            }
-            values.put(AlbumEntry.COLUMN_NAME_LENGTH, album.getLength());
-            long id = database.insert(AlbumEntry.TABLE_NAME, null, values);
-            album.setId(id);
-
-            Log.d(getClass().getName(), "Inserted Album: " + album);
         }
     }
 
     /**
-     * Removes the artists that exist in the DB from the given set. Also updates the ID of the removed Artist.
-     * @param artists The set to remove artists from in case they exist in the DB.
+     * Inserts the Album in the DB and sets the Album object's ID to the new ID from the DB.
+     * @param album The album to insert.
      */
-    public void removeExistingArtists(Set<Artist> artists) {
-        for (Artist databaseArtist : getAllArtists()) {
-            if (artists.contains(databaseArtist)) {
-                for (Artist setArtist : artists) {
-                    if (setArtist.equals(databaseArtist)) {
-                        setArtist.setId(databaseArtist.getId());
+    private void insertAlbum(Album album) {
+        ContentValues values = new ContentValues();
+        values.put(AlbumEntry.COLUMN_NAME_NAME, album.getName());
+        values.put(AlbumEntry.COLUMN_NAME_ARTIST, album.getArtist().getId());
+        if (album.getYear() == null) {
+            values.putNull(AlbumEntry.COLUMN_NAME_YEAR);
+        } else {
+            values.put(AlbumEntry.COLUMN_NAME_YEAR, album.getYear());
+        }
+        values.put(AlbumEntry.COLUMN_NAME_LENGTH, album.getLength());
+        long id = database.insert(AlbumEntry.TABLE_NAME, null, values);
+        album.setId(id);
+
+        Log.d(getClass().getName(), "Inserted Album: " + album);
+    }
+
+    /**
+     * Checks artists in the DB. If an artist exists, its ID is updated in the POJO. If the artist doesn't
+     * exist, it's inserted in the DB and the new ID is set in the POJO.
+     * @param artists The set of artists to check for in the DB.
+     */
+    public void checkArtistsSelectInsert(Set<Artist> artists) {
+        final List<Artist> databaseArtists = getAllArtists();
+        for (Artist artist : artists) {
+            if (databaseArtists.contains(artist)) {
+                for (Artist databaseArtist : databaseArtists) {
+                    if (artist.equals(databaseArtist)) {
+                        artist.setId(databaseArtist.getId());
                         break;
                     }
                 }
-                artists.remove(databaseArtist);
+            } else {
+                insertArtist(artist);
             }
         }
     }
 
-    public void insertArtists(Set<Artist> artists) {
-        for (Artist artist : artists) {
-            ContentValues values = new ContentValues();
-            values.put(ArtistEntry.COLUMN_NAME_NAME, artist.getName());
-            long id = database.insert(ArtistEntry.TABLE_NAME, null, values);
-            artist.setId(id);
+    /**
+     * Inserts the Artist in the DB and sets the Artist object's ID to the new ID from the DB.
+     * @param artist The artist to insert.
+     */
+    private void insertArtist(Artist artist) {
+        ContentValues values = new ContentValues();
+        values.put(ArtistEntry.COLUMN_NAME_NAME, artist.getName());
+        long id = database.insert(ArtistEntry.TABLE_NAME, null, values);
+        artist.setId(id);
 
-            Log.d(getClass().getName(), "Inserted Artist: " + artist);
-        }
+        Log.d(getClass().getName(), "Inserted Artist: " + artist);
     }
 
     /**
@@ -190,6 +238,56 @@ public class MusicDao {
         }
     }
 
+    private List<Song> getAllSongs() {
+        ArrayList<Song> songs = new ArrayList<>();
+
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        queryBuilder.setTables(SongEntry.TABLE_NAME
+                + " LEFT OUTER JOIN "
+                + ArtistEntry.TABLE_NAME + " AS A1"
+                + " ON ("
+                + SongEntry.TABLE_NAME + "." + SongEntry.COLUMN_NAME_ARTIST
+                + " = "
+                + "A1." + ArtistEntry._ID + ")"
+                + " LEFT OUTER JOIN "
+                + AlbumEntry.TABLE_NAME
+                + " ON ("
+                + SongEntry.TABLE_NAME + "." + SongEntry.COLUMN_NAME_ALBUM
+                + " = "
+                + AlbumEntry.TABLE_NAME + "." + AlbumEntry._ID + ")"
+                + " LEFT OUTER JOIN "
+                + ArtistEntry.TABLE_NAME + " AS A2"
+                + " ON ("
+                + AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_ARTIST
+                + " = "
+                + "A2." + ArtistEntry._ID + ")");
+
+        Cursor cursor = queryBuilder.query(database, new String[] {
+                        SongEntry.TABLE_NAME + "." + SongEntry._ID,
+                        SongEntry.TABLE_NAME + "." + SongEntry.COLUMN_NAME_NAME,
+                        SongEntry.TABLE_NAME + "." + SongEntry.COLUMN_NAME_LENGTH,
+                        SongEntry.TABLE_NAME + "." + SongEntry.COLUMN_NAME_FILE,
+                        "A1." + ArtistEntry._ID,
+                        "A1." + ArtistEntry.COLUMN_NAME_NAME,
+                        AlbumEntry.TABLE_NAME + "." + AlbumEntry._ID,
+                        AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_NAME,
+                        AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_YEAR,
+                        AlbumEntry.TABLE_NAME + "." + AlbumEntry.COLUMN_NAME_LENGTH,
+                        "A2." + ArtistEntry._ID,
+                        "A2." + ArtistEntry.COLUMN_NAME_NAME },
+                null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Song song = cursorToSongEager(cursor);
+            songs.add(song);
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return songs;
+    }
+
     private Song findSong(Song song) {
         Song result = null;
 
@@ -199,7 +297,7 @@ public class MusicDao {
 
         cursor.moveToFirst();
         if (!cursor.isAfterLast()) {
-            result = cursorToSong(cursor);
+            result = cursorToSongLazy(cursor);
         }
         cursor.close();
 

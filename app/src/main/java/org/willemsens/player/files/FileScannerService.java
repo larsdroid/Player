@@ -45,15 +45,8 @@ public class FileScannerService extends IntentService {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
                     processDirectory(root);
-
-                    this.musicDao.removeExistingArtists(artists);
-                    this.musicDao.insertArtists(artists);
-
-                    this.musicDao.removeExistingAlbums(albums);
-                    // TODO: calculate total length for each album in 'albums'
-                    //       simply iterate all songs and sum those with an equal album (Album::equals)
-                    this.musicDao.insertAlbums(albums);
-
+                    this.musicDao.checkArtistsSelectInsert(artists);
+                    this.musicDao.checkAlbumsSelectInsert(albums);
                     this.musicDao.checkSongsSelectInsert(songs);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");

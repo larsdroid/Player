@@ -30,7 +30,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).getYear());
+        holder.mIdView.setText(String.valueOf(mValues.get(position).getYear()));
         holder.mContentView.setText(mValues.get(position).getName());
     }
 
