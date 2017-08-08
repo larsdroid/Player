@@ -58,10 +58,4 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
             return super.toString() + " '" + mContentView.getText() + "'";
         }
     }
-
-    // http://musicbrainz.org/ws/2/artist/?query=artist:wilco
-    // http://musicbrainz.org/ws/2/artist/9e53f84d-ef44-4c16-9677-5fd4d78cbd7d?inc=url-rels
-
-    // http://musicbrainz.org/ws/2/release/?query=release:Being%20There%20AND%20artist:Wilco
-    //     Multiple results, first one has no art, second one does
 }
