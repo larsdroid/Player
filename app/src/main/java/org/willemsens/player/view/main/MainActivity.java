@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import org.willemsens.player.R;
-import org.willemsens.player.files.FileScannerService;
+import org.willemsens.player.services.FileScannerService;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.albums.AlbumsFragment;

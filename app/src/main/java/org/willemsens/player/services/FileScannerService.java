@@ -1,4 +1,4 @@
-package org.willemsens.player.files;
+package org.willemsens.player.services;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -48,6 +48,11 @@ public class FileScannerService extends IntentService {
                     this.musicDao.checkArtistsSelectInsert(artists);
                     this.musicDao.checkAlbumsSelectInsert(albums);
                     this.musicDao.checkSongsSelectInsert(songs);
+
+                    // TODO: The above three method calls should return how many records were inserted.
+                    //       In case new records were inserted of a given type, a broadcast should be sent using
+                    //       LocalBroadcastManager. Fragments (or adapters should refresh their content when
+                    //       a broadcast is received.
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }

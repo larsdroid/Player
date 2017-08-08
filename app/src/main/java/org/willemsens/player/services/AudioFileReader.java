@@ -1,4 +1,4 @@
-package org.willemsens.player.files;
+package org.willemsens.player.services;
 
 import android.util.Log;
 

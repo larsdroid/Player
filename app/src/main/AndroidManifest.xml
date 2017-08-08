@@ -21,11 +21,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".files.FileScannerService"
+        <service android:name=".services.FileScannerService"
                  android:exported="false"
                  android:description="@string/scanner_service_description" />
 
-        <service android:name=".files.PurgingService"
+        <service android:name=".services.PurgingService"
                  android:exported="false"
                  android:description="@string/purging_service_description" />
     </application>

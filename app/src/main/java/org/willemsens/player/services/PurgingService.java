@@ -1,4 +1,4 @@
-package org.willemsens.player.files;
+package org.willemsens.player.services;
 
 import android.app.IntentService;
 import android.content.Intent;
