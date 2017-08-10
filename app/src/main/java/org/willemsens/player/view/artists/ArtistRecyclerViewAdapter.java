@@ -5,14 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import org.willemsens.player.R;
+import org.willemsens.player.model.AbstractArtist;
 import org.willemsens.player.model.Artist;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display an {@link Artist}.
+ * {@link RecyclerView.Adapter} that can display an {@link AbstractArtist}.
  */
 public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
     private final List<Artist> artists;
@@ -44,7 +44,7 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public Artist mItem;
+        public AbstractArtist mItem;
 
         public ViewHolder(View view) {
             super(view);

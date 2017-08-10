@@ -6,12 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import org.willemsens.player.R;
+import org.willemsens.player.model.AbstractAlbum;
 import org.willemsens.player.model.Album;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display an {@link Album}.
+ * {@link RecyclerView.Adapter} that can display an {@link AbstractAlbum}.
  */
 public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.ViewHolder> {
     private final List<Album> albums;
@@ -30,7 +31,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = albums.get(position);
-        holder.mIdView.setText(String.valueOf(albums.get(position).getYear()));
+        holder.mIdView.setText(String.valueOf(albums.get(position).getYearReleased()));
         holder.mContentView.setText(albums.get(position).getName());
     }
 
@@ -43,7 +44,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public Album mItem;
+        public AbstractAlbum mItem;
 
         public ViewHolder(View view) {
             super(view);

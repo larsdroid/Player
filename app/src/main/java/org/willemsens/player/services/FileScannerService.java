@@ -4,6 +4,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
+import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -20,11 +23,8 @@ import java.util.Set;
  * updates the file's information in the music DB.
  */
 public class FileScannerService extends IntentService {
+    private EntityDataStore<Persistable> dataStore;
     private MusicDao musicDao;
-
-    private Set<Song> songs;
-    private Set<Album> albums;
-    private Set<Artist> artists;
 
     public FileScannerService() {
         super(FileScannerService.class.getName());
@@ -32,21 +32,24 @@ public class FileScannerService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        if (this.dataStore == null) {
+            this.dataStore = ((PlayerApplication)getApplication()).getData();
+        }
         if (this.musicDao == null) {
-            this.musicDao = new MusicDao(getApplicationContext());
+            this.musicDao = new MusicDao(this.dataStore);
         }
 
-        this.songs = new HashSet<>();
-        this.albums = new HashSet<>();
-        this.artists = new HashSet<>();
+        Set<Song> songs = new HashSet<>();
+        Set<Album> albums = new HashSet<>();
+        Set<Artist> artists = new HashSet<>();
 
         for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
-                    processDirectory(root);
-                    this.musicDao.checkArtistsSelectInsert(artists);
-                    this.musicDao.checkAlbumsSelectInsert(albums);
+                    processDirectory(root, songs, albums, artists);
+                    this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
+                    this.musicDao.checkAlbumsSelectInsert(albums, songs);
                     this.musicDao.checkSongsSelectInsert(songs);
 
                     // TODO: The above three method calls should return how many records were inserted.
@@ -62,7 +65,7 @@ public class FileScannerService extends IntentService {
         }
     }
 
-    private void processDirectory(File currentRoot) throws IOException {
+    private void processDirectory(File currentRoot, Set<Song> songs, Set<Album> albums, Set<Artist> artists) throws IOException {
         final File[] files = currentRoot.listFiles();
         if (files != null) {
             Song song;
@@ -70,41 +73,41 @@ public class FileScannerService extends IntentService {
             for (File file : files) {
                 final File canonicalFile = file.getCanonicalFile();
                 if (canonicalFile.isDirectory()) {
-                    processDirectory(canonicalFile);
+                    processDirectory(canonicalFile, songs, albums, artists);
                 } else {
                     song = AudioFileReader.readSong(canonicalFile);
-                    this.songs.add(song);
+                    songs.add(song);
 
-                    if (this.artists.contains(song.getArtist())) {
-                        for (Artist artist : this.artists) {
+                    if (artists.contains(song.getArtist())) {
+                        for (Artist artist : artists) {
                             if (artist.equals(song.getArtist())) {
                                 song.setArtist(artist);
                                 break;
                             }
                         }
                     } else {
-                        this.artists.add(song.getArtist());
+                        artists.add(song.getArtist());
                     }
 
-                    if (this.albums.contains(song.getAlbum())) {
-                        for (Album album : this.albums) {
+                    if (albums.contains(song.getAlbum())) {
+                        for (Album album : albums) {
                             if (album.equals(song.getAlbum())) {
                                 song.setAlbum(album);
                                 break;
                             }
                         }
                     } else {
-                        if (this.artists.contains(song.getAlbum().getArtist())) {
-                            for (Artist artist : this.artists) {
+                        if (artists.contains(song.getAlbum().getArtist())) {
+                            for (Artist artist : artists) {
                                 if (artist.equals(song.getAlbum().getArtist())) {
                                     song.getAlbum().setArtist(artist);
                                     break;
                                 }
                             }
                         } else {
-                            this.artists.add(song.getAlbum().getArtist());
+                            artists.add(song.getAlbum().getArtist());
                         }
-                        this.albums.add(song.getAlbum());
+                        albums.add(song.getAlbum());
                     }
                 }
             }

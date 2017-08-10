@@ -7,18 +7,19 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
+import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
-import org.willemsens.player.services.FileScannerService;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.services.FileScannerService;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.albums.AlbumsFragment;
 import org.willemsens.player.view.artists.ArtistsFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.SongsFragment;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView.OnNavigationItemSelectedListener,
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity
 
     private MenuItem previousMenuItem;
 
+    private EntityDataStore<Persistable> dataStore;
     private MusicDao musicDao;
 
     @Override
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, FileScannerService.class);
         startService(intent);
 
-        this.musicDao = new MusicDao(getApplicationContext());
+        this.dataStore = ((PlayerApplication)getApplication()).getData();
+        this.musicDao = new MusicDao(this.dataStore);
 
         addEventHandlers();
         setupViewPager();

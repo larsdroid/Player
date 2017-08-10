@@ -9,11 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
-import org.willemsens.player.view.artists.ArtistRecyclerViewAdapter;
 
 import java.util.List;
 

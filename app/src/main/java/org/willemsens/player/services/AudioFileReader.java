@@ -1,7 +1,6 @@
 package org.willemsens.player.services;
 
 import android.util.Log;
-
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
@@ -24,19 +23,30 @@ class AudioFileReader {
             final AudioFile audioFile = AudioFileIO.read(file);
 
             final String albumArtistName = audioFile.getTag().getFirst(FieldKey.ALBUM_ARTIST);
-            final Artist albumArtist = new Artist(albumArtistName);
+            final Artist albumArtist = new Artist();
+            albumArtist.setName(albumArtistName);
 
             final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
             final String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
             final Integer albumYear = yearString != null && !yearString.isEmpty() ? Integer.parseInt(yearString) : null;
-            final Album album = new Album(albumName, albumArtist, albumYear, 0);
+            final Album album = new Album();
+            album.setName(albumName);
+            album.setArtist(albumArtist);
+            album.setYearReleased(albumYear);
+            album.setLength(0);
 
             final String songArtistName = audioFile.getTag().getFirst(FieldKey.ARTIST);
-            final Artist songArtist = new Artist(songArtistName);
+            final Artist songArtist = new Artist();
+            songArtist.setName(songArtistName);
 
             final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
             final int songLength = audioFile.getAudioHeader().getTrackLength();
-            final Song song = new Song(songName, songArtist, album, songLength, file.getCanonicalPath());
+            final Song song = new Song();
+            song.setName(songName);
+            song.setArtist(songArtist);
+            song.setAlbum(album);
+            song.setLength(songLength);
+            song.setFile(file.getCanonicalPath());
 
             if ((albumArtistName == null || albumArtistName.trim().isEmpty()) && songArtistName != null && !songArtistName.trim().isEmpty()) {
                 song.getAlbum().setArtist(songArtist);

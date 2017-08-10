@@ -16,7 +16,7 @@ public class PurgingService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         // The intent should not have any parameters in it (is this good practice)?
-        // Artist per Artist should be iterated over or Album per Album?
+        // AbstractArtist per AbstractArtist should be iterated over or AbstractAlbum per AbstractAlbum?
         // --> THEN song per song.
         // Afterwards, each album should be checked to see if there is still at least one song,
         // if not -> purge album
