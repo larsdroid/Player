@@ -1,8 +1,7 @@
 package org.willemsens.player.persistence;
 
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -10,6 +9,9 @@ import org.willemsens.player.model.Song;
 
 import java.util.List;
 import java.util.Set;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -35,9 +37,11 @@ public class MusicDao {
     }
 
     /**
-     * Checks albums in the DB. If an album exists, its ID is updated in the POJO. If the album doesn't
-     * exist, it's inserted in the DB and the new ID is set in the POJO.
+     * Checks albums in the DB. If an album exists, all songs with this album are updated to have
+     * the corresponding album from the DB. If the album doesn't exist, it is inserted into the DB.
      * @param albums The set of albums to check for in the DB.
+     * @param songs The songs that may have to be updated in case their album turns out
+     *              to be in the DB already.
      */
     public void checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
         final List<Album> databaseAlbums = getAllAlbums();
@@ -45,7 +49,11 @@ public class MusicDao {
             if (databaseAlbums.contains(album)) {
                 for (Album databaseAlbum : databaseAlbums) {
                     if (album.equals(databaseAlbum)) {
-                        // FIXME album.setId(databaseAlbum.getId());
+                        for (Song song : songs) {
+                            if (song.getAlbum().equals(album)) {
+                                song.setAlbum(databaseAlbum);
+                            }
+                        }
                         break;
                     }
                 }
@@ -58,9 +66,14 @@ public class MusicDao {
     }
 
     /**
-     * Checks artists in the DB. If an artist exists, its ID is updated in the POJO. If the artist doesn't
-     * exist, it's inserted in the DB and the new ID is set in the POJO.
+     * Checks artists in the DB. If an artist exists, all songs and albums with this artist are
+     * updated to have the corresponding artist from the DB. If the artist doesn't exist, it is
+     * inserted into the DB.
      * @param artists The set of artists to check for in the DB.
+     * @param albums The albums that may have to be updated in case their artist turns out
+     *               to be in the DB already.
+     * @param songs The songs that may have to be updated in case their artist turns out
+     *              to be in the DB already.
      */
     public void checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
         final List<Artist> databaseArtists = getAllArtists();
@@ -68,7 +81,16 @@ public class MusicDao {
             if (databaseArtists.contains(artist)) {
                 for (Artist databaseArtist : databaseArtists) {
                     if (artist.equals(databaseArtist)) {
-                        // FIXME artist.setId(databaseArtist.getId());
+                        for (Album album : albums) {
+                            if (album.getArtist().equals(artist)) {
+                                album.setArtist(databaseArtist);
+                            }
+                        }
+                        for (Song song : songs) {
+                            if (song.getArtist().equals(artist)) {
+                                song.setArtist(databaseArtist);
+                            }
+                        }
                         break;
                     }
                 }

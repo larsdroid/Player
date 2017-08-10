@@ -2,12 +2,14 @@ package org.willemsens.player;
 
 import android.app.Application;
 import android.os.StrictMode;
+
+import org.willemsens.player.persistence.MusicDatabaseSource;
+
 import io.requery.Persistable;
 import io.requery.android.sqlite.DatabaseSource;
 import io.requery.sql.Configuration;
 import io.requery.sql.EntityDataStore;
 import io.requery.sql.TableCreationMode;
-import org.willemsens.player.model.Models;
 
 public class PlayerApplication extends Application {
     private EntityDataStore<Persistable> dataStore;
@@ -20,8 +22,7 @@ public class PlayerApplication extends Application {
 
     public EntityDataStore<Persistable> getData() {
         if (dataStore == null) {
-            // TODO: override onUpgrade in class DatabaseSource
-            DatabaseSource source = new DatabaseSource(this, Models.DEFAULT, 1);
+            DatabaseSource source = new MusicDatabaseSource(this);
             if (BuildConfig.DEBUG) {
                 source.setTableCreationMode(TableCreationMode.DROP_CREATE);
             }
