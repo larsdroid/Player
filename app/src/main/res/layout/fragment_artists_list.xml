@@ -7,6 +7,4 @@
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
     tools:context=".view.artists.ArtistsFragment"
-    tools:listitem="@layout/fragment_artist"
-
-    android:background="@color/green" />
+    tools:listitem="@layout/fragment_artist" />

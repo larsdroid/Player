@@ -9,7 +9,7 @@ import io.requery.Key;
 import io.requery.ManyToOne;
 
 @Entity
-public abstract class AbstractSong implements Comparable<AbstractSong> {
+abstract class AbstractSong implements Comparable<AbstractSong> {
     @Key
     @Generated
     Long id;

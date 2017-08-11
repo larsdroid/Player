@@ -45,13 +45,13 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.album_name)
+        @BindView(R.id.album_list_name)
         TextView albumName;
 
-        @BindView(R.id.album_year)
+        @BindView(R.id.album_list_year)
         TextView albumYear;
 
-        @BindView(R.id.image)
+        @BindView(R.id.album_list_image)
         ImageView albumCover;
 
         ViewHolder(View view) {
@@ -63,9 +63,11 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
             this.albumName.setText(album.getName());
             this.albumYear.setText(String.valueOf(album.getYearReleased()));
 
-            final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                    album.getImage().getImageData(), 0, album.getImage().getImageData().length);
-            this.albumCover.setImageBitmap(bitmap);
+            if (album.getImage() != null) {
+                final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                        album.getImage().getImageData(), 0, album.getImage().getImageData().length);
+                this.albumCover.setImageBitmap(bitmap);
+            }
         }
     }
 }

@@ -43,6 +43,12 @@ public class MusicDao {
                 .get().toList();
     }
 
+    public List<Artist> getAllArtistsWithoutArt() {
+        return this.dataStore.select(Artist.class)
+                .where(Artist.IMAGE.isNull())
+                .get().toList();
+    }
+
     public void saveImage(Image image) {
         this.dataStore.insert(image);
         Log.d(getClass().getName(), "Inserted Image: " + image);
@@ -51,6 +57,11 @@ public class MusicDao {
     public void updateAlbum(Album album) {
         this.dataStore.update(album);
         Log.d(getClass().getName(), "Updated Album: " + album);
+    }
+
+    public void updateArtist(Artist artist) {
+        this.dataStore.update(artist);
+        Log.d(getClass().getName(), "Updated Artist: " + artist);
     }
 
     /**

@@ -6,15 +6,19 @@ import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Key;
+import io.requery.ManyToOne;
 
 @Entity
-public abstract class AbstractArtist implements Comparable<AbstractArtist> {
+abstract class AbstractArtist implements Comparable<AbstractArtist> {
     @Key
     @Generated
     Long id;
 
     @Column(unique = true, nullable = false)
     String name;
+
+    @ManyToOne
+    Image image;
 
     @Override
     public int compareTo(@NonNull AbstractArtist that) {

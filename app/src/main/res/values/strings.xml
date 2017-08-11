@@ -10,6 +10,7 @@
     <string name="image_fetcher_service_description">Fetches album and artist art.</string>
 
     <string name="album_cover_image_description">Album cover</string>
+    <string name="artist_image_description">Artist image</string>
 
     <string name="key_artists_inserted">org.willemsens.ARTISTS_INSERTED</string>
     <string name="key_albums_inserted">org.willemsens.ALBUMS_INSERTED</string>

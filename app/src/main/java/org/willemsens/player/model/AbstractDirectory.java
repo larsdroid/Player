@@ -8,15 +8,7 @@ import io.requery.Generated;
 import io.requery.Key;
 
 @Entity
-public abstract class AbstractDirectory {
-    /*
-    FIXME
-    @SuppressLint("SimpleDateFormat")
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    static {
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }*/
-
+abstract class AbstractDirectory {
     @Key
     @Generated
     long id;

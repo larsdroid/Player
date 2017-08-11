@@ -8,7 +8,9 @@ import android.util.Log;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.imagefetchers.ImageDownloader;
 import org.willemsens.player.imagefetchers.discogs.DiscogsArtFetcher;
+import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzArtFetcher;
 import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Image;
 import org.willemsens.player.model.ImageSource;
 import org.willemsens.player.persistence.MusicDao;
@@ -23,17 +25,17 @@ import io.requery.sql.EntityDataStore;
  * yet and fetches those images.
  */
 public class ImageFetcherService extends IntentService {
-    private static final int WAIT_MILLIS = 3000;
+    private static final int WAIT_MILLIS = 1100;
 
     private final DiscogsArtFetcher discogs;
-    // TODO: private final MusicbrainzArtFetcher musicbrainz;
+    private final MusicbrainzArtFetcher musicbrainz;
     private MusicDao musicDao;
 
     public ImageFetcherService() {
         super(ImageFetcherService.class.getName());
 
         this.discogs = new DiscogsArtFetcher();
-        // TODO: this.musicbrainz = new MusicbrainzArtFetcher();
+        this.musicbrainz = new MusicbrainzArtFetcher();
     }
 
     @Override
@@ -45,13 +47,36 @@ public class ImageFetcherService extends IntentService {
 
         final ImageDownloader imageDownloader = new ImageDownloader();
 
-        // TODO: artists
+        final List<Artist> artists = this.musicDao.getAllArtistsWithoutArt();
+        for (Artist artist : artists) {
+            final Image image = new Image();
+            final Long discogsArtistId = discogs.fetchArtistId(artist.getName());
+
+            waitRateLimit();
+
+            image.setUrl(discogs.fetchArtistImage(discogsArtistId));
+            image.setSource(ImageSource.DISCOGS);
+            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+
+            this.musicDao.saveImage(image);
+
+            artist.setImage(image);
+            this.musicDao.updateArtist(artist);
+
+            // TODO: LocalBroadCast --> artist updated
+
+            waitRateLimit();
+        }
 
         final List<Album> albums = this.musicDao.getAllAlbumsWithoutArt();
         for (Album album : albums) {
             final Image image = new Image();
-            image.setUrl(discogs.fetchAlbumImage(album.getArtist().getName(), album.getName()));
-            image.setSource(ImageSource.DISCOGS);
+            final String musicbrainzArtistId = musicbrainz.fetchArtistId(album.getArtist().getName());
+
+            waitRateLimit();
+
+            image.setUrl(musicbrainz.fetchLargeThumbnail(musicbrainzArtistId, album.getName()));
+            image.setSource(ImageSource.MUSICBRAINZ);
             image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
             this.musicDao.saveImage(image);
@@ -59,12 +84,18 @@ public class ImageFetcherService extends IntentService {
             album.setImage(image);
             this.musicDao.updateAlbum(album);
 
-            try {
-                Thread.sleep(WAIT_MILLIS);
-            }
-            catch (InterruptedException e) {
-                Log.d(getClass().getName(), e.getMessage());
-            }
+            // TODO: LocalBroadCast --> album updated
+
+            waitRateLimit();
+        }
+    }
+
+    private void waitRateLimit() {
+        try {
+            Thread.sleep(WAIT_MILLIS);
+        }
+        catch (InterruptedException e) {
+            Log.d(getClass().getName(), e.getMessage());
         }
     }
 }

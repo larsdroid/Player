@@ -6,7 +6,7 @@ import io.requery.Generated;
 import io.requery.Key;
 
 @Entity
-public abstract class AbstractImage {
+abstract class AbstractImage {
     @Key
     @Generated
     Long id;
