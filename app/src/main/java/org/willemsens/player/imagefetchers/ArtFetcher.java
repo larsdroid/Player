@@ -1,12 +1,13 @@
 package org.willemsens.player.imagefetchers;
 
 import com.google.gson.Gson;
+
+import java.io.IOException;
+
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import java.io.IOException;
 
 public abstract class ArtFetcher {
     private final OkHttpClient httpClient;
@@ -27,7 +28,7 @@ public abstract class ArtFetcher {
                 .addHeader("Accept", "application/json")
                 .build();
         try (Response response = httpClient.newCall(request).execute()) {
-            if (response.code() == 200) {
+            if (response.isSuccessful()) {
                 return response.body().string();
             }
             // TODO: handle response codes other than 200

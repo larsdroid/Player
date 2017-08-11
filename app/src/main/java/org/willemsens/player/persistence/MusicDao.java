@@ -5,6 +5,7 @@ import android.util.Log;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
+import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 
 import java.util.List;
@@ -34,6 +35,22 @@ public class MusicDao {
 
     public List<Song> getAllSongs() {
         return this.dataStore.select(Song.class).get().toList();
+    }
+
+    public List<Album> getAllAlbumsWithoutArt() {
+        return this.dataStore.select(Album.class)
+                .where(Album.IMAGE.isNull())
+                .get().toList();
+    }
+
+    public void saveImage(Image image) {
+        this.dataStore.insert(image);
+        Log.d(getClass().getName(), "Inserted Image: " + image);
+    }
+
+    public void updateAlbum(Album album) {
+        this.dataStore.update(album);
+        Log.d(getClass().getName(), "Updated Album: " + album);
     }
 
     /**

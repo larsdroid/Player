@@ -1,20 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/grid_cell_padding"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    <org.willemsens.player.view.GridImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/album_cover_image_description"
+        tools:background="@color/blue"
+        tools:layout_width="250dp"
+        tools:layout_height="250dp" />
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        tools:layout_width="250dp">
+
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:layout_margin="@dimen/grid_cell_text_padding"
+            android:layout_alignParentStart="true"
+            tools:text="My Album abcdefghid" />
+
+        <TextView
+            android:id="@+id/album_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:layout_margin="@dimen/grid_cell_text_padding"
+            android:layout_toEndOf="@id/album_name"
+            android:layout_alignBaseline="@id/album_name"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="viewEnd"
+            tools:text="123" />
+    </RelativeLayout>
 </LinearLayout>

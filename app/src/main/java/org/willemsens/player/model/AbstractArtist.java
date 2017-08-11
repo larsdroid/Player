@@ -1,6 +1,8 @@
 package org.willemsens.player.model;
 
 import android.support.annotation.NonNull;
+
+import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Key;
@@ -11,15 +13,8 @@ public abstract class AbstractArtist implements Comparable<AbstractArtist> {
     @Generated
     Long id;
 
+    @Column(unique = true, nullable = false)
     String name;
-
-    @Override
-    public String toString() {
-        return "AbstractArtist{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
 
     @Override
     public int compareTo(@NonNull AbstractArtist that) {

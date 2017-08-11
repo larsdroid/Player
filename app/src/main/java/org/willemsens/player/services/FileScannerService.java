@@ -27,7 +27,6 @@ import io.requery.sql.EntityDataStore;
  * updates the file's information in the music DB.
  */
 public class FileScannerService extends IntentService {
-    private EntityDataStore<Persistable> dataStore;
     private MusicDao musicDao;
 
     public FileScannerService() {
@@ -36,11 +35,9 @@ public class FileScannerService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        if (this.dataStore == null) {
-            this.dataStore = ((PlayerApplication)getApplication()).getData();
-        }
         if (this.musicDao == null) {
-            this.musicDao = new MusicDao(this.dataStore);
+            final EntityDataStore<Persistable> dataStore = ((PlayerApplication)getApplication()).getData();
+            this.musicDao = new MusicDao(dataStore);
         }
 
         Set<Song> songs = new HashSet<>();

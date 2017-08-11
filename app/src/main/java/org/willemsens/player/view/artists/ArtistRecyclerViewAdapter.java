@@ -5,24 +5,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import org.willemsens.player.R;
-import org.willemsens.player.model.AbstractArtist;
 import org.willemsens.player.model.Artist;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
- * {@link RecyclerView.Adapter} that can display an {@link AbstractArtist}.
+ * {@link RecyclerView.Adapter} that can display an {@link Artist}.
  */
-public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
+class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
     private final List<Artist> artists;
 
-    public ArtistRecyclerViewAdapter(List<Artist> artists) {
+    ArtistRecyclerViewAdapter(List<Artist> artists) {
         this.artists = artists;
-    }
-
-    public List<Artist> getArtists() {
-        return artists;
     }
 
     @Override
@@ -34,7 +33,7 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = artists.get(position);
+        holder.artist = artists.get(position);
         holder.mIdView.setText(String.valueOf(artists.get(position).getId()));
         holder.mContentView.setText(artists.get(position).getName());
     }
@@ -44,22 +43,18 @@ public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecycl
         return artists.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public AbstractArtist mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.id)
+        TextView mIdView;
 
-        public ViewHolder(View view) {
+        @BindView(R.id.content)
+        TextView mContentView;
+
+        private Artist artist;
+
+        ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            ButterKnife.bind(this, view);
         }
     }
 }

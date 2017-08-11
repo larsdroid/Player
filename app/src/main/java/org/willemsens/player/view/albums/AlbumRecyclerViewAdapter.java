@@ -1,28 +1,30 @@
 package org.willemsens.player.view.albums;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import org.willemsens.player.R;
-import org.willemsens.player.model.AbstractAlbum;
 import org.willemsens.player.model.Album;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
- * {@link RecyclerView.Adapter} that can display an {@link AbstractAlbum}.
+ * {@link RecyclerView.Adapter} that can display an {@link Album}.
  */
-public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.ViewHolder> {
+class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.ViewHolder> {
     private final List<Album> albums;
 
-    public AlbumRecyclerViewAdapter(List<Album> albums) {
+    AlbumRecyclerViewAdapter(List<Album> albums) {
         this.albums = albums;
-    }
-
-    public List<Album> getAlbums() {
-        return this.albums;
     }
 
     @Override
@@ -34,9 +36,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = albums.get(position);
-        holder.mIdView.setText(String.valueOf(albums.get(position).getYearReleased()));
-        holder.mContentView.setText(albums.get(position).getName());
+        holder.setAlbum(albums.get(position));
     }
 
     @Override
@@ -44,22 +44,28 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         return albums.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public AbstractAlbum mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.album_name)
+        TextView albumName;
 
-        public ViewHolder(View view) {
+        @BindView(R.id.album_year)
+        TextView albumYear;
+
+        @BindView(R.id.image)
+        ImageView albumCover;
+
+        ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            ButterKnife.bind(this, view);
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+        private void setAlbum(Album album) {
+            this.albumName.setText(album.getName());
+            this.albumYear.setText(String.valueOf(album.getYearReleased()));
+
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                    album.getImage().getImageData(), 0, album.getImage().getImageData().length);
+            this.albumCover.setImageBitmap(bitmap);
         }
     }
 }

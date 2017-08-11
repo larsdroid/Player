@@ -5,19 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import org.willemsens.player.R;
-import org.willemsens.player.model.AbstractSong;
 import org.willemsens.player.model.Song;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
- * {@link RecyclerView.Adapter} that can display a {@link AbstractSong}.
+ * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
+class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
     private final List<Song> songs;
 
-    public SongRecyclerViewAdapter(List<Song> songs) {
+    SongRecyclerViewAdapter(List<Song> songs) {
         this.songs = songs;
     }
 
@@ -30,7 +33,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = songs.get(position);
+        holder.song = songs.get(position);
         holder.mIdView.setText(String.valueOf(songs.get(position).getId()));
         holder.mContentView.setText(songs.get(position).getName());
     }
@@ -40,22 +43,18 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         return songs.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public AbstractSong mItem;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.id)
+        TextView mIdView;
 
-        public ViewHolder(View view) {
+        @BindView(R.id.content)
+        TextView mContentView;
+
+        private Song song;
+
+        ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            ButterKnife.bind(this, view);
         }
     }
 }
