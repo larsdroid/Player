@@ -30,8 +30,13 @@
             android:exported="false" />
 
         <service
-            android:name=".services.ImageFetcherService"
-            android:description="@string/image_fetcher_service_description"
+            android:name=".services.AlbumImageFetcherService"
+            android:description="@string/album_image_fetcher_service_description"
+            android:exported="false" />
+
+        <service
+            android:name=".services.ArtistImageFetcherService"
+            android:description="@string/artist_image_fetcher_service_description"
             android:exported="false" />
 
         <service

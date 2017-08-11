@@ -64,6 +64,18 @@ public class MusicDao {
         Log.d(getClass().getName(), "Updated Artist: " + artist);
     }
 
+    public Album findAlbum(long id) {
+        return this.dataStore.select(Album.class)
+                .where(Album.ID.equal(id))
+                .get().firstOrNull();
+    }
+
+    public Artist findArtist(long id) {
+        return this.dataStore.select(Artist.class)
+                .where(Artist.ID.equal(id))
+                .get().firstOrNull();
+    }
+
     /**
      * Checks albums in the DB. If an album exists, all songs with this album are updated to have
      * the corresponding album from the DB. If the album doesn't exist, it is inserted into the DB.

@@ -26,6 +26,7 @@ import java.util.List;
  */
 public class AlbumsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
+    private AlbumRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Album> albums;
 
@@ -55,7 +56,8 @@ public class AlbumsFragment extends Fragment {
             if (this.albums.isEmpty()) {
                 this.albums.addAll(this.dataAccessProvider.getMusicDao().getAllAlbums());
             }
-            recyclerView.setAdapter(new AlbumRecyclerViewAdapter(this.albums));
+            this.adapter = new AlbumRecyclerViewAdapter(this.albums);
+            recyclerView.setAdapter(this.adapter);
         }
         return view;
     }
@@ -79,7 +81,10 @@ public class AlbumsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        lbm.registerReceiver(this.dbUpdateReceiver, new IntentFilter(getString(R.string.key_albums_inserted)));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.key_albums_inserted));
+        filter.addAction(getString(R.string.key_album_updated));
+        lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
     @Override
@@ -92,11 +97,18 @@ public class AlbumsFragment extends Fragment {
     private class DBUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            RecyclerView view = (RecyclerView)AlbumsFragment.this.getView();
-            AlbumRecyclerViewAdapter adapter = (AlbumRecyclerViewAdapter)view.getAdapter();
-            albums.clear();
-            albums.addAll(AlbumsFragment.this.dataAccessProvider.getMusicDao().getAllAlbums());
-            adapter.notifyDataSetChanged();
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(getString(R.string.key_albums_inserted))) {
+                albums.clear();
+                albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
+                adapter.notifyDataSetChanged();
+            } else if (intentAction.equals(getString(R.string.key_album_updated))) {
+                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                final int index = albums.indexOf(album);
+                albums.set(index, album);
+                adapter.notifyItemChanged(index);
+            }
         }
     }
 }

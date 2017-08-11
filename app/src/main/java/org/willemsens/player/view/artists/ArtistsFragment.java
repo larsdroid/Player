@@ -26,6 +26,7 @@ import java.util.List;
  */
 public class ArtistsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
+    private ArtistRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Artist> artists;
 
@@ -55,7 +56,8 @@ public class ArtistsFragment extends Fragment {
             if (this.artists.isEmpty()) {
                 this.artists.addAll(this.dataAccessProvider.getMusicDao().getAllArtists());
             }
-            recyclerView.setAdapter(new ArtistRecyclerViewAdapter(this.artists));
+            this.adapter = new ArtistRecyclerViewAdapter(this.artists);
+            recyclerView.setAdapter(this.adapter);
         }
         return view;
     }
@@ -80,7 +82,10 @@ public class ArtistsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        lbm.registerReceiver(this.dbUpdateReceiver, new IntentFilter(getString(R.string.key_artists_inserted)));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.key_artists_inserted));
+        filter.addAction(getString(R.string.key_artist_updated));
+        lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
     @Override
@@ -93,11 +98,18 @@ public class ArtistsFragment extends Fragment {
     private class DBUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            RecyclerView view = (RecyclerView)ArtistsFragment.this.getView();
-            ArtistRecyclerViewAdapter adapter = (ArtistRecyclerViewAdapter)view.getAdapter();
-            artists.clear();
-            artists.addAll(ArtistsFragment.this.dataAccessProvider.getMusicDao().getAllArtists());
-            adapter.notifyDataSetChanged();
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(getString(R.string.key_artists_inserted))) {
+                artists.clear();
+                artists.addAll(dataAccessProvider.getMusicDao().getAllArtists());
+                adapter.notifyDataSetChanged();
+            } else if (intentAction.equals(getString(R.string.key_artist_updated))) {
+                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                final int index = artists.indexOf(artist);
+                artists.set(index, artist);
+                adapter.notifyItemChanged(index);
+            }
         }
     }
 }
