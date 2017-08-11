@@ -47,6 +47,10 @@ public abstract class AbstractSong implements Comparable<AbstractSong> {
 
         AbstractSong song = (AbstractSong) o;
 
+        if (this.id != null && song.id != null) {
+            return this.id.equals(song.id);
+        }
+
         return file.equals(song.file);
 
     }

@@ -1,8 +1,3 @@
-Refreshing Grid and ListViews
---
-* FileScannerService should broadcast after new data is inserted in the DB.
-* Adapter/Fragment should listen to broadcast and refresh
-
 Album and Artist Images
 --
 * A new NULLABLE column for image data should be added to the artist and
@@ -15,5 +10,4 @@ Album and Artist Images
 
 Clean code
 --
-* ORM
 * Retrofit the image fetchers (not urgent, code is quite clean)

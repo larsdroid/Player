@@ -42,9 +42,11 @@ public class MusicDao {
      * @param albums The set of albums to check for in the DB.
      * @param songs The songs that may have to be updated in case their album turns out
      *              to be in the DB already.
+     * @return The amount of new albums inserted into the DB.
      */
-    public void checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
+    public int checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
         final List<Album> databaseAlbums = getAllAlbums();
+        int inserts = 0;
         for (Album album : albums) {
             if (databaseAlbums.contains(album)) {
                 for (Album databaseAlbum : databaseAlbums) {
@@ -61,8 +63,10 @@ public class MusicDao {
                 // TODO: calculate total length for all songs in 'album'
                 //       simply iterate all songs and
                 insertAlbum(album);
+                inserts++;
             }
         }
+        return inserts;
     }
 
     /**
@@ -74,9 +78,11 @@ public class MusicDao {
      *               to be in the DB already.
      * @param songs The songs that may have to be updated in case their artist turns out
      *              to be in the DB already.
+     * @return The amount of new artists inserted into the DB.
      */
-    public void checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
+    public int checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
         final List<Artist> databaseArtists = getAllArtists();
+        int inserts = 0;
         for (Artist artist : artists) {
             if (databaseArtists.contains(artist)) {
                 for (Artist databaseArtist : databaseArtists) {
@@ -96,18 +102,23 @@ public class MusicDao {
                 }
             } else {
                 insertArtist(artist);
+                inserts++;
             }
         }
+        return inserts;
     }
 
-    public void checkSongsSelectInsert(Set<Song> songs) {
+    public int checkSongsSelectInsert(Set<Song> songs) {
         List<Song> dbSongs;
+        int inserts = 0;
         for (Song song : songs) {
             dbSongs = this.dataStore.select(Song.class).where(Song.FILE.equal(song.getFile())).get().toList();
             if (dbSongs.size() == 0) {
                 insertSong(song);
+                inserts++;
             }
         }
+        return inserts;
     }
 
     private void insertAlbum(Album album) {

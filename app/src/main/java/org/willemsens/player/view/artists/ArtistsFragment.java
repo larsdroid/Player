@@ -1,18 +1,24 @@
 package org.willemsens.player.view.artists;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.view.DataAccessProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,8 +26,12 @@ import java.util.List;
  */
 public class ArtistsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
+    private final DBUpdateReceiver dbUpdateReceiver;
+    private final List<Artist> artists;
 
     public ArtistsFragment() {
+        this.dbUpdateReceiver = new DBUpdateReceiver();
+        this.artists = new ArrayList<>();
     }
 
     public static ArtistsFragment newInstance() {
@@ -42,9 +52,10 @@ public class ArtistsFragment extends Fragment {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-            final List<Artist> artists = this.dataAccessProvider.getMusicDao().getAllArtists();
-            final ArtistRecyclerViewAdapter adapter = new ArtistRecyclerViewAdapter(artists);
-            recyclerView.setAdapter(adapter);
+            if (this.artists.isEmpty()) {
+                this.artists.addAll(this.dataAccessProvider.getMusicDao().getAllArtists());
+            }
+            recyclerView.setAdapter(new ArtistRecyclerViewAdapter(this.artists));
         }
         return view;
     }
@@ -63,5 +74,30 @@ public class ArtistsFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
+        lbm.registerReceiver(this.dbUpdateReceiver, new IntentFilter(getString(R.string.key_artists_inserted)));
+    }
+
+    @Override
+    public void onPause() {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
+        lbm.unregisterReceiver(this.dbUpdateReceiver);
+        super.onPause();
+    }
+
+    private class DBUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            RecyclerView view = (RecyclerView)ArtistsFragment.this.getView();
+            ArtistRecyclerViewAdapter adapter = (ArtistRecyclerViewAdapter)view.getAdapter();
+            artists.clear();
+            artists.addAll(ArtistsFragment.this.dataAccessProvider.getMusicDao().getAllArtists());
+            adapter.notifyDataSetChanged();
+        }
     }
 }

@@ -33,8 +33,11 @@ public abstract class AbstractArtist implements Comparable<AbstractArtist> {
 
         AbstractArtist artist = (AbstractArtist) o;
 
-        return name.equals(artist.name);
+        if (this.id != null && artist.id != null) {
+            return this.id.equals(artist.id);
+        }
 
+        return name.equals(artist.name);
     }
 
     @Override

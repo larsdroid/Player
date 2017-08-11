@@ -3,10 +3,11 @@ package org.willemsens.player.services;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
+import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -17,6 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
@@ -48,14 +52,27 @@ public class FileScannerService extends IntentService {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
                     processDirectory(root, songs, albums, artists);
-                    this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
-                    this.musicDao.checkAlbumsSelectInsert(albums, songs);
-                    this.musicDao.checkSongsSelectInsert(songs);
+                    int artistInserts = this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
+                    int albumInserts = this.musicDao.checkAlbumsSelectInsert(albums, songs);
+                    int songInserts = this.musicDao.checkSongsSelectInsert(songs);
 
-                    // TODO: The above three method calls should return how many records were inserted.
-                    //       In case new records were inserted of a given type, a broadcast should be sent using
-                    //       LocalBroadcastManager. Fragments (or adapters should refresh their content when
-                    //       a broadcast is received.
+                    LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+                    Intent broadcast;
+
+                    if (artistInserts > 0) {
+                        broadcast = new Intent(getString(R.string.key_artists_inserted));
+                        lbm.sendBroadcast(broadcast);
+                    }
+
+                    if (albumInserts > 0) {
+                        broadcast = new Intent(getString(R.string.key_albums_inserted));
+                        lbm.sendBroadcast(broadcast);
+                    }
+
+                    if (songInserts > 0) {
+                        broadcast = new Intent(getString(R.string.key_songs_inserted));
+                        lbm.sendBroadcast(broadcast);
+                    }
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }

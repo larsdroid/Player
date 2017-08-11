@@ -47,8 +47,11 @@ public abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
 
         AbstractAlbum album = (AbstractAlbum) o;
 
-        return name.equals(album.name) && artist.equals(album.artist);
+        if (this.id != null && album.id != null) {
+            return this.id.equals(album.id);
+        }
 
+        return name.equals(album.name) && artist.equals(album.artist);
     }
 
     @Override
