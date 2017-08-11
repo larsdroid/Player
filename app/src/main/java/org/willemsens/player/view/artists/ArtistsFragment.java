@@ -19,6 +19,7 @@ import org.willemsens.player.model.Artist;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class ArtistsFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
             if (this.artists.isEmpty()) {
-                this.artists.addAll(this.dataAccessProvider.getMusicDao().getAllArtists());
+                loadAllArtists();
             }
             this.adapter = new ArtistRecyclerViewAdapter(this.artists);
             recyclerView.setAdapter(this.adapter);
@@ -100,16 +101,23 @@ public class ArtistsFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
             if (intentAction.equals(getString(R.string.key_artists_inserted))) {
-                artists.clear();
-                artists.addAll(dataAccessProvider.getMusicDao().getAllArtists());
+                loadAllArtists();
                 adapter.notifyDataSetChanged();
             } else if (intentAction.equals(getString(R.string.key_artist_updated))) {
                 final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 final int index = artists.indexOf(artist);
-                artists.set(index, artist);
-                adapter.notifyItemChanged(index);
+                if (index != -1) {
+                    artists.set(index, artist);
+                    adapter.notifyItemChanged(index);
+                }
             }
         }
+    }
+
+    private void loadAllArtists() {
+        artists.clear();
+        artists.addAll(dataAccessProvider.getMusicDao().getAllArtists());
+        Collections.sort(artists);
     }
 }

@@ -59,11 +59,17 @@ public class FileScannerService extends IntentService {
                     if (artistInserts > 0) {
                         broadcast = new Intent(getString(R.string.key_artists_inserted));
                         lbm.sendBroadcast(broadcast);
+
+                        broadcast = new Intent(this, ArtistImageFetcherService.class);
+                        startService(broadcast);
                     }
 
                     if (albumInserts > 0) {
                         broadcast = new Intent(getString(R.string.key_albums_inserted));
                         lbm.sendBroadcast(broadcast);
+
+                        broadcast = new Intent(this, AlbumImageFetcherService.class);
+                        startService(broadcast);
                     }
 
                     if (songInserts > 0) {

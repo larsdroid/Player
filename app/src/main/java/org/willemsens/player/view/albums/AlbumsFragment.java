@@ -19,6 +19,7 @@ import org.willemsens.player.model.Album;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class AlbumsFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
             if (this.albums.isEmpty()) {
-                this.albums.addAll(this.dataAccessProvider.getMusicDao().getAllAlbums());
+                loadAllAlbums();
             }
             this.adapter = new AlbumRecyclerViewAdapter(this.albums);
             recyclerView.setAdapter(this.adapter);
@@ -99,16 +100,23 @@ public class AlbumsFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
             if (intentAction.equals(getString(R.string.key_albums_inserted))) {
-                albums.clear();
-                albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
+                loadAllAlbums();
                 adapter.notifyDataSetChanged();
             } else if (intentAction.equals(getString(R.string.key_album_updated))) {
                 final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 final int index = albums.indexOf(album);
-                albums.set(index, album);
-                adapter.notifyItemChanged(index);
+                if (index != -1) {
+                    albums.set(index, album);
+                    adapter.notifyItemChanged(index);
+                }
             }
         }
+    }
+
+    private void loadAllAlbums() {
+        albums.clear();
+        albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
+        Collections.sort(albums);
     }
 }
