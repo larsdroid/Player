@@ -1,6 +1,8 @@
 package org.willemsens.player.imagefetchers.discogs;
 
+import org.willemsens.player.imagefetchers.AlbumInfo;
 import org.willemsens.player.imagefetchers.ArtFetcher;
+import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.discogs.dto.Release;
@@ -14,7 +16,8 @@ public class DiscogsArtFetcher extends ArtFetcher {
     private static final String KEY = "jdLmQoplPtRzRALOXlyv";
     private static final String SECRET = "uvlyrckmvWeAnsdEXpuFWubBsYIMfaBv";
 
-    public Long fetchArtistId(String name) {
+    @Override
+    public String fetchArtistId(String artistName) {
         final HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host("api.discogs.com")
@@ -23,7 +26,7 @@ public class DiscogsArtFetcher extends ArtFetcher {
                 .addQueryParameter("key", KEY)
                 .addQueryParameter("secret", SECRET)
                 .addQueryParameter("type", "artist")
-                .addQueryParameter("q", name)
+                .addQueryParameter("q", artistName)
                 .build();
 
         final String json = fetch(url);
@@ -35,10 +38,11 @@ public class DiscogsArtFetcher extends ArtFetcher {
             artistId = searchResponse.getFirstArtistID();
         }
 
-        return artistId;
+        return artistId == null ? null : String.valueOf(artistId);
     }
 
-    public String fetchAlbumImage(String artistName, String albumName) {
+    @Override
+    public AlbumInfo fetchAlbumInfo(String artistName, String albumName) {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.discogs.com")
@@ -52,42 +56,43 @@ public class DiscogsArtFetcher extends ArtFetcher {
                 .build();
 
         String json = fetch(url);
-        Release[] releases = null;
         if (json != null) {
             ReleasesResponse releasesResponse = getGson().fromJson(
                     json,
                     ReleasesResponse.class);
-            releases = releasesResponse.getReleases();
-        }
+            Release[] releases = releasesResponse.getReleases();
 
-        if (releases != null) {
-            for (Release release : releases) {
-                url = new HttpUrl.Builder()
-                        .scheme("https")
-                        .host("api.discogs.com")
-                        .addPathSegment("releases")
-                        .addPathSegment(String.valueOf(release.getId()))
-                        .addQueryParameter("key", KEY)
-                        .addQueryParameter("secret", SECRET)
-                        .build();
+            if (releases != null) {
+                for (Release release : releases) {
+                    url = new HttpUrl.Builder()
+                            .scheme("https")
+                            .host("api.discogs.com")
+                            .addPathSegment("releases")
+                            .addPathSegment(String.valueOf(release.getId()))
+                            .addQueryParameter("key", KEY)
+                            .addQueryParameter("secret", SECRET)
+                            .build();
 
-                json = fetch(url);
-                if (json != null) {
-                    ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
+                    json = fetch(url);
+                    if (json != null) {
+                        ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
 
-                    return releaseDetail.getFirstImageURL();
+                        return new AlbumInfo(releaseDetail.getFirstImageURL(), releasesResponse.getOldestReleaseYear());
+                    }
                 }
             }
         }
+
         return null;
     }
 
-    public String fetchArtistImage(Long artistId) {
+    @Override
+    public ArtistInfo fetchArtistInfo(String artistId) {
         final HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.discogs.com")
                 .addPathSegment("artists")
-                .addPathSegment(String.valueOf(artistId))
+                .addPathSegment(artistId)
                 .addQueryParameter("key", KEY)
                 .addQueryParameter("secret", SECRET)
                 .build();
@@ -100,7 +105,7 @@ public class DiscogsArtFetcher extends ArtFetcher {
             artistImageUrl = artistDetail.getFirstImageURL();
         }
 
-        return artistImageUrl;
+        return new ArtistInfo(artistImageUrl);
     }
 
     @Override

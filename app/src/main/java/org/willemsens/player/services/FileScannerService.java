@@ -62,14 +62,14 @@ public class FileScannerService extends IntentService {
                             getString(R.string.key_artist_id),
                             getString(R.string.key_artist_inserted),
                             getString(R.string.key_artists_inserted),
-                            ArtistImageFetcherService.class);
+                            ArtistInfoFetcherService.class);
 
                     newRecordsInserted(
                             albumIds,
                             getString(R.string.key_album_id),
                             getString(R.string.key_album_inserted),
                             getString(R.string.key_albums_inserted),
-                            AlbumImageFetcherService.class);
+                            AlbumInfoFetcherService.class);
 
                     newRecordsInserted(
                             songIds,

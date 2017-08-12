@@ -3,8 +3,9 @@ package org.willemsens.player.services;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-
 import org.willemsens.player.R;
+import org.willemsens.player.imagefetchers.AlbumInfo;
+import org.willemsens.player.imagefetchers.ArtFetcher;
 import org.willemsens.player.imagefetchers.ImageDownloader;
 import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzArtFetcher;
 import org.willemsens.player.model.Album;
@@ -16,13 +17,13 @@ import java.util.List;
  * A background service that iterates over the albums and artists in DB that don't have an image
  * yet and fetches those images.
  */
-public class AlbumImageFetcherService extends ImageFetcherService {
-    private final MusicbrainzArtFetcher musicbrainz;
+public class AlbumInfoFetcherService extends InfoFetcherService {
+    private final ArtFetcher artFetcher;
 
-    public AlbumImageFetcherService() {
-        super(AlbumImageFetcherService.class.getName());
+    public AlbumInfoFetcherService() {
+        super(AlbumInfoFetcherService.class.getName());
 
-        this.musicbrainz = new MusicbrainzArtFetcher();
+        this.artFetcher = new MusicbrainzArtFetcher();
     }
 
     @Override
@@ -47,17 +48,18 @@ public class AlbumImageFetcherService extends ImageFetcherService {
 
     private void fetchSingleAlbum(Album album, ImageDownloader imageDownloader) {
         final Image image = new Image();
-        final String musicbrainzArtistId = musicbrainz.fetchArtistId(album.getArtist().getName());
 
-        waitRateLimit();
-
-        image.setUrl(musicbrainz.fetchLargeThumbnail(musicbrainzArtistId, album.getName()));
-        image.setSource(musicbrainz.getImageSource());
+        final AlbumInfo albumInfo = artFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
+        image.setUrl(albumInfo.getCoverImageUrl());
+        image.setSource(artFetcher.getImageSource());
         image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
         getMusicDao().saveImage(image);
 
         album.setImage(image);
+        if (album.getYearReleased() == null && albumInfo.getYear() != null) {
+            album.setYearReleased(albumInfo.getYear());
+        }
         getMusicDao().updateAlbum(album);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);

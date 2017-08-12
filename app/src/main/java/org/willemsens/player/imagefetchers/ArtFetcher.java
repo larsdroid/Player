@@ -1,15 +1,13 @@
 package org.willemsens.player.imagefetchers;
 
 import com.google.gson.Gson;
-
-import org.willemsens.player.model.ImageSource;
-
-import java.io.IOException;
-
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.willemsens.player.model.ImageSource;
+
+import java.io.IOException;
 
 public abstract class ArtFetcher {
     private final OkHttpClient httpClient;
@@ -41,5 +39,8 @@ public abstract class ArtFetcher {
         return null;
     }
 
+    public abstract String fetchArtistId(String artistName);
+    public abstract ArtistInfo fetchArtistInfo(String artistId);
+    public abstract AlbumInfo fetchAlbumInfo(String artistName, String albumName);
     public abstract ImageSource getImageSource();
 }

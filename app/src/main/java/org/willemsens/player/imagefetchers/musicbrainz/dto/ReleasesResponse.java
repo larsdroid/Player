@@ -9,4 +9,14 @@ public class ReleasesResponse {
     public Release[] getReleases() {
         return releases;
     }
+
+    public Integer getOldestReleaseYear() {
+        Integer year = null;
+        for (Release release : releases) {
+            if (year == null || (release.getYear() != null && release.getYear() < year)) {
+                year = release.getYear();
+            }
+        }
+        return year;
+    }
 }

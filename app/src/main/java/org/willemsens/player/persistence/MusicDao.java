@@ -1,7 +1,8 @@
 package org.willemsens.player.persistence;
 
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -9,11 +10,9 @@ import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -27,7 +26,9 @@ public class MusicDao {
     }
 
     public List<Album> getAllAlbums() {
-        return this.dataStore.select(Album.class).get().toList();
+        final List<Album> albums = this.dataStore.select(Album.class).get().toList();
+        enrichAlbumsEagerFetch(albums);
+        return albums;
     }
 
     public List<Artist> getAllArtists() {
@@ -35,13 +36,17 @@ public class MusicDao {
     }
 
     public List<Song> getAllSongs() {
-        return this.dataStore.select(Song.class).get().toList();
+        final List<Song> songs = this.dataStore.select(Song.class).get().toList();
+        enrichSongsEagerFetch(songs);
+        return songs;
     }
 
     public List<Album> getAllAlbumsWithoutArt() {
-        return this.dataStore.select(Album.class)
+        final List<Album> albums = this.dataStore.select(Album.class)
                 .where(Album.IMAGE.isNull())
                 .get().toList();
+        enrichAlbumsEagerFetch(albums);
+        return albums;
     }
 
     public List<Artist> getAllArtistsWithoutArt() {
@@ -66,15 +71,38 @@ public class MusicDao {
     }
 
     public Album findAlbum(long id) {
-        return this.dataStore.select(Album.class)
+        final Album album = this.dataStore.select(Album.class)
                 .where(Album.ID.equal(id))
                 .get().firstOrNull();
+        enrichAlbumEagerFetch(album);
+        return album;
     }
 
     public Artist findArtist(long id) {
         return this.dataStore.select(Artist.class)
                 .where(Artist.ID.equal(id))
                 .get().firstOrNull();
+    }
+
+    private void enrichAlbumEagerFetch(Album album) {
+        album.setArtist(findArtist(album.getArtist().getId()));
+    }
+
+    private void enrichAlbumsEagerFetch(Collection<Album> albums) {
+        for (Album album : albums) {
+            enrichAlbumEagerFetch(album);
+        }
+    }
+
+    private void enrichSongEagerFetch(Song song) {
+        song.setArtist(findArtist(song.getArtist().getId()));
+        song.setAlbum(findAlbum(song.getAlbum().getId()));
+    }
+
+    private void enrichSongsEagerFetch(Collection<Song> songs) {
+        for (Song song : songs) {
+            enrichSongEagerFetch(song);
+        }
     }
 
     /**

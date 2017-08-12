@@ -17,10 +17,7 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     @Column(nullable = false)
     String name;
 
-    // *** TODO FIXME ***
-    // This relation should be eagerly fetched, else the app will blow up once multiple different
-    // artists are present.
-    // https://github.com/requery/requery/issues/654
+    // Artist is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     @Column(nullable = false)
     Artist artist;

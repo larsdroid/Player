@@ -11,9 +11,9 @@ import android.view.MenuItem;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.services.ArtistImageFetcherService;
+import org.willemsens.player.services.ArtistInfoFetcherService;
 import org.willemsens.player.services.FileScannerService;
-import org.willemsens.player.services.AlbumImageFetcherService;
+import org.willemsens.player.services.AlbumInfoFetcherService;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.albums.AlbumsFragment;
 import org.willemsens.player.view.artists.ArtistsFragment;
@@ -51,10 +51,10 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, FileScannerService.class);
         startService(intent);
 
-        intent = new Intent(this, AlbumImageFetcherService.class);
+        intent = new Intent(this, AlbumInfoFetcherService.class);
         startService(intent);
 
-        intent = new Intent(this, ArtistImageFetcherService.class);
+        intent = new Intent(this, ArtistInfoFetcherService.class);
         startService(intent);
 
         addEventHandlers();

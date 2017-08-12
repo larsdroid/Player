@@ -8,14 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -61,7 +59,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
 
         private void setAlbum(Album album) {
             this.albumName.setText(album.getName());
-            this.albumYear.setText(String.valueOf(album.getYearReleased()));
+            this.albumYear.setText(album.getYearReleased() == null ? "" : String.valueOf(album.getYearReleased()));
 
             if (album.getImage() != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(

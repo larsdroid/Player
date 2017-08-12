@@ -17,10 +17,12 @@ abstract class AbstractSong implements Comparable<AbstractSong> {
     @Column(nullable = false)
     String name;
 
+    // Artist is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     @Column(nullable = false)
     Artist artist;
 
+    // Album is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     Album album;
 

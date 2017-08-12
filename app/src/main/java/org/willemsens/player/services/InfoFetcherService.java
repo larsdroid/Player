@@ -9,12 +9,12 @@ import org.willemsens.player.persistence.MusicDao;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
-public abstract class ImageFetcherService extends IntentService {
+public abstract class InfoFetcherService extends IntentService {
     private static final int WAIT_MILLIS = 1100;
 
     private MusicDao musicDao;
 
-    protected ImageFetcherService(String serviceName) {
+    protected InfoFetcherService(String serviceName) {
         super(serviceName);
     }
 

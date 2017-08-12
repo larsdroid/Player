@@ -3,8 +3,9 @@ package org.willemsens.player.services;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-
 import org.willemsens.player.R;
+import org.willemsens.player.imagefetchers.ArtFetcher;
+import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.ImageDownloader;
 import org.willemsens.player.imagefetchers.discogs.DiscogsArtFetcher;
 import org.willemsens.player.model.Artist;
@@ -12,13 +13,13 @@ import org.willemsens.player.model.Image;
 
 import java.util.List;
 
-public class ArtistImageFetcherService extends ImageFetcherService {
-    private final DiscogsArtFetcher discogs;
+public class ArtistInfoFetcherService extends InfoFetcherService {
+    private final ArtFetcher artFetcher;
 
-    public ArtistImageFetcherService() {
-        super(ArtistImageFetcherService.class.getName());
+    public ArtistInfoFetcherService() {
+        super(ArtistInfoFetcherService.class.getName());
 
-        this.discogs = new DiscogsArtFetcher();
+        this.artFetcher = new DiscogsArtFetcher();
     }
 
     @Override
@@ -43,12 +44,13 @@ public class ArtistImageFetcherService extends ImageFetcherService {
 
     private void fetchSingleArtist(Artist artist, ImageDownloader imageDownloader) {
         final Image image = new Image();
-        final Long discogsArtistId = discogs.fetchArtistId(artist.getName());
+        final String artistId = artFetcher.fetchArtistId(artist.getName());
 
         waitRateLimit();
 
-        image.setUrl(discogs.fetchArtistImage(discogsArtistId));
-        image.setSource(discogs.getImageSource());
+        final ArtistInfo artistInfo = artFetcher.fetchArtistInfo(artistId);
+        image.setUrl(artistInfo.getImageUrl());
+        image.setSource(artFetcher.getImageSource());
         image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
         getMusicDao().saveImage(image);
