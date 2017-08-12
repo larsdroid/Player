@@ -1,17 +1,28 @@
 package org.willemsens.player.imagefetchers.musicbrainz;
 
-import okhttp3.HttpUrl;
 import org.willemsens.player.exceptions.PlayerException;
 import org.willemsens.player.imagefetchers.AlbumInfo;
-import org.willemsens.player.imagefetchers.ArtFetcher;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ImagesReponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.Release;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ReleasesResponse;
-import org.willemsens.player.model.ImageSource;
+import org.willemsens.player.model.InfoSource;
 
-public class MusicbrainzArtFetcher extends ArtFetcher {
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+
+public class MusicbrainzInfoFetcher extends InfoFetcher {
+    @Override
+    public Request getRequest(HttpUrl url) {
+        return new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Player/0.1 ( https://github.com/larsdroid/Player )")
+                .addHeader("Accept", "application/json")
+                .build();
+    }
+
     @Override
     public String fetchArtistId(String artistName) {
         final HttpUrl url = new HttpUrl.Builder()
@@ -66,7 +77,10 @@ public class MusicbrainzArtFetcher extends ArtFetcher {
                     if (json != null) {
                         ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
 
-                        return new AlbumInfo(imagesReponse.getFirstLargeThumbnail(), releasesResponse.getOldestReleaseYear());
+                        return new AlbumInfo(
+                                InfoSource.MUSICBRAINZ,
+                                imagesReponse.getFirstLargeThumbnail(),
+                                releasesResponse.getOldestReleaseYear());
                     }
                 }
             }
@@ -78,10 +92,5 @@ public class MusicbrainzArtFetcher extends ArtFetcher {
     @Override
     public ArtistInfo fetchArtistInfo(String artistId) {
         throw new PlayerException("Fetching artist images is not supported by Musicbrainz.");
-    }
-
-    @Override
-    public ImageSource getImageSource() {
-        return ImageSource.MUSICBRAINZ;
     }
 }

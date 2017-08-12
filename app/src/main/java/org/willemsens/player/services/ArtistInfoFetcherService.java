@@ -4,22 +4,22 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import org.willemsens.player.R;
-import org.willemsens.player.imagefetchers.ArtFetcher;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.ImageDownloader;
-import org.willemsens.player.imagefetchers.discogs.DiscogsArtFetcher;
+import org.willemsens.player.imagefetchers.discogs.DiscogsInfoFetcher;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Image;
 
 import java.util.List;
 
 public class ArtistInfoFetcherService extends InfoFetcherService {
-    private final ArtFetcher artFetcher;
+    private final InfoFetcher infoFetcher;
 
     public ArtistInfoFetcherService() {
         super(ArtistInfoFetcherService.class.getName());
 
-        this.artFetcher = new DiscogsArtFetcher();
+        this.infoFetcher = new DiscogsInfoFetcher();
     }
 
     @Override
@@ -44,24 +44,26 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
 
     private void fetchSingleArtist(Artist artist, ImageDownloader imageDownloader) {
         final Image image = new Image();
-        final String artistId = artFetcher.fetchArtistId(artist.getName());
+        final String artistId = infoFetcher.fetchArtistId(artist.getName());
 
         waitRateLimit();
 
-        final ArtistInfo artistInfo = artFetcher.fetchArtistInfo(artistId);
-        image.setUrl(artistInfo.getImageUrl());
-        image.setSource(artFetcher.getImageSource());
-        image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+        final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
+        if (artistInfo != null) {
+            image.setUrl(artistInfo.getImageUrl());
+            image.setSource(artistInfo.getInfoSource());
+            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-        getMusicDao().saveImage(image);
+            getMusicDao().saveImage(image);
 
-        artist.setImage(image);
-        getMusicDao().updateArtist(artist);
+            artist.setImage(image);
+            getMusicDao().updateArtist(artist);
 
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-        Intent broadcast = new Intent(getString(R.string.key_artist_updated));
-        broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
-        lbm.sendBroadcast(broadcast);
+            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+            Intent broadcast = new Intent(getString(R.string.key_artist_updated));
+            broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
+            lbm.sendBroadcast(broadcast);
+        }
 
         waitRateLimit();
     }

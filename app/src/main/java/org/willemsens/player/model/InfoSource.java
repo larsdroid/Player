@@ -1,5 +1,5 @@
 package org.willemsens.player.model;
 
-public enum ImageSource {
+public enum InfoSource {
     DISCOGS, MUSICBRAINZ
 }

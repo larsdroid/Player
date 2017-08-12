@@ -3,11 +3,12 @@ package org.willemsens.player.services;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+
 import org.willemsens.player.R;
 import org.willemsens.player.imagefetchers.AlbumInfo;
-import org.willemsens.player.imagefetchers.ArtFetcher;
 import org.willemsens.player.imagefetchers.ImageDownloader;
-import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzArtFetcher;
+import org.willemsens.player.imagefetchers.InfoFetcher;
+import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzInfoFetcher;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Image;
 
@@ -18,12 +19,12 @@ import java.util.List;
  * yet and fetches those images.
  */
 public class AlbumInfoFetcherService extends InfoFetcherService {
-    private final ArtFetcher artFetcher;
+    private final InfoFetcher infoFetcher;
 
     public AlbumInfoFetcherService() {
         super(AlbumInfoFetcherService.class.getName());
 
-        this.artFetcher = new MusicbrainzArtFetcher();
+        this.infoFetcher = new MusicbrainzInfoFetcher();
     }
 
     @Override
@@ -49,23 +50,25 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     private void fetchSingleAlbum(Album album, ImageDownloader imageDownloader) {
         final Image image = new Image();
 
-        final AlbumInfo albumInfo = artFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
-        image.setUrl(albumInfo.getCoverImageUrl());
-        image.setSource(artFetcher.getImageSource());
-        image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+        final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
+        if (albumInfo != null) {
+            image.setUrl(albumInfo.getCoverImageUrl());
+            image.setSource(albumInfo.getInfoSource());
+            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-        getMusicDao().saveImage(image);
+            getMusicDao().saveImage(image);
 
-        album.setImage(image);
-        if (album.getYearReleased() == null && albumInfo.getYear() != null) {
-            album.setYearReleased(albumInfo.getYear());
+            album.setImage(image);
+            if (album.getYearReleased() == null && albumInfo.getYear() != null) {
+                album.setYearReleased(albumInfo.getYear());
+            }
+            getMusicDao().updateAlbum(album);
+
+            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+            Intent broadcast = new Intent(getString(R.string.key_album_updated));
+            broadcast.putExtra(getString(R.string.key_album_id), album.getId());
+            lbm.sendBroadcast(broadcast);
         }
-        getMusicDao().updateAlbum(album);
-
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-        Intent broadcast = new Intent(getString(R.string.key_album_updated));
-        broadcast.putExtra(getString(R.string.key_album_id), album.getId());
-        lbm.sendBroadcast(broadcast);
 
         waitRateLimit();
     }

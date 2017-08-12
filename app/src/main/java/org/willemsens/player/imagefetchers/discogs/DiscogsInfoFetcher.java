@@ -1,20 +1,29 @@
 package org.willemsens.player.imagefetchers.discogs;
 
 import org.willemsens.player.imagefetchers.AlbumInfo;
-import org.willemsens.player.imagefetchers.ArtFetcher;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.discogs.dto.Release;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleaseDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleasesResponse;
-import org.willemsens.player.model.ImageSource;
+import org.willemsens.player.model.InfoSource;
 
 import okhttp3.HttpUrl;
+import okhttp3.Request;
 
-public class DiscogsArtFetcher extends ArtFetcher {
+public class DiscogsInfoFetcher extends InfoFetcher {
     private static final String KEY = "jdLmQoplPtRzRALOXlyv";
     private static final String SECRET = "uvlyrckmvWeAnsdEXpuFWubBsYIMfaBv";
+
+    @Override
+    public Request getRequest(HttpUrl url) {
+        return new Request.Builder()
+                .url(url)
+                .addHeader("Accept", "application/json")
+                .build();
+    }
 
     @Override
     public String fetchArtistId(String artistName) {
@@ -77,7 +86,10 @@ public class DiscogsArtFetcher extends ArtFetcher {
                     if (json != null) {
                         ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
 
-                        return new AlbumInfo(releaseDetail.getFirstImageURL(), releasesResponse.getOldestReleaseYear());
+                        return new AlbumInfo(
+                                InfoSource.DISCOGS,
+                                releaseDetail.getFirstImageURL(),
+                                releasesResponse.getOldestReleaseYear());
                     }
                 }
             }
@@ -98,18 +110,11 @@ public class DiscogsArtFetcher extends ArtFetcher {
                 .build();
 
         final String json = fetch(url);
-        String artistImageUrl = null;
         if (json != null) {
             ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
-
-            artistImageUrl = artistDetail.getFirstImageURL();
+            return new ArtistInfo(InfoSource.DISCOGS, artistDetail.getFirstImageURL());
         }
 
-        return new ArtistInfo(artistImageUrl);
-    }
-
-    @Override
-    public ImageSource getImageSource() {
-        return ImageSource.DISCOGS;
+        return null;
     }
 }

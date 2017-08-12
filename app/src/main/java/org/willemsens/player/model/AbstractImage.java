@@ -12,7 +12,7 @@ abstract class AbstractImage {
     Long id;
 
     @Column(nullable = false)
-    ImageSource source;
+    InfoSource source;
 
     @Column(nullable = false)
     String url;
