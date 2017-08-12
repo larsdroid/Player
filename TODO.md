@@ -1,3 +1,8 @@
+* InfoSource attribute should be moved from AbstractImage to AbstractAlbum
+  and AbstractArtist
+* Add a placehold image to use for albums and artists for which the art
+  couldn't be/wasn't fecthed
+
 Clean code
 --
 * Retrofit the image fetchers (not urgent, code is quite clean)
