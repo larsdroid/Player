@@ -8,6 +8,7 @@ import org.willemsens.player.model.Directory;
 import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -84,9 +85,9 @@ public class MusicDao {
      *              to be in the DB already.
      * @return The amount of new albums inserted into the DB.
      */
-    public int checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
+    public List<Long> checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
         final List<Album> databaseAlbums = getAllAlbums();
-        int inserts = 0;
+        final List<Long> insertedIds = new ArrayList<>();
         for (Album album : albums) {
             if (databaseAlbums.contains(album)) {
                 for (Album databaseAlbum : databaseAlbums) {
@@ -103,10 +104,10 @@ public class MusicDao {
                 // TODO: calculate total length for all songs in 'album'
                 //       simply iterate all songs and
                 insertAlbum(album);
-                inserts++;
+                insertedIds.add(album.getId());
             }
         }
-        return inserts;
+        return insertedIds;
     }
 
     /**
@@ -120,9 +121,9 @@ public class MusicDao {
      *              to be in the DB already.
      * @return The amount of new artists inserted into the DB.
      */
-    public int checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
+    public List<Long> checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
         final List<Artist> databaseArtists = getAllArtists();
-        int inserts = 0;
+        final List<Long> insertedIds = new ArrayList<>();
         for (Artist artist : artists) {
             if (databaseArtists.contains(artist)) {
                 for (Artist databaseArtist : databaseArtists) {
@@ -142,23 +143,23 @@ public class MusicDao {
                 }
             } else {
                 insertArtist(artist);
-                inserts++;
+                insertedIds.add(artist.getId());
             }
         }
-        return inserts;
+        return insertedIds;
     }
 
-    public int checkSongsSelectInsert(Set<Song> songs) {
+    public List<Long> checkSongsSelectInsert(Set<Song> songs) {
         List<Song> dbSongs;
-        int inserts = 0;
+        final List<Long> insertedIds = new ArrayList<>();
         for (Song song : songs) {
             dbSongs = this.dataStore.select(Song.class).where(Song.FILE.equal(song.getFile())).get().toList();
             if (dbSongs.size() == 0) {
                 insertSong(song);
-                inserts++;
+                insertedIds.add(song.getId());
             }
         }
-        return inserts;
+        return insertedIds;
     }
 
     private void insertAlbum(Album album) {

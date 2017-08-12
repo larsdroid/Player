@@ -2,6 +2,7 @@ package org.willemsens.player.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -17,6 +18,7 @@ import org.willemsens.player.persistence.MusicDao;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import io.requery.Persistable;
@@ -27,6 +29,8 @@ import io.requery.sql.EntityDataStore;
  * updates the file's information in the music DB.
  */
 public class FileScannerService extends IntentService {
+    private static final int THRESHOLD_FULL_REFRESH = 10;
+
     private MusicDao musicDao;
 
     public FileScannerService() {
@@ -49,38 +53,81 @@ public class FileScannerService extends IntentService {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
                     processDirectory(root, songs, albums, artists);
-                    int artistInserts = this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
-                    int albumInserts = this.musicDao.checkAlbumsSelectInsert(albums, songs);
-                    int songInserts = this.musicDao.checkSongsSelectInsert(songs);
+                    final List<Long> artistIds = this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
+                    final List<Long> albumIds = this.musicDao.checkAlbumsSelectInsert(albums, songs);
+                    final List<Long> songIds = this.musicDao.checkSongsSelectInsert(songs);
 
-                    LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-                    Intent broadcast;
+                    newRecordsInserted(
+                            artistIds,
+                            getString(R.string.key_artist_id),
+                            getString(R.string.key_artist_inserted),
+                            getString(R.string.key_artists_inserted),
+                            ArtistImageFetcherService.class);
 
-                    if (artistInserts > 0) {
-                        broadcast = new Intent(getString(R.string.key_artists_inserted));
-                        lbm.sendBroadcast(broadcast);
+                    newRecordsInserted(
+                            albumIds,
+                            getString(R.string.key_album_id),
+                            getString(R.string.key_album_inserted),
+                            getString(R.string.key_albums_inserted),
+                            AlbumImageFetcherService.class);
 
-                        broadcast = new Intent(this, ArtistImageFetcherService.class);
-                        startService(broadcast);
-                    }
-
-                    if (albumInserts > 0) {
-                        broadcast = new Intent(getString(R.string.key_albums_inserted));
-                        lbm.sendBroadcast(broadcast);
-
-                        broadcast = new Intent(this, AlbumImageFetcherService.class);
-                        startService(broadcast);
-                    }
-
-                    if (songInserts > 0) {
-                        broadcast = new Intent(getString(R.string.key_songs_inserted));
-                        lbm.sendBroadcast(broadcast);
-                    }
+                    newRecordsInserted(
+                            songIds,
+                            getString(R.string.key_song_id),
+                            getString(R.string.key_song_inserted),
+                            getString(R.string.key_songs_inserted),
+                            null);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Call this method after new records have been inserted into the DB. This method will send
+     * broadcasts to refresh other parts of the application. Either a single "full refresh"
+     * broadcast in case the amount of new records reached a certain threshold, or a few "record
+     * refresh" broadcasts in case the amount of new records didn't reach the threshold.
+     * If a service class is provided as well, then the service in question is launched. Either for
+     * a full refresh or for multiple single record updates, similar to the broadcast.
+     * @param recordIds The IDs of the new records.
+     * @param intentKeyRecordId The intent key to use for submitting a single ID with an intent.
+     * @param intentActionSingleRecord The intent action to use when broadcasting for a single
+     *                                 record insert.
+     * @param intentActionMultipleRecords The intent action to use when broadcasting for a full
+     *                                    refresh.
+     * @param clazz The service to trigger.
+     */
+    private void newRecordsInserted(@NonNull List<Long> recordIds,
+                                    @NonNull String intentKeyRecordId,
+                                    @NonNull String intentActionSingleRecord,
+                                    @NonNull String intentActionMultipleRecords,
+                                    @Nullable Class clazz) {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        Intent broadcast;
+
+        if (recordIds.size() > THRESHOLD_FULL_REFRESH) {
+            broadcast = new Intent(intentActionMultipleRecords);
+            lbm.sendBroadcast(broadcast);
+
+            if (clazz != null) {
+                broadcast = new Intent(this, clazz);
+                startService(broadcast);
+            }
+        } else if (recordIds.size() > 0) {
+            for (Long recordId : recordIds) {
+                broadcast = new Intent(intentActionSingleRecord);
+                broadcast.putExtra(intentKeyRecordId, recordId);
+                lbm.sendBroadcast(broadcast);
+
+                if (clazz != null) {
+                    broadcast = new Intent(this, clazz);
+                    broadcast.putExtra(intentKeyRecordId, recordId);
+                    startService(broadcast);
+                }
             }
         }
     }

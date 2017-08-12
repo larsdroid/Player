@@ -1,12 +1,14 @@
 package org.willemsens.player.imagefetchers.discogs;
 
-import okhttp3.HttpUrl;
 import org.willemsens.player.imagefetchers.ArtFetcher;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.discogs.dto.Release;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleaseDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleasesResponse;
+import org.willemsens.player.model.ImageSource;
+
+import okhttp3.HttpUrl;
 
 public class DiscogsArtFetcher extends ArtFetcher {
     private static final String KEY = "jdLmQoplPtRzRALOXlyv";
@@ -99,5 +101,10 @@ public class DiscogsArtFetcher extends ArtFetcher {
         }
 
         return artistImageUrl;
+    }
+
+    @Override
+    public ImageSource getImageSource() {
+        return ImageSource.DISCOGS;
     }
 }

@@ -9,3 +9,9 @@ Album and Artist Images
 Clean code
 --
 * Retrofit the image fetchers (not urgent, code is quite clean)
+
+Bugs
+--
+* AbstractAlbum: the Artist field should be eagerly fetched. Waiting for
+  requery to implement eagerly fetching relations:
+  https://github.com/requery/requery/issues/654

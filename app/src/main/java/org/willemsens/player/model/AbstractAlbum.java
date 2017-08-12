@@ -17,6 +17,10 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     @Column(nullable = false)
     String name;
 
+    // *** TODO FIXME ***
+    // This relation should be eagerly fetched, else the app will blow up once multiple different
+    // artists are present.
+    // https://github.com/requery/requery/issues/654
     @ManyToOne
     @Column(nullable = false)
     Artist artist;
@@ -31,7 +35,7 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
 
     @Override
     public int compareTo(@NonNull AbstractAlbum that) {
-        if (this.artist.equals(that.artist)) {
+        if (!this.artist.equals(that.artist)) {
             return this.artist.compareTo(that.artist);
         } else {
             return this.name.compareTo(that.name);

@@ -85,6 +85,7 @@ public class ArtistsFragment extends Fragment {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.key_artists_inserted));
+        filter.addAction(getString(R.string.key_artist_inserted));
         filter.addAction(getString(R.string.key_artist_updated));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
@@ -103,6 +104,13 @@ public class ArtistsFragment extends Fragment {
             if (intentAction.equals(getString(R.string.key_artists_inserted))) {
                 loadAllArtists();
                 adapter.notifyDataSetChanged();
+            } else if (intentAction.equals(getString(R.string.key_artist_inserted))) {
+                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                artists.add(artist);
+                Collections.sort(artists);
+                final int index = artists.indexOf(artist);
+                adapter.notifyItemInserted(index);
             } else if (intentAction.equals(getString(R.string.key_artist_updated))) {
                 final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);

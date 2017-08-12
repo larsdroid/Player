@@ -2,6 +2,8 @@ package org.willemsens.player.imagefetchers;
 
 import com.google.gson.Gson;
 
+import org.willemsens.player.model.ImageSource;
+
 import java.io.IOException;
 
 import okhttp3.HttpUrl;
@@ -38,4 +40,6 @@ public abstract class ArtFetcher {
         }
         return null;
     }
+
+    public abstract ImageSource getImageSource();
 }

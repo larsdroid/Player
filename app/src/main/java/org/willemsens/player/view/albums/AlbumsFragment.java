@@ -84,6 +84,7 @@ public class AlbumsFragment extends Fragment {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.key_albums_inserted));
+        filter.addAction(getString(R.string.key_album_inserted));
         filter.addAction(getString(R.string.key_album_updated));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
@@ -102,6 +103,13 @@ public class AlbumsFragment extends Fragment {
             if (intentAction.equals(getString(R.string.key_albums_inserted))) {
                 loadAllAlbums();
                 adapter.notifyDataSetChanged();
+            } else if (intentAction.equals(getString(R.string.key_album_inserted))) {
+                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                albums.add(album);
+                Collections.sort(albums);
+                final int index = albums.indexOf(album);
+                adapter.notifyItemInserted(index);
             } else if (intentAction.equals(getString(R.string.key_album_updated))) {
                 final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);

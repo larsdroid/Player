@@ -9,7 +9,6 @@ import org.willemsens.player.imagefetchers.ImageDownloader;
 import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzArtFetcher;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Image;
-import org.willemsens.player.model.ImageSource;
 
 import java.util.List;
 
@@ -30,28 +29,42 @@ public class AlbumImageFetcherService extends ImageFetcherService {
     protected void onHandleIntent(@Nullable Intent intent) {
         final ImageDownloader imageDownloader = new ImageDownloader();
 
-        final List<Album> albums = getMusicDao().getAllAlbumsWithoutArt();
-        for (Album album : albums) {
-            final Image image = new Image();
-            final String musicbrainzArtistId = musicbrainz.fetchArtistId(album.getArtist().getName());
-
-            waitRateLimit();
-
-            image.setUrl(musicbrainz.fetchLargeThumbnail(musicbrainzArtistId, album.getName()));
-            image.setSource(ImageSource.MUSICBRAINZ);
-            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
-
-            getMusicDao().saveImage(image);
-
-            album.setImage(image);
-            getMusicDao().updateAlbum(album);
-
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-            Intent broadcast = new Intent(getString(R.string.key_album_updated));
-            broadcast.putExtra(getString(R.string.key_album_id), album.getId());
-            lbm.sendBroadcast(broadcast);
-
-            waitRateLimit();
+        long albumId = -1;
+        if (intent != null) {
+            albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
         }
+
+        if (albumId != -1) {
+            final Album album = getMusicDao().findAlbum(albumId);
+            fetchSingleAlbum(album, imageDownloader);
+        } else {
+            final List<Album> albums = getMusicDao().getAllAlbumsWithoutArt();
+            for (Album album : albums) {
+                fetchSingleAlbum(album, imageDownloader);
+            }
+        }
+    }
+
+    private void fetchSingleAlbum(Album album, ImageDownloader imageDownloader) {
+        final Image image = new Image();
+        final String musicbrainzArtistId = musicbrainz.fetchArtistId(album.getArtist().getName());
+
+        waitRateLimit();
+
+        image.setUrl(musicbrainz.fetchLargeThumbnail(musicbrainzArtistId, album.getName()));
+        image.setSource(musicbrainz.getImageSource());
+        image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+
+        getMusicDao().saveImage(image);
+
+        album.setImage(image);
+        getMusicDao().updateAlbum(album);
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        Intent broadcast = new Intent(getString(R.string.key_album_updated));
+        broadcast.putExtra(getString(R.string.key_album_id), album.getId());
+        lbm.sendBroadcast(broadcast);
+
+        waitRateLimit();
     }
 }

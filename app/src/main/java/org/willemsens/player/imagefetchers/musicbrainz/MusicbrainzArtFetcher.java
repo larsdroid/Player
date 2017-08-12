@@ -1,11 +1,13 @@
 package org.willemsens.player.imagefetchers.musicbrainz;
 
-import okhttp3.HttpUrl;
 import org.willemsens.player.imagefetchers.ArtFetcher;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ImagesReponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.Release;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ReleasesResponse;
+import org.willemsens.player.model.ImageSource;
+
+import okhttp3.HttpUrl;
 
 public class MusicbrainzArtFetcher extends ArtFetcher {
     public String fetchArtistId(String name) {
@@ -66,5 +68,10 @@ public class MusicbrainzArtFetcher extends ArtFetcher {
             }
         }
         return null;
+    }
+
+    @Override
+    public ImageSource getImageSource() {
+        return ImageSource.MUSICBRAINZ;
     }
 }

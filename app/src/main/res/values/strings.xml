@@ -14,12 +14,18 @@
     <string name="artist_image_description">Artist image</string>
 
     <string name="key_artists_inserted">org.willemsens.ARTISTS_INSERTED</string>
-    <string name="key_albums_inserted">org.willemsens.ALBUMS_INSERTED</string>
-    <string name="key_songs_inserted">org.willemsens.SONGS_INSERTED</string>
+    <string name="key_artist_inserted">org.willemsens.ARTIST_INSERTED</string>
     <string name="key_artist_updated">org.willemsens.ARTIST_UPDATED</string>
-    <string name="key_album_updated">org.willemsens.ALBUM_UPDATED</string>
     <string name="key_artist_id">org.willemsens.ARTIST_ID</string>
+
+    <string name="key_albums_inserted">org.willemsens.ALBUMS_INSERTED</string>
+    <string name="key_album_inserted">org.willemsens.ALBUM_INSERTED</string>
+    <string name="key_album_updated">org.willemsens.ALBUM_UPDATED</string>
     <string name="key_album_id">org.willemsens.ALBUM_ID</string>
+
+    <string name="key_songs_inserted">org.willemsens.SONGS_INSERTED</string>
+    <string name="key_song_inserted">org.willemsens.SONG_INSERTED</string>
+    <string name="key_song_id">org.willemsens.SONG_ID</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
