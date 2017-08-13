@@ -7,27 +7,28 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-
-import org.willemsens.player.PlayerApplication;
-import org.willemsens.player.R;
-import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.services.ArtistInfoFetcherService;
-import org.willemsens.player.services.FileScannerService;
-import org.willemsens.player.services.AlbumInfoFetcherService;
-import org.willemsens.player.view.DataAccessProvider;
-import org.willemsens.player.view.albums.AlbumsFragment;
-import org.willemsens.player.view.artists.ArtistsFragment;
-import org.willemsens.player.view.settings.SettingsFragment;
-import org.willemsens.player.view.songs.SongsFragment;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
+import org.willemsens.player.PlayerApplication;
+import org.willemsens.player.R;
+import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.services.AlbumInfoFetcherService;
+import org.willemsens.player.services.ArtistInfoFetcherService;
+import org.willemsens.player.services.FileScannerService;
+import org.willemsens.player.services.MusicPlayingService;
+import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.view.albums.AlbumsFragment;
+import org.willemsens.player.view.artists.ArtistsFragment;
+import org.willemsens.player.view.settings.SettingsFragment;
+import org.willemsens.player.view.songs.OnSongClickedListener;
+import org.willemsens.player.view.songs.SongsFragment;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView.OnNavigationItemSelectedListener,
-        DataAccessProvider {
+        DataAccessProvider, OnSongClickedListener {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
@@ -122,5 +123,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public MusicDao getMusicDao() {
         return this.musicDao;
+    }
+
+    @Override
+    public void songClicked(Song song) {
+        Intent intent = new Intent(this, MusicPlayingService.class);
+        intent.putExtra(getString(R.string.key_song_id), song.getId());
+        startService(intent);
     }
 }

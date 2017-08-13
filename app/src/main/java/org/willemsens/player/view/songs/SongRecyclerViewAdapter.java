@@ -8,23 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
 class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
     private final List<Song> songs;
+    private final OnSongClickedListener listener;
 
-    SongRecyclerViewAdapter(List<Song> songs) {
+    SongRecyclerViewAdapter(List<Song> songs, OnSongClickedListener listener) {
         this.songs = songs;
+        this.listener = listener;
     }
 
     @Override
@@ -44,7 +44,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         return songs.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.song_list_album_image)
         ImageView albumCover;
 
@@ -57,12 +57,22 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         @BindView(R.id.song_list_album)
         TextView songAlbumName;
 
+        private Song song;
+
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            listener.songClicked(this.song);
         }
 
         private void setSong(Song song) {
+            this.song = song;
+
             if (song.getAlbum().getImage() != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);

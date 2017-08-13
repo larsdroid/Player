@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
@@ -28,6 +27,7 @@ import java.util.List;
 public class SongsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
     private SongRecyclerViewAdapter adapter;
+    private OnSongClickedListener listener;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Song> songs;
 
@@ -57,7 +57,7 @@ public class SongsFragment extends Fragment {
             if (this.songs.isEmpty()) {
                 loadAllSongs();
             }
-            this.adapter = new SongRecyclerViewAdapter(this.songs);
+            this.adapter = new SongRecyclerViewAdapter(this.songs, (OnSongClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;
