@@ -1,9 +1,12 @@
 package org.willemsens.player.view.songs;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
@@ -33,9 +36,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.song = songs.get(position);
-        holder.mIdView.setText(String.valueOf(songs.get(position).getId()));
-        holder.mContentView.setText(songs.get(position).getName());
+        holder.setSong(songs.get(position));
     }
 
     @Override
@@ -44,17 +45,33 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.id)
-        TextView mIdView;
+        @BindView(R.id.song_list_album_image)
+        ImageView albumCover;
 
-        @BindView(R.id.content)
-        TextView mContentView;
+        @BindView(R.id.song_list_name)
+        TextView songName;
 
-        private Song song;
+        @BindView(R.id.song_list_track)
+        TextView songTrack;
+
+        @BindView(R.id.song_list_album)
+        TextView songAlbumName;
 
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+        }
+
+        private void setSong(Song song) {
+            if (song.getAlbum().getImage() != null) {
+                final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                        song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
+                this.albumCover.setImageBitmap(bitmap);
+            }
+
+            this.songName.setText(song.getName());
+            this.songTrack.setText(String.valueOf(song.getTrack()));
+            this.songAlbumName.setText(song.getAlbum().getName());
         }
     }
 }

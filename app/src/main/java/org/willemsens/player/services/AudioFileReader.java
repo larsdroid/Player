@@ -41,10 +41,13 @@ class AudioFileReader {
 
             final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
             final int songLength = audioFile.getAudioHeader().getTrackLength();
+            final String songTrack = audioFile.getTag().getFirst(FieldKey.TRACK);
+            final int track = songTrack != null && !songTrack.isEmpty() ? Integer.parseInt(songTrack) : -1;
             final Song song = new Song();
             song.setName(songName);
             song.setArtist(songArtist);
             song.setAlbum(album);
+            song.setTrack(track);
             song.setLength(songLength);
             song.setFile(file.getCanonicalPath());
 

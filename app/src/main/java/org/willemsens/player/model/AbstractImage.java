@@ -12,9 +12,6 @@ abstract class AbstractImage {
     Long id;
 
     @Column(nullable = false)
-    InfoSource source;
-
-    @Column(nullable = false)
     String url;
 
     @Column(nullable = false)

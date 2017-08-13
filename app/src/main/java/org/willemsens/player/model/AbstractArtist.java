@@ -17,6 +17,9 @@ abstract class AbstractArtist implements Comparable<AbstractArtist> {
     @Column(unique = true, nullable = false)
     String name;
 
+    @Column
+    InfoSource source;
+
     @ManyToOne
     Image image;
 

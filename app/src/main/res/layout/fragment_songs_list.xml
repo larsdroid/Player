@@ -7,6 +7,4 @@
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
     tools:context=".view.songs.SongsFragment"
-    tools:listitem="@layout/fragment_song"
-
-    android:background="@color/blue" />
+    tools:listitem="@layout/fragment_song" />

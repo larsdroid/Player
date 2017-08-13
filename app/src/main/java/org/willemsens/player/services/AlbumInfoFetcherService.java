@@ -40,7 +40,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
             final Album album = getMusicDao().findAlbum(albumId);
             fetchSingleAlbum(album, imageDownloader);
         } else {
-            final List<Album> albums = getMusicDao().getAllAlbumsWithoutArt();
+            final List<Album> albums = getMusicDao().getAllAlbumsMissingInfo();
             for (Album album : albums) {
                 fetchSingleAlbum(album, imageDownloader);
             }
@@ -53,7 +53,6 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
         final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
         if (albumInfo != null) {
             image.setUrl(albumInfo.getCoverImageUrl());
-            image.setSource(albumInfo.getInfoSource());
             image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
             getMusicDao().saveImage(image);
@@ -62,6 +61,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
             if (album.getYearReleased() == null && albumInfo.getYear() != null) {
                 album.setYearReleased(albumInfo.getYear());
             }
+            album.setSource(albumInfo.getInfoSource());
             getMusicDao().updateAlbum(album);
 
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);

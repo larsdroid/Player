@@ -1,8 +1,7 @@
 package org.willemsens.player.persistence;
 
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -13,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -41,17 +43,17 @@ public class MusicDao {
         return songs;
     }
 
-    public List<Album> getAllAlbumsWithoutArt() {
+    public List<Album> getAllAlbumsMissingInfo() {
         final List<Album> albums = this.dataStore.select(Album.class)
-                .where(Album.IMAGE.isNull())
+                .where(Album.SOURCE.isNull())
                 .get().toList();
         enrichAlbumsEagerFetch(albums);
         return albums;
     }
 
-    public List<Artist> getAllArtistsWithoutArt() {
+    public List<Artist> getAllArtistsMissingInfo() {
         return this.dataStore.select(Artist.class)
-                .where(Artist.IMAGE.isNull())
+                .where(Artist.SOURCE.isNull())
                 .get().toList();
     }
 
@@ -82,6 +84,14 @@ public class MusicDao {
         return this.dataStore.select(Artist.class)
                 .where(Artist.ID.equal(id))
                 .get().firstOrNull();
+    }
+
+    public Song findSong(long id) {
+        final Song song = this.dataStore.select(Song.class)
+                .where(Song.ID.equal(id))
+                .get().firstOrNull();
+        enrichSongEagerFetch(song);
+        return song;
     }
 
     private void enrichAlbumEagerFetch(Album album) {

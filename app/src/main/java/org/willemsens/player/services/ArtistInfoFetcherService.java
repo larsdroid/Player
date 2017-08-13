@@ -35,7 +35,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
             final Artist artist = getMusicDao().findArtist(artistId);
             fetchSingleArtist(artist, imageDownloader);
         } else {
-            final List<Artist> artists = getMusicDao().getAllArtistsWithoutArt();
+            final List<Artist> artists = getMusicDao().getAllArtistsMissingInfo();
             for (Artist artist : artists) {
                 fetchSingleArtist(artist, imageDownloader);
             }
@@ -51,12 +51,12 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
         final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
         if (artistInfo != null) {
             image.setUrl(artistInfo.getImageUrl());
-            image.setSource(artistInfo.getInfoSource());
             image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
             getMusicDao().saveImage(image);
 
             artist.setImage(image);
+            artist.setSource(artistInfo.getInfoSource());
             getMusicDao().updateArtist(artist);
 
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);

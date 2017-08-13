@@ -4,21 +4,21 @@ import android.content.Context;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
-public class GridImageView extends AppCompatImageView {
-    public GridImageView(Context context) {
+public class WidthCalculatedImageView extends AppCompatImageView {
+    public WidthCalculatedImageView(Context context) {
         super(context);
     }
 
-    public GridImageView(Context context, AttributeSet attrs) {
+    public WidthCalculatedImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public GridImageView(Context context, AttributeSet attrs, int defStyle) {
+    public WidthCalculatedImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, widthMeasureSpec);
+        super.onMeasure(heightMeasureSpec, heightMeasureSpec);
     }
 }

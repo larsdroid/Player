@@ -24,7 +24,11 @@ abstract class AbstractSong implements Comparable<AbstractSong> {
 
     // Album is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
+    @Column(nullable = false)
     Album album;
+
+    @Column(nullable = false)
+    int track;
 
     @Column(nullable = false)
     int length; // In seconds
@@ -34,7 +38,11 @@ abstract class AbstractSong implements Comparable<AbstractSong> {
 
     @Override
     public int compareTo(@NonNull AbstractSong that) {
-        return this.file.compareTo(that.file);
+        if (this.album.equals(that.album)) {
+            return this.track - that.track;
+        } else {
+            return this.album.compareTo(that.album);
+        }
     }
 
     @Override

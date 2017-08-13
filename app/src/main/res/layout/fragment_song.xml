@@ -2,19 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="@dimen/grid_cell_padding"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    <org.willemsens.player.view.WidthCalculatedImageView
+        android:id="@+id/song_list_album_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/album_cover_image_description"
+        android:background="@color/red" />
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/song_list_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/grid_cell_text_padding"
+            android:textAppearance="?attr/textAppearanceListItem"
+            android:maxLines="1"
+            tools:text="Song name bla bla bla bla bla feat. Lars"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/song_list_track"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/grid_cell_text_padding"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textAlignment="viewEnd"
+                android:maxLines="1"
+                tools:text="25" />
+
+            <TextView
+                android:id="@+id/song_list_album"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/grid_cell_text_padding"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:maxLines="1"
+                tools:text="Album name bla bla bla"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

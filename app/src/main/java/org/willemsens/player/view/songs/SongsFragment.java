@@ -19,6 +19,7 @@ import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ import java.util.List;
  */
 public class SongsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
+    private SongRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Song> songs;
 
@@ -53,9 +55,10 @@ public class SongsFragment extends Fragment {
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             if (this.songs.isEmpty()) {
-                this.songs.addAll(this.dataAccessProvider.getMusicDao().getAllSongs());
+                loadAllSongs();
             }
-            recyclerView.setAdapter(new SongRecyclerViewAdapter(this.songs));
+            this.adapter = new SongRecyclerViewAdapter(this.songs);
+            recyclerView.setAdapter(this.adapter);
         }
         return view;
     }
@@ -80,7 +83,9 @@ public class SongsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        lbm.registerReceiver(this.dbUpdateReceiver, new IntentFilter(getString(R.string.key_songs_inserted)));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.key_songs_inserted));
+        lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
     @Override
@@ -93,11 +98,24 @@ public class SongsFragment extends Fragment {
     private class DBUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            RecyclerView view = (RecyclerView)SongsFragment.this.getView();
-            SongRecyclerViewAdapter adapter = (SongRecyclerViewAdapter)view.getAdapter();
-            songs.clear();
-            songs.addAll(SongsFragment.this.dataAccessProvider.getMusicDao().getAllSongs());
-            adapter.notifyDataSetChanged();
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(getString(R.string.key_songs_inserted))) {
+                loadAllSongs();
+                adapter.notifyDataSetChanged();
+            } else if (intentAction.equals(getString(R.string.key_song_inserted))) {
+                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+                final Song song = dataAccessProvider.getMusicDao().findSong(songId);
+                songs.add(song);
+                Collections.sort(songs);
+                final int index = songs.indexOf(song);
+                adapter.notifyItemInserted(index);
+            }
         }
+    }
+
+    private void loadAllSongs() {
+        songs.clear();
+        songs.addAll(dataAccessProvider.getMusicDao().getAllSongs());
+        Collections.sort(songs);
     }
 }

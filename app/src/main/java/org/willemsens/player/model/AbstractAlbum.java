@@ -27,6 +27,9 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     @Column(nullable = false)
     int length;
 
+    @Column
+    InfoSource source;
+
     @ManyToOne
     Image image;
 
@@ -35,7 +38,11 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
         if (!this.artist.equals(that.artist)) {
             return this.artist.compareTo(that.artist);
         } else {
-            return this.name.compareTo(that.name);
+            if (this.yearReleased != null && that.yearReleased != null && !this.yearReleased.equals(that.yearReleased)) {
+                return this.yearReleased - that.yearReleased;
+            } else {
+                return this.name.compareTo(that.name);
+            }
         }
     }
 

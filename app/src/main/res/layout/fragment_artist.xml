@@ -8,7 +8,7 @@
     tools:layout_width="250dp"
     tools:layout_height="350dp">
 
-    <org.willemsens.player.view.GridImageView
+    <org.willemsens.player.view.HeightCalculatedImageView
         android:id="@+id/artist_list_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
