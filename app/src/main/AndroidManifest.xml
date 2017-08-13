@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".PlayerApplication"
@@ -42,6 +43,11 @@
         <service
             android:name=".services.PurgingService"
             android:description="@string/purging_service_description"
+            android:exported="false" />
+
+        <service
+            android:name=".services.MusicPlayingService"
+            android:description="@string/music_playing_service_description"
             android:exported="false" />
     </application>
 </manifest>

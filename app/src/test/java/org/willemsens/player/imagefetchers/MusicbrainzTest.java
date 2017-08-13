@@ -10,7 +10,7 @@ public class MusicbrainzTest {
     private static final String ARTIST_ID = "9e53f84d-ef44-4c16-9677-5fd4d78cbd7d";
     private static final String ALBUM_NAME = "Summerteeth";
     private static final String ALBUM_IMAGE_URI = "http://coverartarchive.org/release/312cb54d-9c3c-4181-8f13-1345d87f5810/9752090182-500.jpg";
-    private static final Integer ALBUM_YEAR = 1996;
+    private static final Integer ALBUM_YEAR = 1999;
 
     @Test
     public void testFetchArtistId() throws Exception {

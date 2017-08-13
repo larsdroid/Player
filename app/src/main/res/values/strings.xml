@@ -9,6 +9,7 @@
     <string name="purging_service_description">Updates the list of songs, albums and artists in case music files are removed from storage.</string>
     <string name="album_image_fetcher_service_description">Fetches album art.</string>
     <string name="artist_image_fetcher_service_description">Fetches artist art.</string>
+    <string name="music_playing_service_description">Plays music.</string>
 
     <string name="album_cover_image_description">Album cover</string>
     <string name="artist_image_description">Artist image</string>
