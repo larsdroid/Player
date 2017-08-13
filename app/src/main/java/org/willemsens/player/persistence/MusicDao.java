@@ -9,7 +9,6 @@ import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -28,9 +27,7 @@ public class MusicDao {
     }
 
     public List<Album> getAllAlbums() {
-        final List<Album> albums = this.dataStore.select(Album.class).get().toList();
-        enrichAlbumsEagerFetch(albums);
-        return albums;
+        return this.dataStore.select(Album.class).get().toList();
     }
 
     public List<Artist> getAllArtists() {
@@ -38,17 +35,13 @@ public class MusicDao {
     }
 
     public List<Song> getAllSongs() {
-        final List<Song> songs = this.dataStore.select(Song.class).get().toList();
-        enrichSongsEagerFetch(songs);
-        return songs;
+        return this.dataStore.select(Song.class).get().toList();
     }
 
     public List<Album> getAllAlbumsMissingInfo() {
-        final List<Album> albums = this.dataStore.select(Album.class)
+        return this.dataStore.select(Album.class)
                 .where(Album.SOURCE.isNull())
                 .get().toList();
-        enrichAlbumsEagerFetch(albums);
-        return albums;
     }
 
     public List<Artist> getAllArtistsMissingInfo() {
@@ -73,11 +66,9 @@ public class MusicDao {
     }
 
     public Album findAlbum(long id) {
-        final Album album = this.dataStore.select(Album.class)
+        return this.dataStore.select(Album.class)
                 .where(Album.ID.equal(id))
                 .get().firstOrNull();
-        enrichAlbumEagerFetch(album);
-        return album;
     }
 
     public Artist findArtist(long id) {
@@ -87,32 +78,9 @@ public class MusicDao {
     }
 
     public Song findSong(long id) {
-        final Song song = this.dataStore.select(Song.class)
+        return this.dataStore.select(Song.class)
                 .where(Song.ID.equal(id))
                 .get().firstOrNull();
-        enrichSongEagerFetch(song);
-        return song;
-    }
-
-    private void enrichAlbumEagerFetch(Album album) {
-        album.setArtist(findArtist(album.getArtist().getId()));
-    }
-
-    private void enrichAlbumsEagerFetch(Collection<Album> albums) {
-        for (Album album : albums) {
-            enrichAlbumEagerFetch(album);
-        }
-    }
-
-    private void enrichSongEagerFetch(Song song) {
-        song.setArtist(findArtist(song.getArtist().getId()));
-        song.setAlbum(findAlbum(song.getAlbum().getId()));
-    }
-
-    private void enrichSongsEagerFetch(Collection<Song> songs) {
-        for (Song song : songs) {
-            enrichSongEagerFetch(song);
-        }
     }
 
     /**

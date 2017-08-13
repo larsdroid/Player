@@ -9,7 +9,7 @@ import io.requery.Key;
 import io.requery.ManyToOne;
 
 @Entity
-abstract class AbstractArtist implements Comparable<AbstractArtist> {
+abstract class AbstractArtist implements Comparable<Artist> {
     @Key
     @Generated
     Long id;
@@ -24,26 +24,29 @@ abstract class AbstractArtist implements Comparable<AbstractArtist> {
     Image image;
 
     @Override
-    public int compareTo(@NonNull AbstractArtist that) {
-        return this.name.compareTo(that.name);
+    public int compareTo(@NonNull Artist b) {
+        final Artist a = (Artist)this;
+        return a.getName().compareTo(b.getName());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractArtist)) return false;
+        if (!(o instanceof Artist)) return false;
 
-        AbstractArtist artist = (AbstractArtist) o;
+        final Artist a = (Artist)this;
+        final Artist b = (Artist)o;
 
-        if (this.id != null && artist.id != null) {
-            return this.id.equals(artist.id);
+        if (a.getId() != null && b.getId() != null) {
+            return a.getId().equals(b.getId());
         }
 
-        return name.equals(artist.name);
+        return a.getName().equals(b.getName());
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        final Artist a = (Artist)this;
+        return a.getName().hashCode();
     }
 }

@@ -9,7 +9,7 @@ import io.requery.Key;
 import io.requery.ManyToOne;
 
 @Entity
-abstract class AbstractSong implements Comparable<AbstractSong> {
+abstract class AbstractSong implements Comparable<Song> {
     @Key
     @Generated
     Long id;
@@ -17,12 +17,10 @@ abstract class AbstractSong implements Comparable<AbstractSong> {
     @Column(nullable = false)
     String name;
 
-    // Artist is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     @Column(nullable = false)
     Artist artist;
 
-    // Album is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     @Column(nullable = false)
     Album album;
@@ -37,31 +35,34 @@ abstract class AbstractSong implements Comparable<AbstractSong> {
     String file;
 
     @Override
-    public int compareTo(@NonNull AbstractSong that) {
-        if (this.album.equals(that.album)) {
-            return this.track - that.track;
+    public int compareTo(@NonNull Song b) {
+        final Song a = (Song)this;
+        if (a.getAlbum().equals(b.getAlbum())) {
+            return a.getTrack() - b.getTrack();
         } else {
-            return this.album.compareTo(that.album);
+            return a.getAlbum().compareTo(b.getAlbum());
         }
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractSong)) return false;
+        if (!(o instanceof Song)) return false;
 
-        AbstractSong song = (AbstractSong) o;
+        final Song a = (Song)this;
+        final Song b = (Song)o;
 
-        if (this.id != null && song.id != null) {
-            return this.id.equals(song.id);
+        if (a.getId() != null && b.getId() != null) {
+            return a.getId().equals(b.getId());
         }
 
-        return file.equals(song.file);
+        return a.getFile().equals(b.getFile());
 
     }
 
     @Override
     public int hashCode() {
-        return file.hashCode();
+        final Song a = (Song)this;
+        return a.getFile().hashCode();
     }
 }

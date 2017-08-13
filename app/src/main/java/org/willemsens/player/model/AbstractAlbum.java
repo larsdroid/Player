@@ -9,7 +9,7 @@ import io.requery.Key;
 import io.requery.ManyToOne;
 
 @Entity
-abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
+abstract class AbstractAlbum implements Comparable<Album> {
     @Key
     @Generated
     Long id;
@@ -17,7 +17,6 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     @Column(nullable = false)
     String name;
 
-    // Artist is being fetched eagerly in MusicDao. Hoping for eager fetching support in requery.
     @ManyToOne
     @Column(nullable = false)
     Artist artist;
@@ -34,14 +33,16 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     Image image;
 
     @Override
-    public int compareTo(@NonNull AbstractAlbum that) {
-        if (!this.artist.equals(that.artist)) {
-            return this.artist.compareTo(that.artist);
+    public int compareTo(@NonNull Album b) {
+        final Album a = (Album)this;
+        if (!a.getArtist().equals(b.getArtist())) {
+            return a.getArtist().compareTo(b.getArtist());
         } else {
-            if (this.yearReleased != null && that.yearReleased != null && !this.yearReleased.equals(that.yearReleased)) {
-                return this.yearReleased - that.yearReleased;
+            if (a.getYearReleased() != null && b.getYearReleased() != null
+                    && !a.getYearReleased().equals(b.getYearReleased())) {
+                return a.getYearReleased() - b.getYearReleased();
             } else {
-                return this.name.compareTo(that.name);
+                return a.getName().compareTo(b.getName());
             }
         }
     }
@@ -49,21 +50,23 @@ abstract class AbstractAlbum implements Comparable<AbstractAlbum> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractAlbum)) return false;
+        if (!(o instanceof Album)) return false;
 
-        AbstractAlbum album = (AbstractAlbum) o;
+        final Album a = (Album)this;
+        final Album b = (Album)o;
 
-        if (this.id != null && album.id != null) {
-            return this.id.equals(album.id);
+        if (a.getId() != null && b.getId() != null) {
+            return a.getId().equals(b.getId());
         }
 
-        return name.equals(album.name) && artist.equals(album.artist);
+        return a.getName().equals(b.getName()) && a.getArtist().equals(b.getArtist());
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + artist.hashCode();
+        final Album a = (Album)this;
+        int result = a.getName().hashCode();
+        result = 31 * result + a.getArtist().hashCode();
         return result;
     }
 }
