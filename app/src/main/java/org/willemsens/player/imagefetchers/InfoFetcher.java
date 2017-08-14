@@ -39,6 +39,13 @@ public abstract class InfoFetcher {
         return null;
     }
 
+    protected String sanitizeSearchString(String string) {
+        if (string.indexOf('[') != -1) {
+            string = string.substring(0, string.indexOf('[')).trim();
+        }
+        return string;
+    }
+
     public abstract Request getRequest(HttpUrl url);
     public abstract String fetchArtistId(String artistName);
     public abstract ArtistInfo fetchArtistInfo(String artistId);

@@ -85,7 +85,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
             this.songName.setText(song.getName());
             this.songTrack.setText(String.valueOf(song.getTrack()));
-            this.songAlbumName.setText(song.getAlbum().getName());
+            this.songAlbumName.setText(song.getArtist().getName() + " - " + song.getAlbum().getName());
         }
     }
 }

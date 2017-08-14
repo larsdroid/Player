@@ -35,7 +35,7 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .addQueryParameter("key", KEY)
                 .addQueryParameter("secret", SECRET)
                 .addQueryParameter("type", "artist")
-                .addQueryParameter("q", artistName)
+                .addQueryParameter("q", sanitizeSearchString(artistName))
                 .build();
 
         final String json = fetch(url);
@@ -60,8 +60,8 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .addQueryParameter("key", KEY)
                 .addQueryParameter("secret", SECRET)
                 .addQueryParameter("type", "release")
-                .addQueryParameter("artist", artistName)
-                .addQueryParameter("q", albumName)
+                .addQueryParameter("artist", sanitizeSearchString(artistName))
+                .addQueryParameter("q", sanitizeSearchString(albumName))
                 .build();
 
         String json = fetch(url);

@@ -6,4 +6,6 @@
 
     <dimen name="grid_cell_padding">5dp</dimen>
     <dimen name="grid_cell_text_padding">5dp</dimen>
+
+    <dimen name="grid_font_size">14sp</dimen>
 </resources>

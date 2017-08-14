@@ -31,7 +31,7 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .addPathSegment("ws")
                 .addPathSegment("2")
                 .addPathSegment("artist")
-                .addQueryParameter("query", "artist:" + apacheLuceneEscape(artistName))
+                .addQueryParameter("query", "artist:" + sanitizeSearchString(artistName))
                 .build();
         final String json = fetch(url);
         String artistId = null;
@@ -54,7 +54,7 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .addPathSegment("2")
                 .addPathSegment("release")
                 //.addQueryParameter("query", "release:" + albumName + " AND arid:" + artistId)
-                .addQueryParameter("query", "release:" + apacheLuceneEscape(albumName) + " AND artist:" + apacheLuceneEscape(artistName))
+                .addQueryParameter("query", "release:" + sanitizeSearchString(albumName) + " AND artist:" + sanitizeSearchString(artistName))
                 .build();
 
         String json = fetch(url);
@@ -94,10 +94,11 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
         throw new PlayerException("Fetching artist images is not supported by Musicbrainz.");
     }
 
-    private String apacheLuceneEscape(String string) {
-        if (string.indexOf('[') != -1) {
-            string = string.substring(0, string.indexOf('[')).trim();
-        }
+    @Override
+    protected String sanitizeSearchString(String string) {
+        string = super.sanitizeSearchString(string);
+
+        // Just a few Apache Lucene escapes
         string = string.replaceAll("\\(", "\\\\(");
         string = string.replaceAll("\\)", "\\\\)");
         return string.replaceAll("/", "\\\\/");

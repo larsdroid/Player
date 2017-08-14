@@ -6,3 +6,7 @@
 Clean code
 --
 * Retrofit the image fetchers (not urgent, code is quite clean)
+
+Possible features
+--
+* Trim sections between `[` and `]` from artist and/or album names?
