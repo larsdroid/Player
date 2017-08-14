@@ -48,16 +48,24 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     }
 
     private void fetchSingleAlbum(Album album, ImageDownloader imageDownloader) {
-        final Image image = new Image();
+        final Image image;
 
         final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
         if (albumInfo != null) {
-            image.setUrl(albumInfo.getCoverImageUrl());
-            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+            String coverImageUrl = albumInfo.getCoverImageUrl();
+            final byte[] imageData = imageDownloader.downloadImage(coverImageUrl);
+            if (imageData != null) {
+                image = new Image();
+                image.setUrl(coverImageUrl);
+                image.setImageData(imageData);
+            } else {
+                image = null;
+            }
 
-            getMusicDao().saveImage(image);
-
-            album.setImage(image);
+            if (image != null) {
+                getMusicDao().saveImage(image);
+                album.setImage(image);
+            }
             if (album.getYearReleased() == null && albumInfo.getYear() != null) {
                 album.setYearReleased(albumInfo.getYear());
             }

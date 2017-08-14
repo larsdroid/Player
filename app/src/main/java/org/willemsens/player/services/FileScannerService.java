@@ -31,6 +31,8 @@ import io.requery.sql.EntityDataStore;
 public class FileScannerService extends IntentService {
     private static final int THRESHOLD_FULL_REFRESH = 10;
 
+    private static final String[] SUPPORTED_FORMATS = {"flac", "mkv", "mp3", "ogg", "wav"};
+
     private MusicDao musicDao;
 
     public FileScannerService() {
@@ -141,43 +143,61 @@ public class FileScannerService extends IntentService {
                 final File canonicalFile = file.getCanonicalFile();
                 if (canonicalFile.isDirectory()) {
                     processDirectory(canonicalFile, songs, albums, artists);
-                } else {
+                } else if (isMusicFile(canonicalFile)) {
                     song = AudioFileReader.readSong(canonicalFile);
-                    songs.add(song);
+                    if (song != null) {
+                        songs.add(song);
 
-                    if (artists.contains(song.getArtist())) {
-                        for (Artist artist : artists) {
-                            if (artist.equals(song.getArtist())) {
-                                song.setArtist(artist);
-                                break;
-                            }
-                        }
-                    } else {
-                        artists.add(song.getArtist());
-                    }
-
-                    if (albums.contains(song.getAlbum())) {
-                        for (Album album : albums) {
-                            if (album.equals(song.getAlbum())) {
-                                song.setAlbum(album);
-                                break;
-                            }
-                        }
-                    } else {
-                        if (artists.contains(song.getAlbum().getArtist())) {
+                        if (artists.contains(song.getArtist())) {
                             for (Artist artist : artists) {
-                                if (artist.equals(song.getAlbum().getArtist())) {
-                                    song.getAlbum().setArtist(artist);
+                                if (artist.equals(song.getArtist())) {
+                                    song.setArtist(artist);
                                     break;
                                 }
                             }
                         } else {
-                            artists.add(song.getAlbum().getArtist());
+                            artists.add(song.getArtist());
                         }
-                        albums.add(song.getAlbum());
+
+                        if (albums.contains(song.getAlbum())) {
+                            for (Album album : albums) {
+                                if (album.equals(song.getAlbum())) {
+                                    song.setAlbum(album);
+                                    break;
+                                }
+                            }
+                        } else {
+                            if (artists.contains(song.getAlbum().getArtist())) {
+                                for (Artist artist : artists) {
+                                    if (artist.equals(song.getAlbum().getArtist())) {
+                                        song.getAlbum().setArtist(artist);
+                                        break;
+                                    }
+                                }
+                            } else {
+                                artists.add(song.getAlbum().getArtist());
+                            }
+                            albums.add(song.getAlbum());
+                        }
                     }
                 }
             }
         }
+    }
+
+    private boolean isMusicFile(File canonicalFile) {
+        if (canonicalFile.isFile()) {
+            final String fileName = canonicalFile.getName();
+            final int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex != -1 && dotIndex + 1 < fileName.length()) {
+                final String extension = fileName.substring(dotIndex + 1, fileName.length());
+                for (String supportedExtension : SUPPORTED_FORMATS) {
+                    if (supportedExtension.equalsIgnoreCase(extension)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

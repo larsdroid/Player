@@ -112,7 +112,10 @@ public class DiscogsInfoFetcher extends InfoFetcher {
         final String json = fetch(url);
         if (json != null) {
             ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
-            return new ArtistInfo(InfoSource.DISCOGS, artistDetail.getFirstImageURL());
+            String imageURL = artistDetail.getFirstImageURL();
+            if (imageURL != null) {
+                return new ArtistInfo(InfoSource.DISCOGS, imageURL);
+            }
         }
 
         return null;

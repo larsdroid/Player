@@ -1,10 +1,10 @@
 package org.willemsens.player.services;
 
 import android.util.Log;
+
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
-import org.willemsens.player.exceptions.PlayerException;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
@@ -27,8 +27,14 @@ class AudioFileReader {
             albumArtist.setName(albumArtistName);
 
             final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
-            final String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
-            final Integer albumYear = yearString != null && !yearString.isEmpty() ? Integer.parseInt(yearString) : null;
+            String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
+            Integer albumYear = null;
+            if (yearString != null && !yearString.isEmpty()) {
+                if (yearString.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                    yearString = yearString.substring(0, 4);
+                }
+                albumYear = Integer.parseInt(yearString);
+            }
             final Album album = new Album();
             album.setName(albumName);
             album.setArtist(albumArtist);
@@ -59,13 +65,13 @@ class AudioFileReader {
                 song.setArtist(albumArtist);
             }
 
-            Log.d(AudioFileReader.class.getName(), "SONG: " + song);
+            Log.v(AudioFileReader.class.getName(), "SONG: " + song);
 
             return song;
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(AudioFileReader.class.getName(), e.getMessage());
-            throw new PlayerException(e.getMessage());
+            return null;
         }
     }
 }

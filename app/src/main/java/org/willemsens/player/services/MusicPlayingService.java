@@ -2,21 +2,23 @@ package org.willemsens.player.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.IOException;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MusicPlayingService extends Service
         implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
@@ -41,7 +43,12 @@ public class MusicPlayingService extends Service
             if (this.mediaPlayer == null) {
                 this.mediaPlayer = new MediaPlayer();
                 this.mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-                this.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+                final AudioAttributes.Builder builder = new AudioAttributes.Builder();
+                builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA);
+                final AudioAttributes attributes = builder.build();
+                this.mediaPlayer.setAudioAttributes(attributes);
             }
 
             final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);

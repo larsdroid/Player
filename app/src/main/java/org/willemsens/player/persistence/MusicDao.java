@@ -52,17 +52,17 @@ public class MusicDao {
 
     public void saveImage(Image image) {
         this.dataStore.insert(image);
-        Log.d(getClass().getName(), "Inserted Image: " + image);
+        Log.v(getClass().getName(), "Inserted Image: " + image);
     }
 
     public void updateAlbum(Album album) {
         this.dataStore.update(album);
-        Log.d(getClass().getName(), "Updated Album: " + album);
+        Log.v(getClass().getName(), "Updated Album: " + album);
     }
 
     public void updateArtist(Artist artist) {
         this.dataStore.update(artist);
-        Log.d(getClass().getName(), "Updated Artist: " + artist);
+        Log.v(getClass().getName(), "Updated Artist: " + artist);
     }
 
     public Album findAlbum(long id) {
@@ -170,16 +170,16 @@ public class MusicDao {
 
     private void insertAlbum(Album album) {
         this.dataStore.insert(album);
-        Log.d(getClass().getName(), "Inserted Album: " + album);
+        Log.v(getClass().getName(), "Inserted Album: " + album);
     }
 
     private void insertArtist(Artist artist) {
         this.dataStore.insert(artist);
-        Log.d(getClass().getName(), "Inserted Artist: " + artist);
+        Log.v(getClass().getName(), "Inserted Artist: " + artist);
     }
 
     private void insertSong(Song song) {
         this.dataStore.insert(song);
-        Log.d(getClass().getName(), "Inserted Song: " + song);
+        Log.v(getClass().getName(), "Inserted Song: " + song);
     }
 }

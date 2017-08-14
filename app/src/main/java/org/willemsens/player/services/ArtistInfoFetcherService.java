@@ -3,6 +3,8 @@ package org.willemsens.player.services;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+
 import org.willemsens.player.R;
 import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
@@ -47,22 +49,27 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
         final String artistId = infoFetcher.fetchArtistId(artist.getName());
 
         waitRateLimit();
+        if (artistId != null) {
+            final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
+            if (artistInfo != null) {
+                image.setUrl(artistInfo.getImageUrl());
+                image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-        final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
-        if (artistInfo != null) {
-            image.setUrl(artistInfo.getImageUrl());
-            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+                getMusicDao().saveImage(image);
 
-            getMusicDao().saveImage(image);
+                artist.setImage(image);
+                artist.setSource(artistInfo.getInfoSource());
+                getMusicDao().updateArtist(artist);
 
-            artist.setImage(image);
-            artist.setSource(artistInfo.getInfoSource());
-            getMusicDao().updateArtist(artist);
-
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-            Intent broadcast = new Intent(getString(R.string.key_artist_updated));
-            broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
-            lbm.sendBroadcast(broadcast);
+                LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+                Intent broadcast = new Intent(getString(R.string.key_artist_updated));
+                broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
+                lbm.sendBroadcast(broadcast);
+            } else {
+                Log.e(getClass().getName(), "No ArtistInfo found for '" + artist.getName() + "'.");
+            }
+        } else {
+            Log.e(getClass().getName(), "No ArtistId found for '" + artist.getName() + "'.");
         }
 
         waitRateLimit();

@@ -1,5 +1,7 @@
 package org.willemsens.player.imagefetchers;
 
+import android.util.Log;
+
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -24,11 +26,12 @@ public class ImageDownloader {
             if (response.isSuccessful()) {
                 InputStream inputStream = response.body().byteStream();
                 return IOUtils.toByteArray(inputStream);
+            } else {
+                Log.e(getClass().getName(), "Image download failed for '" + imageURI + "'.");
             }
-            // TODO: handle response codes other than 200
         } catch (IOException e) {
-            // TODO: handle this differently?
-            e.printStackTrace();
+            Log.e(getClass().getName(), "Image download failed for '" + imageURI + "'.");
+            Log.e(getClass().getName(), "Image download failed: " + e.getMessage());
         }
         return null;
     }

@@ -28,8 +28,10 @@ public abstract class InfoFetcher {
         try (Response response = httpClient.newCall(getRequest(url)).execute()) {
             if (response.isSuccessful()) {
                 return response.body().string();
+            } else if (response.code() == 404) {
+                Log.v(getClass().getName(), "Not found: "+ url);
             } else {
-                Log.e(getClass().getName(), "Fetch issue: " + response.message() + " *** "+ response.body());
+                Log.e(getClass().getName(), "Fetch issue: " + response.message() + " *** "+ url);
             }
         } catch (IOException e) {
             Log.e(getClass().getName(), e.getMessage());
