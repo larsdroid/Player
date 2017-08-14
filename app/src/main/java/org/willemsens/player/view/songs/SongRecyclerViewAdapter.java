@@ -8,12 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -77,6 +79,8 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
                 this.albumCover.setImageBitmap(bitmap);
+            } else {
+                this.albumCover.setImageDrawable(null);
             }
 
             this.songName.setText(song.getName());

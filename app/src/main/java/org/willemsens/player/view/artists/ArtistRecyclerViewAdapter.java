@@ -63,6 +63,8 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         artist.getImage().getImageData(), 0, artist.getImage().getImageData().length);
                 this.artistImage.setImageBitmap(bitmap);
+            } else {
+                this.artistImage.setImageDrawable(null);
             }
         }
     }

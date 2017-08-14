@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="color_album_image_background">#762100</color>
     <color name="color_artist_image_padding">#3d3939</color>
 
     <!-- Used for testing and debugging. -->

@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/album_cover_image_description"
-        android:background="@color/red" />
+        android:background="@color/color_album_image_background" />
 
     <LinearLayout
         android:layout_width="match_parent"
