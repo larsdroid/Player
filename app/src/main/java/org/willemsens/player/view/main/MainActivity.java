@@ -4,9 +4,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
@@ -28,12 +35,23 @@ import org.willemsens.player.view.songs.SongsFragment;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView.OnNavigationItemSelectedListener,
-        DataAccessProvider, OnSongClickedListener {
+        DataAccessProvider,
+        OnSongClickedListener,
+        NavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
     @BindView(R.id.navigation)
     BottomNavigationView navigation;
+
+    @BindView(R.id.main_toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
 
     private MenuItem previousMenuItem;
 
@@ -46,7 +64,16 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        this.dataStore = ((PlayerApplication)getApplication()).getData();
+        setSupportActionBar(toolbar);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle); // TODO
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        this.dataStore = ((PlayerApplication) getApplication()).getData();
         this.musicDao = new MusicDao(this.dataStore);
 
         Intent intent = new Intent(this, FileScannerService.class);
@@ -60,6 +87,16 @@ public class MainActivity extends AppCompatActivity
 
         addEventHandlers();
         setupViewPager();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -84,6 +121,30 @@ public class MainActivity extends AppCompatActivity
         } else {
             return false;
         }
+
+        /*
+
+        TODO: code comes from NavigationView / DrawerLayout (left sliding menu thing). So both menu (bottom AND left slider) use this SAME method???
+
+         if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+
+        */
     }
 
     private void addEventHandlers() {
@@ -130,5 +191,24 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MusicPlayingService.class);
         intent.putExtra(getString(R.string.key_song_id), song.getId());
         startService(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            // TODO
+            Toast.makeText(this, "SETTINGS", Toast.LENGTH_LONG).show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

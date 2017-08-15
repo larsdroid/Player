@@ -1,53 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.willemsens.player">
+          package="org.willemsens.player">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
-        android:name=".PlayerApplication"
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
+            android:name=".PlayerApplication"
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
         <activity
-            android:name=".view.main.MainActivity"
-            android:label="@string/app_name">
+                android:name=".view.main.MainActivity"
+                android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
         <service
-            android:name=".services.FileScannerService"
-            android:description="@string/scanner_service_description"
-            android:exported="false" />
-
+                android:name=".services.FileScannerService"
+                android:description="@string/scanner_service_description"
+                android:exported="false"/>
         <service
-            android:name=".services.AlbumInfoFetcherService"
-            android:description="@string/album_image_fetcher_service_description"
-            android:exported="false" />
-
+                android:name=".services.AlbumInfoFetcherService"
+                android:description="@string/album_image_fetcher_service_description"
+                android:exported="false"/>
         <service
-            android:name=".services.ArtistInfoFetcherService"
-            android:description="@string/artist_image_fetcher_service_description"
-            android:exported="false" />
-
+                android:name=".services.ArtistInfoFetcherService"
+                android:description="@string/artist_image_fetcher_service_description"
+                android:exported="false"/>
         <service
-            android:name=".services.PurgingService"
-            android:description="@string/purging_service_description"
-            android:exported="false" />
-
+                android:name=".services.PurgingService"
+                android:description="@string/purging_service_description"
+                android:exported="false"/>
         <service
-            android:name=".services.MusicPlayingService"
-            android:description="@string/music_playing_service_description"
-            android:exported="false" />
+                android:name=".services.MusicPlayingService"
+                android:description="@string/music_playing_service_description"
+                android:exported="false"/>
     </application>
+
 </manifest>
