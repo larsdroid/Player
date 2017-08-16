@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:background="?android:attr/windowBackground"
-            app:menu="@menu/activity_main_bottom_navigation"/>
+            app:menu="@menu/activity_main_bottom_navigation"
+            style="@style/PlayerBottomNavigationStyle"/>
 
 </LinearLayout>
