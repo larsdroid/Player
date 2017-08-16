@@ -3,6 +3,10 @@
 
     <group android:checkableBehavior="single">
         <item
+                android:id="@+id/nav_music_library"
+                android:icon="@drawable/ic_library_music_black_24dp"
+                android:title="@string/action_music_library"/>
+        <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_settings_black_24dp"
                 android:title="@string/action_settings"/>

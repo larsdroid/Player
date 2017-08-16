@@ -36,6 +36,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_music_library">Music Library</string>
     <string name="action_settings">Settings</string>
     <string name="group_communicate">Communicate</string>
     <string name="action_about">About</string>
