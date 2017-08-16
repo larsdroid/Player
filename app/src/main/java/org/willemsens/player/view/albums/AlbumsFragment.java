@@ -41,11 +41,6 @@ public class AlbumsFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
@@ -71,11 +66,6 @@ public class AlbumsFragment extends Fragment {
         } else {
             Log.e(getClass().getName(), "Context should be a DataAccessProvider.");
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Override
