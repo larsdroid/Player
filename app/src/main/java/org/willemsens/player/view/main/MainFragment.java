@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import org.willemsens.player.R;
 import org.willemsens.player.view.albums.AlbumsFragment;
 import org.willemsens.player.view.artists.ArtistsFragment;
-import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.SongsFragment;
 
 import butterknife.BindView;
@@ -60,9 +59,6 @@ public class MainFragment extends Fragment
                 break;
             case R.id.navigation_songs:
                 newItemIndex = 2;
-                break;
-            case R.id.navigation_settings:
-                newItemIndex = 3;
         }
         if (viewPager.getCurrentItem() != newItemIndex) {
             viewPager.setCurrentItem(newItemIndex);
@@ -102,7 +98,6 @@ public class MainFragment extends Fragment
         adapter.addFragment(AlbumsFragment.newInstance());
         adapter.addFragment(ArtistsFragment.newInstance());
         adapter.addFragment(SongsFragment.newInstance());
-        adapter.addFragment(SettingsFragment.newInstance("", ""));
         viewPager.setAdapter(adapter);
     }
 }

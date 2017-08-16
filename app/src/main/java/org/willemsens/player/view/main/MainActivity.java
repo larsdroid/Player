@@ -25,6 +25,7 @@ import org.willemsens.player.services.ArtistInfoFetcherService;
 import org.willemsens.player.services.FileScannerService;
 import org.willemsens.player.services.MusicPlayingService;
 import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.OnSongClickedListener;
 
 import butterknife.BindView;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
+    private Integer previousMenuItem;
     private MusicDao musicDao;
 
     @Override
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity
 
         startBackgroundServices();
         setupActionBarAndDrawer();
-        addMainActivity();
+        setMainActivity(false);
     }
 
     private void startBackgroundServices() {
@@ -83,11 +85,27 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    private void addMainActivity() {
+    private void setMainActivity(boolean replacePreviousFragment) {
         Fragment mainFragment = MainFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.fragment_container, mainFragment);
+
+        if (replacePreviousFragment) {
+            transaction.replace(R.id.fragment_container, mainFragment);
+            transaction.addToBackStack(null);
+        } else {
+            transaction.add(R.id.fragment_container, mainFragment);
+        }
+
+        transaction.commit();
+    }
+
+    private void setSettingsActivity() {
+        Fragment settingsFragment = SettingsFragment.newInstance("", "");
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.fragment_container, settingsFragment);
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -103,29 +121,25 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        /*
-
-        TODO: code comes from NavigationView / DrawerLayout (left sliding menu thing).
-
-         if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (previousMenuItem == null || previousMenuItem != item.getItemId()) {
+            switch (item.getItemId()) {
+                case R.id.nav_music_library:
+                    setMainActivity(true);
+                    break;
+                case R.id.nav_settings:
+                    setSettingsActivity();
+                    break;
+                case R.id.nav_about:
+                    // TODO
+                    break;
+                case R.id.nav_contact:
+                    // TODO
+                    break;
+            }
+            previousMenuItem = item.getItemId();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
-        return true;
-
-        */
         return true;
     }
 
