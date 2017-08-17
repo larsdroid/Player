@@ -94,7 +94,7 @@ public class MainFragment extends Fragment
     }
 
     private void setupViewPager() {
-        MainViewPagerAdapter adapter = new MainViewPagerAdapter(getFragmentManager());
+        MainViewPagerAdapter adapter = new MainViewPagerAdapter(getChildFragmentManager());
         adapter.addFragment(AlbumsFragment.newInstance());
         adapter.addFragment(ArtistsFragment.newInstance());
         adapter.addFragment(SongsFragment.newInstance());
