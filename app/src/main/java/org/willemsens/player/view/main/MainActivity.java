@@ -1,12 +1,18 @@
 package org.willemsens.player.view.main;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -37,6 +43,9 @@ public class MainActivity extends AppCompatActivity
         implements DataAccessProvider,
         OnSongClickedListener,
         NavigationView.OnNavigationItemSelectedListener {
+    private static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
+    private static final int PERMISSION_REQUEST_CODE_INTERNET = 2;
+
     @BindView(R.id.main_toolbar)
     Toolbar toolbar;
 
@@ -58,20 +67,82 @@ public class MainActivity extends AppCompatActivity
         final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
         this.musicDao = new MusicDao(dataStore);
 
-        startBackgroundServices();
+        handlePermission(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE,
+                getString(R.string.read_external_storage_required),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        setupAfterPermissionReadExternalStorage();
+                    }
+                });
+        handlePermission(
+                Manifest.permission.INTERNET,
+                PERMISSION_REQUEST_CODE_INTERNET,
+                getString(R.string.internet_required),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        setupAfterPermissionInternet();
+                    }
+                });
+
         setupActionBarAndDrawer();
-        setMainActivity(false);
+        setMainFragment(false);
     }
 
-    private void startBackgroundServices() {
-        Intent intent = new Intent(this, FileScannerService.class);
-        startService(intent);
+    private void handlePermission(@NonNull String permission, int requestCode, String deniedUserMessage, Runnable runnable) {
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+            runnable.run();
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                Toast.makeText(this, deniedUserMessage, Toast.LENGTH_LONG).show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{ permission }, requestCode);
+            }
+        }
+    }
 
-        intent = new Intent(this, AlbumInfoFetcherService.class);
+    private void setupAfterPermissionReadExternalStorage() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean(getString(R.string.key_first_app_execution), true)) {
+            this.musicDao.afterInstallationSetup();
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(getString(R.string.key_first_app_execution), false);
+            editor.apply();
+        }
+
+        final Intent intent = new Intent(this, FileScannerService.class);
+        startService(intent);
+    }
+
+    private void setupAfterPermissionInternet() {
+        Intent intent = new Intent(this, AlbumInfoFetcherService.class);
         startService(intent);
 
         intent = new Intent(this, ArtistInfoFetcherService.class);
         startService(intent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setupAfterPermissionReadExternalStorage();
+                } else {
+                    Toast.makeText(this, getString(R.string.read_external_storage_required), Toast.LENGTH_LONG).show();
+                }
+                break;
+            case PERMISSION_REQUEST_CODE_INTERNET:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setupAfterPermissionInternet();
+                } else {
+                    Toast.makeText(this, getString(R.string.internet_required), Toast.LENGTH_LONG).show();
+                }
+        }
     }
 
     private void setupActionBarAndDrawer() {
@@ -85,7 +156,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    private void setMainActivity(boolean replacePreviousFragment) {
+    private void setMainFragment(boolean replacePreviousFragment) {
         Fragment mainFragment = MainFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -100,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void setSettingsActivity() {
+    private void setSettingsFragment() {
         Fragment settingsFragment = SettingsFragment.newInstance("", "");
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -124,10 +195,10 @@ public class MainActivity extends AppCompatActivity
         if (previousMenuItem == null || previousMenuItem != item.getItemId()) {
             switch (item.getItemId()) {
                 case R.id.nav_music_library:
-                    setMainActivity(true);
+                    setMainFragment(true);
                     break;
                 case R.id.nav_settings:
-                    setSettingsActivity();
+                    setSettingsFragment();
                     break;
                 case R.id.nav_about:
                     // TODO

@@ -6,6 +6,10 @@
     <string name="title_songs">Songs</string>
     <string name="title_settings">Settings</string>
 
+    <string name="read_external_storage_required">Read External Storage permission allows us to read music files. Please allow this permission in App Settings.</string>
+    <string name="internet_required">Internet permission allows us to download album art and artist pictures. Please allow this permission in App Settings.</string>
+
+
     <string name="scanner_service_description">Scans a select number of directories (listed in settings) for music
         files.
     </string>
@@ -19,6 +23,8 @@
     <string name="album_cover_image_description">Album cover</string>
     <string name="artist_image_description">Artist image</string>
     <string name="app_logo_description">Application Logo</string>
+
+    <string name="key_first_app_execution">org.willemsens.FIRST_APP_EXECUTION</string>
 
     <string name="key_artists_inserted">org.willemsens.ARTISTS_INSERTED</string>
     <string name="key_artist_inserted">org.willemsens.ARTIST_INSERTED</string>

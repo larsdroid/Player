@@ -1,5 +1,6 @@
 package org.willemsens.player.persistence;
 
+import android.os.Environment;
 import android.util.Log;
 
 import org.willemsens.player.model.Album;
@@ -8,6 +9,8 @@ import org.willemsens.player.model.Directory;
 import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -181,5 +184,51 @@ public class MusicDao {
     private void insertSong(Song song) {
         this.dataStore.insert(song);
         Log.v(getClass().getName(), "Inserted Song: " + song);
+    }
+
+    public void afterInstallationSetup() {
+        checkInsertMusicPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
+        if (System.getenv("SECONDARY_STORAGE") != null) {
+            checkInsertMusicPath(System.getenv("SECONDARY_STORAGE") + "/" + Environment.DIRECTORY_MUSIC);
+        }
+    }
+
+    /**
+     * Checks if a path is an existing directory and if so inserts it into the DB as default music
+     * directory.
+     * @param path The path to check.
+     * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
+     */
+    private boolean checkInsertMusicPath(String path) {
+        return checkInsertMusicPath(new File(path));
+    }
+
+    /**
+     * Checks if a path is an existing directory and if so inserts it into the DB as default music
+     * directory.
+     * @param path The path to check.
+     * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
+     */
+    private boolean checkInsertMusicPath(File path) {
+        try {
+            final File canonicalPath = path.getCanonicalFile();
+            if (canonicalPath.isDirectory() && canonicalPath.listFiles() != null) {
+                insertMusicPath(canonicalPath.getCanonicalPath());
+                return true;
+            }
+        } catch (IOException e) {
+            Log.e(getClass().getName(), "Error while checking path: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Inserts the given path as a default music directory into the DB.
+     * @param path The path to insert into the DB.
+     */
+    private void insertMusicPath(String path) {
+        final Directory directory = new Directory();
+        directory.setPath(path);
+        this.dataStore.insert(directory);
     }
 }
