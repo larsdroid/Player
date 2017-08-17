@@ -186,6 +186,11 @@ public class MusicDao {
         Log.v(getClass().getName(), "Inserted Song: " + song);
     }
 
+    /**
+     * This helper method should only be called once, right after the app has been installed for
+     * the first time. Should be called after READ_EXTERNAL_STORAGE has been granted and before
+     * the FileScannerService is launched for the first time.
+     */
     public void afterInstallationSetup() {
         checkInsertMusicPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
         if (System.getenv("SECONDARY_STORAGE") != null) {
