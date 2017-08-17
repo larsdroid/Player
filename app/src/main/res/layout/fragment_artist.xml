@@ -1,27 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/grid_cell_padding"
     tools:layout_width="250dp"
-    tools:layout_height="350dp">
+    tools:showIn="@layout/fragment_artists_list">
 
-    <org.willemsens.player.view.HeightCalculatedImageView
-        android:id="@+id/artist_list_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:contentDescription="@string/artist_image_description"
-        android:background="@color/color_artist_image_padding" />
-
-    <TextView
-        android:id="@+id/artist_list_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/grid_cell_text_padding"
-        android:textAppearance="?attr/textAppearanceListItem"
-        android:maxLines="1"
-        android:textSize="@dimen/grid_font_size"
-        tools:text="Artist Name abcdefghi jklmnopqrst uvw" />
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="@dimen/grid_cell_padding"
+            tools:layout_width="250dp">
+
+            <org.willemsens.player.view.HeightCalculatedImageView
+                android:id="@+id/artist_list_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/artist_image_description"
+                android:background="@color/color_artist_image_padding" />
+
+            <TextView
+                android:id="@+id/artist_list_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/grid_cell_text_padding"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:maxLines="1"
+                android:textSize="@dimen/grid_font_size"
+                tools:text="Artist Name abcdefghi jklmnopqrst uvw" />
+        </LinearLayout>
+
+        <View style="@style/VerticalDivider" />
+    </LinearLayout>
+
+    <View style="@style/HorizontalDivider" />
 </LinearLayout>
