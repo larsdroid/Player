@@ -20,7 +20,7 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder> {
+class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final List<Song> songs;
     private final OnSongClickedListener listener;
 
@@ -30,15 +30,24 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_song, parent, false);
-        return new ViewHolder(view);
+        return new SongViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.setSong(songs.get(position));
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        final Song song = songs.get(position);
+
+        final boolean showAlbumCover =
+                position == 0
+                        || (position > 0 && !songs.get(position - 1).getAlbum().equals(song.getAlbum()));
+
+        final boolean showLongLine =
+                (songs.size() > position + 1) && !songs.get(position + 1).getAlbum().equals(song.getAlbum());
+
+        ((SongViewHolder)holder).setSong(song, showAlbumCover, showLongLine);
     }
 
     @Override
@@ -46,7 +55,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         return songs.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.song_list_album_image)
         ImageView albumCover;
 
@@ -59,9 +68,12 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         @BindView(R.id.song_list_album)
         TextView songAlbumName;
 
+        @BindView(R.id.left_section_of_divider)
+        View leftSectionOfDivider;
+
         private Song song;
 
-        ViewHolder(View view) {
+        SongViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
             view.setOnClickListener(this);
@@ -72,10 +84,10 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             listener.songClicked(this.song);
         }
 
-        private void setSong(Song song) {
+        private void setSong(Song song, boolean showAlbumCover, boolean showLongLine) {
             this.song = song;
 
-            if (song.getAlbum().getImage() != null) {
+            if (showAlbumCover && song.getAlbum().getImage() != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
                 this.albumCover.setImageBitmap(bitmap);
@@ -86,6 +98,12 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             this.songName.setText(song.getName());
             this.songTrack.setText(String.valueOf(song.getTrack()));
             this.songAlbumName.setText(song.getArtist().getName() + " - " + song.getAlbum().getName());
+
+            if (!showLongLine) {
+                this.leftSectionOfDivider.setVisibility(View.INVISIBLE);
+            } else {
+                this.leftSectionOfDivider.setVisibility(View.VISIBLE);
+            }
         }
     }
 }
