@@ -3,13 +3,14 @@ package org.willemsens.player.services;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-
 import org.willemsens.player.R;
-import org.willemsens.player.imagefetchers.InfoFetcher;
+import org.willemsens.player.exceptions.NetworkClientException;
+import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.imagefetchers.ArtistInfo;
 import org.willemsens.player.imagefetchers.ImageDownloader;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.discogs.DiscogsInfoFetcher;
+import org.willemsens.player.imagegenerators.ImageGenerator;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Image;
 
@@ -35,41 +36,55 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
 
         if (artistId != -1) {
             final Artist artist = getMusicDao().findArtist(artistId);
-            fetchSingleArtist(artist, imageDownloader);
+            fetchArtist(artist, imageDownloader);
         } else {
-            final List<Artist> artists = getMusicDao().getAllArtistsMissingInfo();
+            final List<Artist> artists = getMusicDao().getAllArtistsMissingImage();
             for (Artist artist : artists) {
-                fetchSingleArtist(artist, imageDownloader);
+                fetchArtist(artist, imageDownloader);
             }
         }
     }
 
-    private void fetchSingleArtist(Artist artist, ImageDownloader imageDownloader) {
+    private void generateArtistImage(Artist artist) {
         final Image image = new Image();
-        final String artistId = infoFetcher.fetchArtistId(artist.getName());
+        image.setImageData(ImageGenerator.generateArtistImage(artist));
+        getMusicDao().saveImage(image);
+        artist.setImage(image);
+    }
 
-        waitRateLimit();
-        if (artistId != null) {
+    private void fetchArtist(Artist artist, ImageDownloader imageDownloader) {
+        boolean isArtistUpdated = false;
+
+        try {
+            final String artistId = infoFetcher.fetchArtistId(artist.getName());
+
+            waitRateLimit();
+
             final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
-            if (artistInfo != null) {
-                image.setUrl(artistInfo.getImageUrl());
-                image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-                getMusicDao().saveImage(image);
+            final Image image = new Image();
+            image.setUrl(artistInfo.getImageUrl());
+            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-                artist.setImage(image);
-                artist.setSource(artistInfo.getInfoSource());
-                getMusicDao().updateArtist(artist);
+            getMusicDao().saveImage(image);
 
-                LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-                Intent broadcast = new Intent(getString(R.string.key_artist_updated));
-                broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
-                lbm.sendBroadcast(broadcast);
-            } else {
-                Log.e(getClass().getName(), "No ArtistInfo found for '" + artist.getName() + "'.");
-            }
-        } else {
-            Log.e(getClass().getName(), "No ArtistId found for '" + artist.getName() + "'.");
+            artist.setImage(image);
+
+            isArtistUpdated = true;
+        } catch (NetworkClientException e) {
+            generateArtistImage(artist);
+            isArtistUpdated = true;
+        } catch (NetworkServerException e) {
+            // Ignore
+        }
+
+        if (isArtistUpdated) {
+            getMusicDao().updateArtist(artist);
+
+            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+            Intent broadcast = new Intent(getString(R.string.key_artist_updated));
+            broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
+            lbm.sendBroadcast(broadcast);
         }
 
         waitRateLimit();

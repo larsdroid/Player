@@ -1,17 +1,19 @@
 package org.willemsens.player.imagefetchers.musicbrainz;
 
+import android.support.annotation.NonNull;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import org.willemsens.player.exceptions.NetworkClientException;
+import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.exceptions.PlayerException;
 import org.willemsens.player.imagefetchers.AlbumInfo;
-import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ImagesReponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.Release;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ReleasesResponse;
 import org.willemsens.player.model.InfoSource;
-
-import okhttp3.HttpUrl;
-import okhttp3.Request;
 
 public class MusicbrainzInfoFetcher extends InfoFetcher {
     @Override
@@ -24,7 +26,8 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
     }
 
     @Override
-    public String fetchArtistId(String artistName) {
+    @NonNull
+    public String fetchArtistId(String artistName) throws NetworkClientException, NetworkServerException {
         final HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host("musicbrainz.org")
@@ -34,19 +37,15 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .addQueryParameter("query", "artist:" + sanitizeSearchString(artistName))
                 .build();
         final String json = fetch(url);
-        String artistId = null;
-        if (json != null) {
-            ArtistsResponse artistsResponse = getGson().fromJson(
-                    json,
-                    ArtistsResponse.class);
-            artistId = artistsResponse.getFirstArtistID();
-        }
-
-        return artistId;
+        final ArtistsResponse artistsResponse = getGson().fromJson(
+                json,
+                ArtistsResponse.class);
+        return artistsResponse.getFirstArtistID();
     }
 
     @Override
-    public AlbumInfo fetchAlbumInfo(String artistName, String albumName) {
+    @NonNull
+    public AlbumInfo fetchAlbumInfo(String artistName, String albumName) throws NetworkClientException, NetworkServerException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host("musicbrainz.org")
@@ -58,38 +57,39 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .build();
 
         String json = fetch(url);
-        if (json != null) {
-            ReleasesResponse releasesResponse = getGson().fromJson(
-                    json,
-                    ReleasesResponse.class);
-            Release[] releases = releasesResponse.getReleases();
+        final ReleasesResponse releasesResponse = getGson().fromJson(
+                json,
+                ReleasesResponse.class);
+        final Release[] releases = releasesResponse.getReleases();
 
-            if (releases != null) {
-                for (Release release : releases) {
-                    url = new HttpUrl.Builder()
-                            .scheme("http")
-                            .host("coverartarchive.org")
-                            .addPathSegment("release")
-                            .addPathSegment(release.getId())
-                            .build();
+        if (releases != null) {
+            for (Release release : releases) {
+                url = new HttpUrl.Builder()
+                        .scheme("http")
+                        .host("coverartarchive.org")
+                        .addPathSegment("release")
+                        .addPathSegment(release.getId())
+                        .build();
 
+                try {
                     json = fetch(url);
-                    if (json != null) {
-                        ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
+                    ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
 
-                        return new AlbumInfo(
-                                InfoSource.MUSICBRAINZ,
-                                imagesReponse.getFirstLargeThumbnail(),
-                                releasesResponse.getOldestReleaseYear());
-                    }
+                    return new AlbumInfo(
+                            InfoSource.MUSICBRAINZ,
+                            imagesReponse.getFirstLargeThumbnail(),
+                            releasesResponse.getOldestReleaseYear());
+                } catch (NetworkClientException e) {
+                    // Ignore and try the next one...
                 }
             }
         }
 
-        return null;
+        throw new NetworkClientException("No album info found for artist '" + artistName + "' album '" + albumName + "'.");
     }
 
     @Override
+    @NonNull
     public ArtistInfo fetchArtistInfo(String artistId) {
         throw new PlayerException("Fetching artist images is not supported by Musicbrainz.");
     }

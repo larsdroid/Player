@@ -2,7 +2,8 @@ package org.willemsens.player.persistence;
 
 import android.os.Environment;
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -14,9 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -47,9 +45,9 @@ public class MusicDao {
                 .get().toList();
     }
 
-    public List<Artist> getAllArtistsMissingInfo() {
+    public List<Artist> getAllArtistsMissingImage() {
         return this.dataStore.select(Artist.class)
-                .where(Artist.SOURCE.isNull())
+                .where(Artist.IMAGE.isNull())
                 .get().toList();
     }
 

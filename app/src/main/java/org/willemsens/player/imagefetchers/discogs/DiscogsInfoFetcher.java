@@ -1,17 +1,19 @@
 package org.willemsens.player.imagefetchers.discogs;
 
+import android.support.annotation.NonNull;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import org.willemsens.player.exceptions.NetworkClientException;
+import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.imagefetchers.AlbumInfo;
-import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.ArtistInfo;
+import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.discogs.dto.Release;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleaseDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleasesResponse;
 import org.willemsens.player.model.InfoSource;
-
-import okhttp3.HttpUrl;
-import okhttp3.Request;
 
 public class DiscogsInfoFetcher extends InfoFetcher {
     private static final String KEY = "jdLmQoplPtRzRALOXlyv";
@@ -26,7 +28,8 @@ public class DiscogsInfoFetcher extends InfoFetcher {
     }
 
     @Override
-    public String fetchArtistId(String artistName) {
+    @NonNull
+    public String fetchArtistId(String artistName) throws NetworkClientException, NetworkServerException {
         final HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host("api.discogs.com")
@@ -39,19 +42,21 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .build();
 
         final String json = fetch(url);
-        Long artistId = null;
-        if (json != null) {
-            ArtistsResponse searchResponse = getGson().fromJson(
-                    json,
-                    ArtistsResponse.class);
-            artistId = searchResponse.getFirstArtistID();
+        final ArtistsResponse searchResponse = getGson().fromJson(
+                json,
+                ArtistsResponse.class);
+        final Long artistId = searchResponse.getFirstArtistID();
+
+        if (artistId != null) {
+            return String.valueOf(artistId);
         }
 
-        return artistId == null ? null : String.valueOf(artistId);
+        throw new NetworkClientException("No artist ID found for artist '" + artistName + "'.");
     }
 
     @Override
-    public AlbumInfo fetchAlbumInfo(String artistName, String albumName) {
+    @NonNull
+    public AlbumInfo fetchAlbumInfo(String artistName, String albumName) throws NetworkClientException, NetworkServerException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.discogs.com")
@@ -65,41 +70,42 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .build();
 
         String json = fetch(url);
-        if (json != null) {
-            ReleasesResponse releasesResponse = getGson().fromJson(
-                    json,
-                    ReleasesResponse.class);
-            Release[] releases = releasesResponse.getReleases();
+        final ReleasesResponse releasesResponse = getGson().fromJson(
+                json,
+                ReleasesResponse.class);
+        final Release[] releases = releasesResponse.getReleases();
 
-            if (releases != null) {
-                for (Release release : releases) {
-                    url = new HttpUrl.Builder()
-                            .scheme("https")
-                            .host("api.discogs.com")
-                            .addPathSegment("releases")
-                            .addPathSegment(String.valueOf(release.getId()))
-                            .addQueryParameter("key", KEY)
-                            .addQueryParameter("secret", SECRET)
-                            .build();
+        if (releases != null) {
+            for (Release release : releases) {
+                url = new HttpUrl.Builder()
+                        .scheme("https")
+                        .host("api.discogs.com")
+                        .addPathSegment("releases")
+                        .addPathSegment(String.valueOf(release.getId()))
+                        .addQueryParameter("key", KEY)
+                        .addQueryParameter("secret", SECRET)
+                        .build();
 
+                try {
                     json = fetch(url);
-                    if (json != null) {
-                        ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
+                    final ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
 
-                        return new AlbumInfo(
-                                InfoSource.DISCOGS,
-                                releaseDetail.getFirstImageURL(),
-                                releasesResponse.getOldestReleaseYear());
-                    }
+                    return new AlbumInfo(
+                            InfoSource.DISCOGS,
+                            releaseDetail.getFirstImageURL(),
+                            releasesResponse.getOldestReleaseYear());
+                } catch (NetworkClientException e) {
+                    // Ignore and try the next one...
                 }
             }
         }
 
-        return null;
+        throw new NetworkClientException("No album info found for artist '" + artistName + "' album '" + albumName + "'.");
     }
 
     @Override
-    public ArtistInfo fetchArtistInfo(String artistId) {
+    @NonNull
+    public ArtistInfo fetchArtistInfo(String artistId) throws NetworkClientException, NetworkServerException {
         final HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host("api.discogs.com")
@@ -110,14 +116,12 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .build();
 
         final String json = fetch(url);
-        if (json != null) {
-            ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
-            String imageURL = artistDetail.getFirstImageURL();
-            if (imageURL != null) {
+        final ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
+        final String imageURL = artistDetail.getFirstImageURL();
+        if (imageURL != null) {
                 return new ArtistInfo(InfoSource.DISCOGS, imageURL);
-            }
         }
 
-        return null;
+        throw new NetworkClientException("No artist info found for artist ID '" + artistId + "'.");
     }
 }
