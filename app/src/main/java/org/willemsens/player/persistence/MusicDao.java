@@ -43,7 +43,7 @@ public class MusicDao {
 
     public List<Album> getAllAlbumsMissingInfo() {
         return this.dataStore.select(Album.class)
-                .where(Album.SOURCE.isNull())
+                .where(Album.IMAGE.isNull().or(Album.YEAR_RELEASED.isNull()))
                 .get().toList();
     }
 

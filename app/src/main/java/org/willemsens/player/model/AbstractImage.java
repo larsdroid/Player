@@ -11,7 +11,7 @@ abstract class AbstractImage {
     @Generated
     Long id;
 
-    @Column(nullable = false)
+    @Column
     String url;
 
     @Column(nullable = false)

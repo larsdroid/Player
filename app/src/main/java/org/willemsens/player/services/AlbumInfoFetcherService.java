@@ -9,6 +9,7 @@ import org.willemsens.player.imagefetchers.AlbumInfo;
 import org.willemsens.player.imagefetchers.ImageDownloader;
 import org.willemsens.player.imagefetchers.InfoFetcher;
 import org.willemsens.player.imagefetchers.musicbrainz.MusicbrainzInfoFetcher;
+import org.willemsens.player.imagegenerators.ImageGenerator;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Image;
 
@@ -47,29 +48,50 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
         }
     }
 
+    private boolean fetchSingleAlbumArt(Album album, ImageDownloader imageDownloader, AlbumInfo albumInfo) {
+        if (album.getImage() == null) {
+            byte[] imageData = null;
+            String coverImageUrl = null;
+            if (albumInfo != null) {
+                coverImageUrl = albumInfo.getCoverImageUrl();
+                imageData = imageDownloader.downloadImage(coverImageUrl);
+            }
+
+            if (imageData == null) { // TODO: ... AND response was 404
+                // TODO: try the discogs service first?
+                coverImageUrl = null;
+                imageData = ImageGenerator.generateAlbumCover();
+            }
+            // TODO: else if not 404 (e.g. 500, serice down) --> keep image at NULL and return false
+
+            final Image image = new Image();
+            image.setUrl(coverImageUrl);
+            image.setImageData(imageData);
+            getMusicDao().saveImage(image);
+            album.setImage(image);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void fetchSingleAlbum(Album album, ImageDownloader imageDownloader) {
-        final Image image;
-
         final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
-        if (albumInfo != null) {
-            String coverImageUrl = albumInfo.getCoverImageUrl();
-            final byte[] imageData = imageDownloader.downloadImage(coverImageUrl);
-            if (imageData != null) {
-                image = new Image();
-                image.setUrl(coverImageUrl);
-                image.setImageData(imageData);
-            } else {
-                image = null;
-            }
 
-            if (image != null) {
-                getMusicDao().saveImage(image);
-                album.setImage(image);
-            }
-            if (album.getYearReleased() == null && albumInfo.getYear() != null) {
-                album.setYearReleased(albumInfo.getYear());
-            }
+        boolean albumUpdated = false;
+
+        if (albumInfo != null) { //  TODO:  ... OR albumInfo was 404
+            albumUpdated = fetchSingleAlbumArt(album, imageDownloader, albumInfo);
+        }
+
+        if (album.getYearReleased() == null && albumInfo != null && albumInfo.getYear() != null) {
+            album.setYearReleased(albumInfo.getYear());
             album.setSource(albumInfo.getInfoSource());
+            albumUpdated = true;
+        }
+
+        if (albumUpdated) {
             getMusicDao().updateAlbum(album);
 
             LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
