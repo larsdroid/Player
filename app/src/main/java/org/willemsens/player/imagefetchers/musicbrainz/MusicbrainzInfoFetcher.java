@@ -98,6 +98,9 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
     protected String sanitizeSearchString(String string) {
         string = super.sanitizeSearchString(string);
 
+        // Remove ending "Disc X"
+        string = string.replaceAll("(?i)\\s+disc\\s+\\d{1,2}$", "");
+
         // Just a few Apache Lucene escapes
         string = string.replaceAll("\\(", "\\\\(");
         string = string.replaceAll("\\)", "\\\\)");

@@ -21,6 +21,7 @@ Clean code
 Possible features
 --
 * Trim sections between `[` and `]` from artist and/or album names?
+  * Don't trim ending "Disc 1" strings since it's valuable for picking an album to play
 
 File scanning features
 --
@@ -33,7 +34,5 @@ Fetching issues for album art
 --
 * High Life by Brian Eno, Karl Hyde
 * (What's the story) Morning Glory by Oasis
-* Catch the breeze (Disc 1)
-* Catch the breeze (Disc 2)
 * Zombie Heaven (Disc 2) by The Zombies
 * Go Tell Fire to the Mountain
