@@ -1,5 +1,6 @@
 package org.willemsens.player.services;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -8,11 +9,14 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.notification.NotificationBar;
+import org.willemsens.player.notification.NotificationType;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.IOException;
@@ -79,6 +83,21 @@ public class MusicPlayingService extends Service
     @Override
     public void onPrepared(MediaPlayer mp) {
         mediaPlayer.start();
+
+        /*Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intentNotif, PendingIntent.FLAG_UPDATE_CURRENT);*/
+        NotificationCompat.Builder builder = new NotificationCompat
+                .Builder(getApplicationContext())
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setAutoCancel(false)
+                .setOngoing(true)
+                //.setContentIntent(pendingIntent)
+                .setContent(new NotificationBar(getApplicationContext().getPackageName()));
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NotificationType.DEFAULT_START.getCode(), builder.build());
     }
 
     @Override
