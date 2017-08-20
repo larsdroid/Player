@@ -2,15 +2,18 @@ package org.willemsens.player.imagefetchers;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.google.gson.Gson;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 
 import java.io.IOException;
+
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public abstract class InfoFetcher {
     private final OkHttpClient httpClient;
@@ -32,7 +35,7 @@ public abstract class InfoFetcher {
             }
 
             final String errorMessage = "HTTP error '" + response.code() + "' for URL '" + url + "'.";
-            Log.v(getClass().getName(), errorMessage);
+            Log.e(getClass().getName(), errorMessage);
             if (response.code() >= 400 && response.code() < 500) {
                 throw new NetworkClientException(errorMessage);
             } else { // Assuming 500

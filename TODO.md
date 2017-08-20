@@ -13,6 +13,13 @@
 * "Now playing" notification bar
 * Continue to next song in album after a song is over
 * "The Zombies" should be sorted at "Z" (not "T")
+* Pick album art Activity
+  * Let the user choose from:
+    * Musicbrainz method 1: default search using album name and artist name
+    * Musicbrainz method 2: search artist ID, then search using album name and artist ID
+      * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
+    * Discogs method
+    * Custom file (JPG/PNG/...) selection
 
 Clean code
 --
@@ -32,7 +39,4 @@ File scanning features
 
 Fetching issues for album art
 --
-* High Life by Brian Eno, Karl Hyde
-* (What's the story) Morning Glory by Oasis
-* Zombie Heaven (Disc 2) by The Zombies
-* Go Tell Fire to the Mountain
+* Go Tell Fire to the Mountain --> 404 from coverartarchive
