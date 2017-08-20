@@ -26,9 +26,6 @@ abstract class AbstractAlbum implements Comparable<Album> {
     @Column(nullable = false)
     int length;
 
-    @Column
-    InfoSource source;
-
     @ManyToOne
     Image image;
 

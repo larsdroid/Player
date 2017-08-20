@@ -1,8 +1,7 @@
 package org.willemsens.player.imagefetchers.musicbrainz;
 
 import android.support.annotation.NonNull;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
+
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.exceptions.PlayerException;
@@ -13,7 +12,9 @@ import org.willemsens.player.imagefetchers.musicbrainz.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ImagesReponse;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.Release;
 import org.willemsens.player.imagefetchers.musicbrainz.dto.ReleasesResponse;
-import org.willemsens.player.model.InfoSource;
+
+import okhttp3.HttpUrl;
+import okhttp3.Request;
 
 public class MusicbrainzInfoFetcher extends InfoFetcher {
     @Override
@@ -76,7 +77,6 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                     ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
 
                     return new AlbumInfo(
-                            InfoSource.MUSICBRAINZ,
                             imagesReponse.getFirstLargeThumbnail(),
                             releasesResponse.getOldestReleaseYear());
                 } catch (NetworkClientException e) {

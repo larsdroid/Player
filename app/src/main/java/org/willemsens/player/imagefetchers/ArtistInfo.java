@@ -1,12 +1,9 @@
 package org.willemsens.player.imagefetchers;
 
-import org.willemsens.player.model.InfoSource;
-
-public class ArtistInfo extends FetchedInfo {
+public class ArtistInfo {
     private final String imageUrl;
 
-    public ArtistInfo(InfoSource infoSource, String imageUrl) {
-        super(infoSource);
+    public ArtistInfo(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 

@@ -89,7 +89,6 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
 
             if (album.getYearReleased() == null && albumInfo.getYear() != null) {
                 album.setYearReleased(albumInfo.getYear());
-                album.setSource(albumInfo.getInfoSource());
                 isAlbumUpdated = true;
             }
         } catch (NetworkClientException e) {

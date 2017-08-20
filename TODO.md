@@ -1,3 +1,5 @@
+* Screen rotate at i.e. album list creates a second fragment on top of the previous?
+* Album grid: the album year is not displayed if the album name is too long (overlap)
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
 * Settings fragment
@@ -11,6 +13,7 @@
 * "Now playing" bottom bar
 * "Now playing" notification bar
 * Continue to next song in album after a song is over
+* "The Zombies" should be sorted at "Z" (not "T")
 
 Clean code
 --
@@ -26,3 +29,12 @@ File scanning features
   can be updated in the list after it is fetched
 * FileScannerService should start broadcasting sooner, not after ALL
   records have been inserted
+
+Fetching issues for album art
+--
+* High Life by Brian Eno, Karl Hyde
+* (What's the story) Morning Glory by Oasis
+* Catch the breeze (Disc 1)
+* Catch the breeze (Disc 2)
+* Zombie Heaven (Disc 2) by The Zombies
+* Go Tell Fire to the Mountain

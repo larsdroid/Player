@@ -1,8 +1,7 @@
 package org.willemsens.player.imagefetchers.discogs;
 
 import android.support.annotation.NonNull;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
+
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.imagefetchers.AlbumInfo;
@@ -13,7 +12,9 @@ import org.willemsens.player.imagefetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.imagefetchers.discogs.dto.Release;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleaseDetail;
 import org.willemsens.player.imagefetchers.discogs.dto.ReleasesResponse;
-import org.willemsens.player.model.InfoSource;
+
+import okhttp3.HttpUrl;
+import okhttp3.Request;
 
 public class DiscogsInfoFetcher extends InfoFetcher {
     private static final String KEY = "jdLmQoplPtRzRALOXlyv";
@@ -91,7 +92,6 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                     final ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
 
                     return new AlbumInfo(
-                            InfoSource.DISCOGS,
                             releaseDetail.getFirstImageURL(),
                             releasesResponse.getOldestReleaseYear());
                 } catch (NetworkClientException e) {
@@ -119,7 +119,7 @@ public class DiscogsInfoFetcher extends InfoFetcher {
         final ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
         final String imageURL = artistDetail.getFirstImageURL();
         if (imageURL != null) {
-                return new ArtistInfo(InfoSource.DISCOGS, imageURL);
+                return new ArtistInfo(imageURL);
         }
 
         throw new NetworkClientException("No artist info found for artist ID '" + artistId + "'.");
