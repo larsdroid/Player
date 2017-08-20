@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
@@ -54,6 +55,9 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         @BindView(R.id.album_list_image)
         ImageView albumCover;
 
+        @BindView(R.id.progress_bar)
+        ProgressBar progressBar;
+
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
@@ -67,8 +71,14 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         album.getImage().getImageData(), 0, album.getImage().getImageData().length);
                 this.albumCover.setImageBitmap(bitmap);
+
+                this.albumCover.setVisibility(View.VISIBLE);
+                this.progressBar.setVisibility(View.GONE);
             } else {
                 this.albumCover.setImageDrawable(null);
+
+                this.albumCover.setVisibility(View.GONE);
+                this.progressBar.setVisibility(View.VISIBLE);
             }
         }
     }

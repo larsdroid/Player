@@ -39,4 +39,4 @@ File scanning features
 
 Fetching issues for album art
 --
-* Go Tell Fire to the Mountain --> 404 from coverartarchive
+* "Go Tell Fire to the Mountain" by "WU LYF" --> 404 from coverartarchive
