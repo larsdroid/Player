@@ -89,7 +89,9 @@ public class MainActivity extends AppCompatActivity
                 });
 
         setupActionBarAndDrawer();
-        setMainFragment(false);
+        if (savedInstanceState == null) {
+            setMainFragment(false);
+        }
     }
 
     private void handlePermission(@NonNull String permission, int requestCode, String deniedUserMessage, Runnable runnable) {

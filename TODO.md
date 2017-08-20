@@ -1,4 +1,3 @@
-* Screen rotate at i.e. album list creates a second fragment on top of the previous?
 * Album grid: the album year is not displayed if the album name is too long (overlap)
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
