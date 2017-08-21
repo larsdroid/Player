@@ -14,4 +14,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="progressbar_padding_two_columns">50dp</dimen>
+
+    <dimen name="notification_large_font">18sp</dimen>
+    <dimen name="notification_small_font">12sp</dimen>
 </resources>
