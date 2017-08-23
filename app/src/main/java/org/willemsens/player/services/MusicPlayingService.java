@@ -27,6 +27,7 @@ public class MusicPlayingService extends Service
     private MusicDao musicDao;
     private MediaPlayer mediaPlayer;
     private Song currentSong;
+    private NotificationBar notificationBar;
 
     @Nullable
     @Override
@@ -35,52 +36,59 @@ public class MusicPlayingService extends Service
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+        final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
+        this.musicDao = new MusicDao(dataStore);
+
+        this.mediaPlayer = new MediaPlayer();
+        this.mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+
+        final AudioAttributes.Builder builder = new AudioAttributes.Builder();
+        builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributes.USAGE_MEDIA);
+        final AudioAttributes attributes = builder.build();
+        this.mediaPlayer.setAudioAttributes(attributes);
+
+        this.notificationBar = new NotificationBar(getApplicationContext().getPackageName());
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            if (this.musicDao == null) {
-                final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
-                this.musicDao = new MusicDao(dataStore);
-            }
-
-            if (this.mediaPlayer == null) {
-                this.mediaPlayer = new MediaPlayer();
-                this.mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-
-                final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-                builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .setUsage(AudioAttributes.USAGE_MEDIA);
-                final AudioAttributes attributes = builder.build();
-                this.mediaPlayer.setAudioAttributes(attributes);
-            }
-
             final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
             final Song song = this.musicDao.findSong(songId);
-
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-            }
-            if (!song.equals(currentSong)) {
-                mediaPlayer.reset();
-            }
-
-            Uri.Builder builder = new Uri.Builder();
-            Uri uri = builder.path(song.getFile()).build();
-            this.currentSong = song;
-
-            try {
-                mediaPlayer.setDataSource(getApplicationContext(), uri);
-                mediaPlayer.setOnPreparedListener(this);
-                mediaPlayer.prepareAsync();
-            } catch (IOException e) {
-                Log.e(getClass().getName(), "Can't play song: " + e.getMessage());
-            }
+            setCurrentSong(song);
         }
         return START_STICKY;
     }
 
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        mediaPlayer.start();
+    private void setCurrentSong(Song song) {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        if (!song.equals(currentSong)) {
+            mediaPlayer.reset();
+        }
+
+        Uri.Builder builder = new Uri.Builder();
+        Uri uri = builder.path(song.getFile()).build();
+        this.currentSong = song;
+
+        try {
+            mediaPlayer.setDataSource(getApplicationContext(), uri);
+            mediaPlayer.setOnPreparedListener(this);
+            mediaPlayer.prepareAsync();
+
+            updateNotificationBar();
+        } catch (IOException e) {
+            Log.e(getClass().getName(), "Can't play song: " + e.getMessage());
+        }
+    }
+
+    private void updateNotificationBar() {
+        this.notificationBar.setSong(this.currentSong);
 
         /*Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -91,11 +99,16 @@ public class MusicPlayingService extends Service
                 .setAutoCancel(false)
                 .setOngoing(true)
                 //.setContentIntent(pendingIntent)
-                .setContent(new NotificationBar(getApplicationContext().getPackageName()));
+                .setContent(this.notificationBar);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NotificationType.DEFAULT_START.getCode(), builder.build());
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mediaPlayer.start();
     }
 
     @Override
@@ -105,13 +118,9 @@ public class MusicPlayingService extends Service
 
     @Override
     public void onDestroy() {
-        if (this.mediaPlayer != null) {
-            this.mediaPlayer.release();
-            this.mediaPlayer = null;
-        }
-
-        if (this.musicDao != null) {
-            this.musicDao = null;
-        }
+        this.mediaPlayer.release();
+        this.mediaPlayer = null;
+        this.musicDao = null;
+        super.onDestroy();
     }
 }
