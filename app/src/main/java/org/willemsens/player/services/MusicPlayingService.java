@@ -11,7 +11,8 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
@@ -20,9 +21,6 @@ import org.willemsens.player.notification.NotificationType;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.IOException;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public class MusicPlayingService extends Service
         implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
@@ -86,7 +84,7 @@ public class MusicPlayingService extends Service
 
         /*Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intentNotif, PendingIntent.FLAG_UPDATE_CURRENT);*/
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);*/
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(getApplicationContext())
                 .setSmallIcon(android.R.drawable.ic_media_play)

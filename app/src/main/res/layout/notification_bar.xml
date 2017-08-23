@@ -7,11 +7,11 @@
     android:layout_height="match_parent"
     tools:layout_height="64dp">
 
-    <org.willemsens.player.view.WidthCalculatedImageView
+    <ImageView
         android:id="@+id/notification_bar_image"
         android:layout_margin="2dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         tools:background="@color/blue"/>
 
     <TextView
