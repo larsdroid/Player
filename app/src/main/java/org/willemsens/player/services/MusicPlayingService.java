@@ -1,6 +1,7 @@
 package org.willemsens.player.services;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -34,6 +35,7 @@ public class MusicPlayingService extends Service
     private Song currentSong;
     private NotificationBarSmall notificationBarSmall;
     private NotificationBarBig notificationBarBig;
+    private NotificationManager notificationManager;
 
     @Nullable
     @Override
@@ -59,6 +61,22 @@ public class MusicPlayingService extends Service
 
         this.notificationBarSmall = new NotificationBarSmall(getApplicationContext().getPackageName());
         this.notificationBarBig = new NotificationBarBig(getApplicationContext().getPackageName());
+
+        initNotificationManager();
+    }
+
+    private void initNotificationManager() {
+        this.notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            NotificationChannel channel = new NotificationChannel(
+                    NotificationType.MUSIC_PLAYING.getChannel(),
+                    getString(R.string.channel_name),
+                    NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription(getString(R.string.channel_description));
+            this.notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -100,7 +118,7 @@ public class MusicPlayingService extends Service
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat
-                .Builder(getApplicationContext())
+                .Builder(getApplicationContext(), NotificationType.MUSIC_PLAYING.getChannel())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setAutoCancel(false)
                 .setOngoing(true)
@@ -109,9 +127,7 @@ public class MusicPlayingService extends Service
                 .setCustomContentView(this.notificationBarSmall);
 
         Notification notification = builder.build();
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), notification);
+        this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), notification);
     }
 
     @Override
