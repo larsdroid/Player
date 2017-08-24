@@ -5,10 +5,12 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout_height="64dp">
+    tools:layout_height="64dp"
+    android:background="@color/green">
 
     <ImageView
         android:id="@+id/notification_bar_image"
+        android:contentDescription="@string/album_cover_image_description"
         android:layout_margin="2dp"
         android:layout_width="60dp"
         android:layout_height="60dp"

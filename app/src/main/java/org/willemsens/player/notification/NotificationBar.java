@@ -5,9 +5,9 @@ import android.widget.RemoteViews;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 
-public class NotificationBar extends RemoteViews {
-    public NotificationBar(String packageName) {
-        super(packageName, R.layout.notification_bar);
+abstract class NotificationBar extends RemoteViews {
+    NotificationBar(String packageName, int layoutId) {
+        super(packageName, layoutId);
     }
 
     public void setSong(Song song) {

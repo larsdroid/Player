@@ -1,6 +1,8 @@
 package org.willemsens.player.services;
 
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -11,23 +13,28 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
-import org.willemsens.player.notification.NotificationBar;
+import org.willemsens.player.notification.NotificationBarBig;
+import org.willemsens.player.notification.NotificationBarSmall;
 import org.willemsens.player.notification.NotificationType;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.view.main.MainActivity;
 
 import java.io.IOException;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MusicPlayingService extends Service
         implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
     private MusicDao musicDao;
     private MediaPlayer mediaPlayer;
     private Song currentSong;
-    private NotificationBar notificationBar;
+    private NotificationBarSmall notificationBarSmall;
+    private NotificationBarBig notificationBarBig;
 
     @Nullable
     @Override
@@ -51,7 +58,8 @@ public class MusicPlayingService extends Service
         final AudioAttributes attributes = builder.build();
         this.mediaPlayer.setAudioAttributes(attributes);
 
-        this.notificationBar = new NotificationBar(getApplicationContext().getPackageName());
+        this.notificationBarSmall = new NotificationBarSmall(getApplicationContext().getPackageName());
+        this.notificationBarBig = new NotificationBarBig(getApplicationContext().getPackageName());
     }
 
     @Override
@@ -88,22 +96,25 @@ public class MusicPlayingService extends Service
     }
 
     private void updateNotificationBar() {
-        this.notificationBar.setSong(this.currentSong);
+        this.notificationBarSmall.setSong(this.currentSong);
+        this.notificationBarBig.setSong(this.currentSong);
 
-        /*Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);*/
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(getApplicationContext())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setAutoCancel(false)
                 .setOngoing(true)
-                //.setContentIntent(pendingIntent)
-                .setContent(this.notificationBar);
+                .setContentIntent(pendingIntent)
+                .setCustomBigContentView(this.notificationBarBig)
+                .setCustomContentView(this.notificationBarSmall);
 
+        Notification notification = builder.build();
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(NotificationType.DEFAULT_START.getCode(), builder.build());
+        notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), notification);
     }
 
     @Override

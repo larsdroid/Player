@@ -1,7 +1,7 @@
 package org.willemsens.player.notification;
 
 public enum NotificationType {
-    DEFAULT_START(1);
+    MUSIC_PLAYING(1);
 
     private final int code;
 
