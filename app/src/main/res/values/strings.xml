@@ -26,6 +26,9 @@
     <string name="album_cover_image_description">Album cover</string>
     <string name="artist_image_description">Artist image</string>
     <string name="app_logo_description">Application Logo</string>
+    <string name="previous_track_description">Previous track</string>
+    <string name="next_track_description">Next track</string>
+    <string name="play_pause_stop_description">Play Pause Stop</string>
 
     <string name="key_first_app_execution">org.willemsens.FIRST_APP_EXECUTION</string>
 

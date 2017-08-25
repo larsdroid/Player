@@ -125,6 +125,10 @@ public class MusicPlayingService extends Service
         this.notificationBarSmall.setSong(this.currentSong);
         this.notificationBarBig.setSong(this.currentSong);
 
+        // TODO: Playing --> show play button
+        // TODO: Paused  --> show play button
+        // TODO: Stopped --> show play button
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
