@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="64dp">
+
+    <ImageView
+        android:id="@+id/now_playing_bar_image"
+        android:contentDescription="@string/album_cover_image_description"
+        android:layout_margin="2dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        tools:background="@color/blue"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:id="@+id/now_playing_bar_track"
+        android:layout_toEndOf="@id/now_playing_bar_image"
+        android:padding="10dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+        android:textSize="@dimen/now_playing_large_font"
+        tools:text="6"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_toEndOf="@id/now_playing_bar_track"
+        android:layout_toStartOf="@+id/button_previous">
+        <TextView
+            android:id="@+id/now_playing_bar_song"
+            android:textSize="@dimen/now_playing_large_font"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+            android:maxLines="1"
+            tools:text="The Song Name Comes Here"/>
+
+        <TextView
+            android:id="@+id/now_playing_bar_album"
+            android:textSize="@dimen/now_playing_small_font"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
+            android:maxLines="1"
+            tools:text="The Album Name Comes Here"/>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@id/button_previous"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/previous_track_description"
+        android:src="@drawable/ic_skip_previous_black_48dp"
+        android:layout_toStartOf="@+id/button_play_pause_stop"
+        android:layout_centerVertical="true"/>
+
+    <ImageView
+        android:id="@id/button_play_pause_stop"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/previous_track_description"
+        android:src="@drawable/ic_stop_black_48dp"
+        android:layout_toStartOf="@+id/button_next"
+        android:layout_centerVertical="true"/>
+
+    <ImageView
+        android:id="@id/button_next"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/previous_track_description"
+        android:src="@drawable/ic_skip_next_black_48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"/>
+</RelativeLayout>

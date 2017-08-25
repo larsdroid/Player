@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.willemsens.player.PlayerApplication;
@@ -147,9 +148,11 @@ public class MusicPlayingService extends Service
                     } else if (this.playStatus == PAUSED) {
                         this.playStatus = PLAYING;
                         this.mediaPlayer.start();
+                        broadcastAndNotification();
                     } else if (this.playStatus == PLAYING) {
                         this.playStatus = PAUSED;
                         this.mediaPlayer.pause();
+                        broadcastAndNotification();
                     }
                 } else {
                     Log.e(getClass().getName(), "Invalid PlayCommand received in MusicPlayingService::onStartCommand");
@@ -196,10 +199,16 @@ public class MusicPlayingService extends Service
         return builder.build();
     }
 
-    private void showUpdateNotification() {
+    private void broadcastAndNotification() {
         this.notificationBarSmall.update(this.currentSong, this.playStatus);
         this.notificationBarBig.update(this.currentSong, this.playStatus);
         this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        Intent broadcast = new Intent(getString(R.string.key_player_status_changed));
+        broadcast.putExtra(getString(R.string.key_song_id), this.currentSong.getId());
+        broadcast.putExtra(getString(R.string.key_play_status), this.playStatus.name());
+        lbm.sendBroadcast(broadcast);
     }
 
     @Override
@@ -207,7 +216,7 @@ public class MusicPlayingService extends Service
         if (this.playStatus == PLAYING) {
             this.mediaPlayer.start();
         }
-        showUpdateNotification();
+        broadcastAndNotification();
     }
 
     @Override
@@ -226,7 +235,7 @@ public class MusicPlayingService extends Service
                     // TODO: dismiss notification?
                     // TODO: something else?
                     this.playStatus = PlayStatus.STOPPED;
-                    showUpdateNotification();
+                    broadcastAndNotification();
                 }
             } else {
                 setCurrentSong(nextSong);

@@ -46,8 +46,11 @@
     <string name="key_song_inserted">org.willemsens.SONG_INSERTED</string>
     <string name="key_song_id">org.willemsens.SONG_ID</string>
 
+    <string name="key_player_status_changed">org.willemsens.PLAYER_STATUS_CHANGED</string>
+
     <string name="key_play_mode">org.willemsens.PLAY_MODE</string>
     <string name="key_play_command">org.willemsens.PLAY_COMMAND</string>
+    <string name="key_play_status">org.willemsens.PLAY_STATUS</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

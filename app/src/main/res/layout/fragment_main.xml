@@ -26,4 +26,10 @@
             app:menu="@menu/activity_main_bottom_navigation"
             style="@style/PlayerBottomNavigationStyle"/>
 
+    <FrameLayout
+        android:id="@+id/now_playing_bar_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </FrameLayout>
+
 </LinearLayout>

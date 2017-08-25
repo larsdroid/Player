@@ -31,6 +31,7 @@ import org.willemsens.player.model.Song;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.MusicPlayingService;
 import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.view.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.OnSongClickedListener;
 
@@ -226,6 +227,12 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this, MusicPlayingService.class);
         intent.putExtra(getString(R.string.key_song_id), song.getId());
         startService(intent);
+
+        Fragment nowPlayingFragment = NowPlayingFragment.newInstance();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.add(R.id.now_playing_bar_container, nowPlayingFragment);
+        transaction.commit();
     }
 
     @Override

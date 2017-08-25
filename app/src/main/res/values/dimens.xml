@@ -17,4 +17,7 @@
 
     <dimen name="notification_large_font">18sp</dimen>
     <dimen name="notification_small_font">12sp</dimen>
+
+    <dimen name="now_playing_large_font">18sp</dimen>
+    <dimen name="now_playing_small_font">12sp</dimen>
 </resources>
