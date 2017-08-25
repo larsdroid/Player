@@ -41,7 +41,7 @@
                 android:description="@string/purging_service_description"
                 android:exported="false"/>
         <service
-                android:name=".services.MusicPlayingService"
+                android:name=".playback.MusicPlayingService"
                 android:description="@string/music_playing_service_description"
                 android:exported="false"/>
     </application>

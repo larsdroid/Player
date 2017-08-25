@@ -2,8 +2,7 @@ package org.willemsens.player.persistence;
 
 import android.os.Environment;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
@@ -15,6 +14,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -81,6 +83,21 @@ public class MusicDao {
     public Song findSong(long id) {
         return this.dataStore.select(Song.class)
                 .where(Song.ID.equal(id))
+                .get().firstOrNull();
+    }
+
+    public Song findNextSong(Song song) {
+        return this.dataStore.select(Song.class)
+                .where(Song.ALBUM.equal(song.getAlbum())
+                        .and(Song.TRACK.greaterThan(song.getTrack())))
+                .orderBy(Song.TRACK.asc())
+                .get().firstOrNull();
+    }
+
+    public Song findFirstSong(Album album) {
+        return this.dataStore.select(Song.class)
+                .where(Song.ALBUM.equal(album))
+                .orderBy(Song.TRACK.asc())
                 .get().firstOrNull();
     }
 
