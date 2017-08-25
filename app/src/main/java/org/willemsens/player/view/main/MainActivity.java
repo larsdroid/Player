@@ -24,12 +24,11 @@ import android.widget.Toast;
 
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Song;
-import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.playback.PlayMode;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
+import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.MusicPlayingService;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.settings.SettingsFragment;
@@ -226,7 +225,6 @@ public class MainActivity extends AppCompatActivity
     public void songClicked(Song song) {
         Intent intent = new Intent(this, MusicPlayingService.class);
         intent.putExtra(getString(R.string.key_song_id), song.getId());
-        intent.putExtra(getString(R.string.key_play_mode), PlayMode.NO_REPEAT.name());
         startService(intent);
     }
 

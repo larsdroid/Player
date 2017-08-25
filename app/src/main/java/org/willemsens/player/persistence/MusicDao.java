@@ -94,10 +94,25 @@ public class MusicDao {
                 .get().firstOrNull();
     }
 
+    public Song findPreviousSong(Song song) {
+        return this.dataStore.select(Song.class)
+                .where(Song.ALBUM.equal(song.getAlbum())
+                        .and(Song.TRACK.lessThan(song.getTrack())))
+                .orderBy(Song.TRACK.desc())
+                .get().firstOrNull();
+    }
+
     public Song findFirstSong(Album album) {
         return this.dataStore.select(Song.class)
                 .where(Song.ALBUM.equal(album))
                 .orderBy(Song.TRACK.asc())
+                .get().firstOrNull();
+    }
+
+    public Song findLastSong(Album album) {
+        return this.dataStore.select(Song.class)
+                .where(Song.ALBUM.equal(album))
+                .orderBy(Song.TRACK.desc())
                 .get().firstOrNull();
     }
 

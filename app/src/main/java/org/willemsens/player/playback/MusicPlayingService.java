@@ -28,6 +28,13 @@ import java.io.IOException;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
+import static org.willemsens.player.playback.PlayCommand.NEXT;
+import static org.willemsens.player.playback.PlayCommand.PREVIOUS;
+import static org.willemsens.player.playback.PlayCommand.STOP_PLAY_PAUSE;
+import static org.willemsens.player.playback.PlayStatus.PAUSED;
+import static org.willemsens.player.playback.PlayStatus.PLAYING;
+import static org.willemsens.player.playback.PlayStatus.STOPPED;
+
 public class MusicPlayingService extends Service
         implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private MusicDao musicDao;
@@ -67,10 +74,31 @@ public class MusicPlayingService extends Service
         final AudioAttributes attributes = builder.build();
         this.mediaPlayer.setAudioAttributes(attributes);
 
+        initNotificationBars();
+        initNotificationManager();
+    }
+
+    private void initNotificationBars() {
         this.notificationBarSmall = new NotificationBarSmall(getApplicationContext().getPackageName());
         this.notificationBarBig = new NotificationBarBig(getApplicationContext().getPackageName());
 
-        initNotificationManager();
+        Intent intent = new Intent(this, MusicPlayingService.class);
+        intent.putExtra(getString(R.string.key_play_command), STOP_PLAY_PAUSE.name());
+        PendingIntent pendingIntent = PendingIntent.getService(this, STOP_PLAY_PAUSE.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        this.notificationBarSmall.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
+        this.notificationBarBig.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
+
+        intent = new Intent(this, MusicPlayingService.class);
+        intent.putExtra(getString(R.string.key_play_command), PREVIOUS.name());
+        pendingIntent = PendingIntent.getService(this, PREVIOUS.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        this.notificationBarSmall.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
+        this.notificationBarBig.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
+
+        intent = new Intent(this, MusicPlayingService.class);
+        intent.putExtra(getString(R.string.key_play_command), NEXT.name());
+        pendingIntent = PendingIntent.getService(this, NEXT.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        this.notificationBarSmall.setOnClickPendingIntent(R.id.button_next, pendingIntent);
+        this.notificationBarBig.setOnClickPendingIntent(R.id.button_next, pendingIntent);
     }
 
     private void initNotificationManager() {
@@ -90,28 +118,59 @@ public class MusicPlayingService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
-            final Song song = this.musicDao.findSong(songId);
-            setCurrentSong(song, PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode))));
+            if (intent.hasExtra(getString(R.string.key_song_id))) {
+                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+                final Song song = this.musicDao.findSong(songId);
+                this.playStatus = PLAYING;
+                setCurrentSong(song);
+            } else if (intent.hasExtra(getString(R.string.key_play_command))) {
+                final PlayCommand playCommand = PlayCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
+                if (playCommand == PREVIOUS || playCommand == NEXT) {
+                    Song newSong;
+                    if (playCommand == PREVIOUS) {
+                        newSong = this.musicDao.findPreviousSong(this.currentSong);
+                        if (newSong == null) {
+                            newSong = this.musicDao.findLastSong(this.currentSong.getAlbum());
+                        }
+                    } else {
+                        newSong = this.musicDao.findNextSong(this.currentSong);
+                        if (newSong == null) {
+                            newSong = this.musicDao.findFirstSong(this.currentSong.getAlbum());
+                        }
+                    }
+
+                    setCurrentSong(newSong);
+                } else if (playCommand == STOP_PLAY_PAUSE) {
+                    if (this.playStatus == STOPPED && this.currentSong != null) {
+                        this.playStatus = PLAYING;
+                        setCurrentSong(this.currentSong); // TODO: not optimal to reload this song, I guess...
+                    } else if (this.playStatus == PAUSED) {
+                        this.playStatus = PLAYING;
+                        this.mediaPlayer.start();
+                    } else if (this.playStatus == PLAYING) {
+                        this.playStatus = PAUSED;
+                        this.mediaPlayer.pause();
+                    }
+                } else {
+                    Log.e(getClass().getName(), "Invalid PlayCommand received in MusicPlayingService::onStartCommand");
+                }
+            } else if (intent.hasExtra(getString(R.string.key_play_command))) {
+                PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
+                // TODO
+            } else {
+                Log.e(getClass().getName(), "Invalid intent received in MusicPlayingService::onStartCommand");
+            }
         }
         return START_STICKY;
     }
 
     private void setCurrentSong(Song song) {
-        setCurrentSong(song, this.playMode);
-    }
-
-    private void setCurrentSong(Song song, PlayMode playMode) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
-            this.playStatus = PlayStatus.STOPPED;
         }
-        if (!song.equals(currentSong)) {
-            mediaPlayer.reset();
-        }
+        mediaPlayer.reset();
 
         this.currentSong = song;
-        this.playMode = playMode;
 
         try {
             mediaPlayer.setDataSource(song.getFile());
@@ -122,13 +181,6 @@ public class MusicPlayingService extends Service
     }
 
     private Notification createNotification() {
-        this.notificationBarSmall.setSong(this.currentSong);
-        this.notificationBarBig.setSong(this.currentSong);
-
-        // TODO: Playing --> show play button
-        // TODO: Paused  --> show play button
-        // TODO: Stopped --> show play button
-
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -136,7 +188,7 @@ public class MusicPlayingService extends Service
                 .Builder(getApplicationContext(), NotificationType.MUSIC_PLAYING.getChannel())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setAutoCancel(false)
-                .setOngoing(this.playStatus == PlayStatus.PLAYING)
+                .setOngoing(this.playStatus == PLAYING)
                 .setContentIntent(pendingIntent)
                 .setCustomBigContentView(this.notificationBarBig)
                 .setCustomContentView(this.notificationBarSmall);
@@ -145,20 +197,24 @@ public class MusicPlayingService extends Service
     }
 
     private void showUpdateNotification() {
+        this.notificationBarSmall.update(this.currentSong, this.playStatus);
+        this.notificationBarBig.update(this.currentSong, this.playStatus);
         this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        this.mediaPlayer.start();
-        this.playStatus = PlayStatus.PLAYING;
+        if (this.playStatus == PLAYING) {
+            this.mediaPlayer.start();
+        }
         showUpdateNotification();
     }
 
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
-        if (this.playMode == PlayMode.REPEAT_ONE) {
-            setCurrentSong(this.currentSong);
+        if (this.playMode == PlayMode.REPEAT_ONE && this.playStatus == PLAYING) {
+            // TODO: the looping functionality of MediaPlayer can be used
+            this.mediaPlayer.start();
         } else {
             Song nextSong = this.musicDao.findNextSong(this.currentSong);
             if (nextSong == null) {
