@@ -17,9 +17,9 @@ import android.util.Log;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
-import org.willemsens.player.notification.NotificationBarBig;
-import org.willemsens.player.notification.NotificationBarSmall;
-import org.willemsens.player.notification.NotificationType;
+import org.willemsens.player.playback.notification.NotificationBarBig;
+import org.willemsens.player.playback.notification.NotificationBarSmall;
+import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.view.main.MainActivity;
 

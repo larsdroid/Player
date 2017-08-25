@@ -21,7 +21,7 @@
             android:padding="@dimen/grid_cell_padding"
             tools:layout_width="250dp">
 
-            <org.willemsens.player.view.HeightCalculatedImageView
+            <org.willemsens.player.view.customviews.HeightCalculatedImageView
                 android:id="@+id/artist_list_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:layout_alignBottom="@+id/right_side_text_side">
 
-        <org.willemsens.player.view.WidthCalculatedImageView
+        <org.willemsens.player.view.customviews.WidthCalculatedImageView
             android:id="@+id/song_list_album_image"
             android:layout_width="60dp"
             android:layout_height="60dp"

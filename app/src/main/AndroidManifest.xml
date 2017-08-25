@@ -25,19 +25,19 @@
         </activity>
 
         <service
-                android:name=".services.FileScannerService"
+                android:name=".filescanning.FileScannerService"
                 android:description="@string/scanner_service_description"
                 android:exported="false"/>
         <service
-                android:name=".services.AlbumInfoFetcherService"
+                android:name=".fetchers.AlbumInfoFetcherService"
                 android:description="@string/album_image_fetcher_service_description"
                 android:exported="false"/>
         <service
-                android:name=".services.ArtistInfoFetcherService"
+                android:name=".fetchers.ArtistInfoFetcherService"
                 android:description="@string/artist_image_fetcher_service_description"
                 android:exported="false"/>
         <service
-                android:name=".services.PurgingService"
+                android:name=".filescanning.PurgingService"
                 android:description="@string/purging_service_description"
                 android:exported="false"/>
         <service
