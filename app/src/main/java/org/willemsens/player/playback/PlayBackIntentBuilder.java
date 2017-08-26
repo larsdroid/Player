@@ -6,6 +6,10 @@ import android.content.Intent;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 
+/**
+ * An Intent builder for creating Intents that are targeted AT the PlayBackService (not coming
+ * FROM the PlayBackService).
+ */
 public class PlayBackIntentBuilder {
     private final Context context;
     private Intent intent;
@@ -20,8 +24,8 @@ public class PlayBackIntentBuilder {
         return this;
     }
 
-    public PlayBackIntentBuilder setPlayCommand(PlayCommand playCommand) {
-        this.intent.putExtra(context.getString(R.string.key_play_command), playCommand.name());
+    public PlayBackIntentBuilder setPlayerCommand(PlayerCommand playerCommand) {
+        this.intent.putExtra(context.getString(R.string.key_play_command), playerCommand.name());
         return this;
     }
 

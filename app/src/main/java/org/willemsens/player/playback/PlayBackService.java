@@ -29,9 +29,9 @@ import java.io.IOException;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
-import static org.willemsens.player.playback.PlayCommand.NEXT;
-import static org.willemsens.player.playback.PlayCommand.PREVIOUS;
-import static org.willemsens.player.playback.PlayCommand.STOP_PLAY_PAUSE;
+import static org.willemsens.player.playback.PlayerCommand.NEXT;
+import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
+import static org.willemsens.player.playback.PlayerCommand.STOP_PLAY_PAUSE;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
@@ -88,14 +88,14 @@ public class PlayBackService extends Service
         PendingIntent pendingIntent = PendingIntent.getService(
                 this,
                 STOP_PLAY_PAUSE.getRequestCode(),
-                intentBuilder.setPlayCommand(STOP_PLAY_PAUSE).build(),
+                intentBuilder.setPlayerCommand(STOP_PLAY_PAUSE).build(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
 
         pendingIntent = PendingIntent.getService(
                 this, PREVIOUS.getRequestCode(),
-                intentBuilder.setPlayCommand(PREVIOUS).build(),
+                intentBuilder.setPlayerCommand(PREVIOUS).build(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
@@ -103,7 +103,7 @@ public class PlayBackService extends Service
         pendingIntent = PendingIntent.getService(
                 this,
                 NEXT.getRequestCode(),
-                intentBuilder.setPlayCommand(NEXT).build(),
+                intentBuilder.setPlayerCommand(NEXT).build(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_next, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_next, pendingIntent);
@@ -129,13 +129,21 @@ public class PlayBackService extends Service
             if (intent.hasExtra(getString(R.string.key_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = this.musicDao.findSong(songId);
-                this.playStatus = PLAYING;
+
+                if (intent.hasExtra(getString(R.string.key_play_command))) {
+                    final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
+                    switch (playerCommand) {
+                        case PLAY:
+                            this.playStatus = PLAYING;
+                    }
+                }
+
                 setCurrentSong(song);
             } else if (intent.hasExtra(getString(R.string.key_play_command))) {
-                final PlayCommand playCommand = PlayCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
-                if (playCommand == PREVIOUS || playCommand == NEXT) {
+                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
+                if (playerCommand == PREVIOUS || playerCommand == NEXT) {
                     Song newSong;
-                    if (playCommand == PREVIOUS) {
+                    if (playerCommand == PREVIOUS) {
                         newSong = this.musicDao.findPreviousSong(this.currentSong);
                         if (newSong == null) {
                             newSong = this.musicDao.findLastSong(this.currentSong.getAlbum());
@@ -148,7 +156,7 @@ public class PlayBackService extends Service
                     }
 
                     setCurrentSong(newSong);
-                } else if (playCommand == STOP_PLAY_PAUSE) {
+                } else if (playerCommand == STOP_PLAY_PAUSE) {
                     if (this.playStatus == STOPPED && this.currentSong != null) {
                         this.playStatus = PLAYING;
                         setCurrentSong(this.currentSong); // TODO: not optimal to reload this song, I guess...
@@ -162,7 +170,7 @@ public class PlayBackService extends Service
                         broadcastAndNotification();
                     }
                 } else {
-                    Log.e(getClass().getName(), "Invalid PlayCommand received in PlayBackService::onStartCommand");
+                    Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
                 }
             } else if (intent.hasExtra(getString(R.string.key_play_command))) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));

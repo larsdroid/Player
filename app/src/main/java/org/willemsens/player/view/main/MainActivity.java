@@ -45,6 +45,8 @@ import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
+import static org.willemsens.player.playback.PlayerCommand.PLAY;
+
 public class MainActivity extends AppCompatActivity
         implements DataAccessProvider,
         OnSongClickedListener,
@@ -248,6 +250,7 @@ public class MainActivity extends AppCompatActivity
     public void songClicked(Song song) {
         new PlayBackIntentBuilder(this)
                 .setSong(song)
+                .setPlayerCommand(PLAY)
                 .buildAndSubmit();
     }
 
