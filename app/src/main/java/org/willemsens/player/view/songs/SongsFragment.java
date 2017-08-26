@@ -27,7 +27,6 @@ import java.util.List;
 public class SongsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
     private SongRecyclerViewAdapter adapter;
-    private OnSongClickedListener listener;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Song> songs;
 

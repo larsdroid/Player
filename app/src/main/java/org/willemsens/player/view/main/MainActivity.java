@@ -21,7 +21,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
@@ -34,11 +37,6 @@ import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.OnSongClickedListener;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public class MainActivity extends AppCompatActivity
         implements DataAccessProvider,
@@ -183,9 +181,17 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    private void setNowPlayingFragment() {
+        // TODO: check if not added already (this method can be called from multiple locations)
+        Fragment nowPlayingFragment = NowPlayingFragment.newInstance();
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.add(R.id.now_playing_bar_container, nowPlayingFragment);
+        transaction.commit();
+    }
+
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -228,11 +234,7 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra(getString(R.string.key_song_id), song.getId());
         startService(intent);
 
-        Fragment nowPlayingFragment = NowPlayingFragment.newInstance();
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.now_playing_bar_container, nowPlayingFragment);
-        transaction.commit();
+        setNowPlayingFragment();
     }
 
     @Override
