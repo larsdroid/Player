@@ -36,7 +36,7 @@ import static org.willemsens.player.playback.PlayStatus.PAUSED;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 
-public class MusicPlayingService extends Service
+public class PlayBackService extends Service
         implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private MusicDao musicDao;
     private MediaPlayer mediaPlayer;
@@ -83,21 +83,28 @@ public class MusicPlayingService extends Service
         this.notificationBarSmall = new NotificationBarSmall(getApplicationContext().getPackageName());
         this.notificationBarBig = new NotificationBarBig(getApplicationContext().getPackageName());
 
-        Intent intent = new Intent(this, MusicPlayingService.class);
-        intent.putExtra(getString(R.string.key_play_command), STOP_PLAY_PAUSE.name());
-        PendingIntent pendingIntent = PendingIntent.getService(this, STOP_PLAY_PAUSE.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PlayBackIntentBuilder intentBuilder = new PlayBackIntentBuilder(this);
+
+        PendingIntent pendingIntent = PendingIntent.getService(
+                this,
+                STOP_PLAY_PAUSE.getRequestCode(),
+                intentBuilder.setPlayCommand(STOP_PLAY_PAUSE).build(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
 
-        intent = new Intent(this, MusicPlayingService.class);
-        intent.putExtra(getString(R.string.key_play_command), PREVIOUS.name());
-        pendingIntent = PendingIntent.getService(this, PREVIOUS.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getService(
+                this, PREVIOUS.getRequestCode(),
+                intentBuilder.setPlayCommand(PREVIOUS).build(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
 
-        intent = new Intent(this, MusicPlayingService.class);
-        intent.putExtra(getString(R.string.key_play_command), NEXT.name());
-        pendingIntent = PendingIntent.getService(this, NEXT.getRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getService(
+                this,
+                NEXT.getRequestCode(),
+                intentBuilder.setPlayCommand(NEXT).build(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_next, pendingIntent);
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_next, pendingIntent);
     }
@@ -155,13 +162,13 @@ public class MusicPlayingService extends Service
                         broadcastAndNotification();
                     }
                 } else {
-                    Log.e(getClass().getName(), "Invalid PlayCommand received in MusicPlayingService::onStartCommand");
+                    Log.e(getClass().getName(), "Invalid PlayCommand received in PlayBackService::onStartCommand");
                 }
             } else if (intent.hasExtra(getString(R.string.key_play_command))) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
                 // TODO
             } else {
-                Log.e(getClass().getName(), "Invalid intent received in MusicPlayingService::onStartCommand");
+                Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand");
             }
         }
         return START_STICKY;

@@ -1,7 +1,10 @@
 package org.willemsens.player.view.main;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,10 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
@@ -32,11 +33,17 @@ import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.playback.MusicPlayingService;
+import org.willemsens.player.playback.PlayBackIntentBuilder;
+import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.settings.SettingsFragment;
 import org.willemsens.player.view.songs.OnSongClickedListener;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 public class MainActivity extends AppCompatActivity
         implements DataAccessProvider,
@@ -56,6 +63,7 @@ public class MainActivity extends AppCompatActivity
 
     private Integer previousMenuItem;
     private MusicDao musicDao;
+    private PlayBackStatusReceiver playBackStatusReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,13 +189,21 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void setNowPlayingFragment() {
-        // TODO: check if not added already (this method can be called from multiple locations)
-        Fragment nowPlayingFragment = NowPlayingFragment.newInstance();
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.now_playing_bar_container, nowPlayingFragment);
-        transaction.commit();
+    private void setNowPlayingFragment(Song song, PlayStatus playStatus) {
+        final FragmentManager manager = getSupportFragmentManager();
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment)manager.findFragmentById(R.id.now_playing_bar_container);
+        if (nowPlayingFragment == null) {
+            nowPlayingFragment = NowPlayingFragment.newInstance();
+
+            final FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.now_playing_bar_container, nowPlayingFragment);
+            transaction.commit();
+
+            // We have to execute the pending transactions since we're about to update the new fragment's view...
+            manager.executePendingTransactions();
+        }
+
+        nowPlayingFragment.update(song, playStatus);
     }
 
     @Override
@@ -230,11 +246,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void songClicked(Song song) {
-        Intent intent = new Intent(this, MusicPlayingService.class);
-        intent.putExtra(getString(R.string.key_song_id), song.getId());
-        startService(intent);
-
-        setNowPlayingFragment();
+        new PlayBackIntentBuilder(this)
+                .setSong(song)
+                .buildAndSubmit();
     }
 
     @Override
@@ -254,5 +268,34 @@ public class MainActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.playBackStatusReceiver = new PlayBackStatusReceiver();
+        final LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(getString(R.string.key_player_status_changed));
+        lbm.registerReceiver(this.playBackStatusReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(this.playBackStatusReceiver);
+        super.onPause();
+    }
+
+    private class PlayBackStatusReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(getString(R.string.key_player_status_changed))) {
+                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+                final Song song = getMusicDao().findSong(songId);
+                final PlayStatus playStatus = PlayStatus.valueOf(intent.getStringExtra(getString(R.string.key_play_status)));
+                setNowPlayingFragment(song, playStatus);
+            }
+        }
     }
 }

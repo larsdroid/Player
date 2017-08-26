@@ -21,6 +21,11 @@
         <item name="itemTextColor">@android:color/white</item>
     </style>
 
+    <style name="PlayerNowPlayingStyle">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@color/colorPrimaryDark</item>
+    </style>
+
     <style name="HorizontalDivider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>

@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="64dp">
+    android:layout_height="64dp"
+    android:theme="@style/PlayerNowPlayingStyle">
 
     <ImageView
         android:id="@+id/now_playing_bar_image"
@@ -21,7 +22,6 @@
         android:gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:textAppearance="@style/TextAppearance.AppCompat.Notification"
         android:textSize="@dimen/now_playing_large_font"
         tools:text="6"/>
 
@@ -37,7 +37,6 @@
             android:textSize="@dimen/now_playing_large_font"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
             android:maxLines="1"
             tools:text="The Song Name Comes Here"/>
 
@@ -46,7 +45,6 @@
             android:textSize="@dimen/now_playing_small_font"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Notification"
             android:maxLines="1"
             tools:text="The Album Name Comes Here"/>
     </LinearLayout>
@@ -56,7 +54,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:contentDescription="@string/previous_track_description"
-        android:src="@drawable/ic_skip_previous_black_48dp"
+        android:src="@drawable/ic_skip_previous_white_48dp"
         android:layout_toStartOf="@+id/button_play_pause_stop"
         android:layout_centerVertical="true"/>
 
@@ -65,7 +63,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:contentDescription="@string/previous_track_description"
-        android:src="@drawable/ic_stop_black_48dp"
+        android:src="@drawable/ic_stop_white_48dp"
         android:layout_toStartOf="@+id/button_next"
         android:layout_centerVertical="true"/>
 
@@ -74,7 +72,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:contentDescription="@string/previous_track_description"
-        android:src="@drawable/ic_skip_next_black_48dp"
+        android:src="@drawable/ic_skip_next_white_48dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"/>
 </RelativeLayout>
