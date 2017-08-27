@@ -16,7 +16,6 @@ public class MusicDatabaseSource extends DatabaseSource {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // TODO
         super.onUpgrade(db, oldVersion, newVersion);
     }
 }

@@ -9,9 +9,6 @@
   * Click album -> show only songs in that album
   * Click artist -> show only albums by that artist
   * Merge into a "Search" feature that also shows a limited selection
-* "Now playing" bottom bar
-* "Now playing" notification bar
-* Continue to next song in album after a song is over
 * "The Zombies" should be sorted at "Z" (not "T")
 * Pick album art Activity
   * Let the user choose from:

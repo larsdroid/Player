@@ -172,7 +172,7 @@ public class PlayBackService extends Service
                 } else {
                     Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
                 }
-            } else if (intent.hasExtra(getString(R.string.key_play_command))) {
+            } else if (intent.hasExtra(getString(R.string.key_play_mode))) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
                 // TODO
             } else {
@@ -246,11 +246,11 @@ public class PlayBackService extends Service
                     nextSong = this.musicDao.findFirstSong(this.currentSong.getAlbum());
                     setCurrentSong(nextSong);
                 } else {
-                    // TODO: set song null? set song to first song from album AND stopped?
-                    // TODO: dismiss notification?
-                    // TODO: something else?
+                    // TODO: dismiss notification
+                    // TODO: make sure that the MainActivity removes the NowPlayingFragment when "STOPPED" broadcast is received.
                     this.playStatus = PlayStatus.STOPPED;
                     broadcastAndNotification();
+                    // TODO: END this service
                 }
             } else {
                 setCurrentSong(nextSong);
