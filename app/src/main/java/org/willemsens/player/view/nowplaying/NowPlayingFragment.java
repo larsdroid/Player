@@ -12,10 +12,16 @@ import android.widget.TextView;
 
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+import static org.willemsens.player.playback.PlayerCommand.NEXT;
+import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
+import static org.willemsens.player.playback.PlayerCommand.STOP_PLAY_PAUSE;
 
 public class NowPlayingFragment extends Fragment {
     @BindView(R.id.now_playing_bar_image)
@@ -41,6 +47,27 @@ public class NowPlayingFragment extends Fragment {
 
     public static NowPlayingFragment newInstance() {
         return new NowPlayingFragment();
+    }
+
+    @OnClick(R.id.button_previous)
+    public void previousClicked() {
+        new PlayBackIntentBuilder(getContext())
+                .setPlayerCommand(PREVIOUS)
+                .buildAndSubmit();
+    }
+
+    @OnClick(R.id.button_next)
+    public void nextClicked() {
+        new PlayBackIntentBuilder(getContext())
+                .setPlayerCommand(NEXT)
+                .buildAndSubmit();
+    }
+
+    @OnClick(R.id.button_play_pause_stop)
+    public void playPauseStopClicked() {
+        new PlayBackIntentBuilder(getContext())
+                .setPlayerCommand(STOP_PLAY_PAUSE)
+                .buildAndSubmit();
     }
 
     @Override
