@@ -17,6 +17,7 @@
       * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
     * Discogs method
     * Custom file (JPG/PNG/...) selection
+* Pause the music in case the headphones get unplugged
 
 Clean code
 --
