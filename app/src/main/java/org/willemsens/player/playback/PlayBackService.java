@@ -30,6 +30,7 @@ import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
+import static org.willemsens.player.playback.PlayerCommand.PAUSE;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
 import static org.willemsens.player.playback.PlayerCommand.STOP_PLAY_PAUSE;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
@@ -165,6 +166,12 @@ public class PlayBackService extends Service
                         this.mediaPlayer.start();
                         broadcastAndNotification();
                     } else if (this.playStatus == PLAYING) {
+                        this.playStatus = PAUSED;
+                        this.mediaPlayer.pause();
+                        broadcastAndNotification();
+                    }
+                } else if (playerCommand == PAUSE) {
+                    if (this.playStatus == PLAYING) {
                         this.playStatus = PAUSED;
                         this.mediaPlayer.pause();
                         broadcastAndNotification();

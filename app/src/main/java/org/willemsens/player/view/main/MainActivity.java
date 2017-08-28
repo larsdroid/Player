@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -46,6 +47,7 @@ import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
+import static org.willemsens.player.playback.PlayerCommand.PAUSE;
 import static org.willemsens.player.playback.PlayerCommand.PLAY;
 
 public class MainActivity extends AppCompatActivity
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity
     private Integer previousMenuItem;
     private MusicDao musicDao;
     private PlayBackStatusReceiver playBackStatusReceiver;
+    private HeadsetReceiver headsetReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -287,16 +290,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+
         this.playBackStatusReceiver = new PlayBackStatusReceiver();
         final LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(getString(R.string.key_player_status_changed));
+        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status_changed));
         lbm.registerReceiver(this.playBackStatusReceiver, filter);
+
+        this.headsetReceiver = new HeadsetReceiver();
+        filter = new IntentFilter(AudioManager.ACTION_HEADSET_PLUG);
+        registerReceiver(this.headsetReceiver, filter);
     }
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(this.playBackStatusReceiver);
+        unregisterReceiver(this.headsetReceiver);
         super.onPause();
     }
 
@@ -312,6 +320,21 @@ public class MainActivity extends AppCompatActivity
                     removeNowPlayingFragment();
                 } else {
                     setNowPlayingFragment(song, playStatus);
+                }
+            }
+        }
+    }
+
+    private class HeadsetReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(AudioManager.ACTION_HEADSET_PLUG)) {
+                boolean isPluggedIn = intent.getIntExtra("state", 0) == 1;
+                if (!isPluggedIn) {
+                    new PlayBackIntentBuilder(MainActivity.this)
+                            .setPlayerCommand(PAUSE)
+                            .buildAndSubmit();
                 }
             }
         }
