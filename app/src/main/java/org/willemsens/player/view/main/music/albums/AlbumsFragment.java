@@ -52,7 +52,7 @@ public class AlbumsFragment extends Fragment {
             if (this.albums.isEmpty()) {
                 loadAllAlbums();
             }
-            this.adapter = new AlbumRecyclerViewAdapter(this.albums);
+            this.adapter = new AlbumRecyclerViewAdapter(this.albums, (OnAlbumClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;

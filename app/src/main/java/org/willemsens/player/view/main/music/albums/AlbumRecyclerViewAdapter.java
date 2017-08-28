@@ -23,9 +23,11 @@ import butterknife.ButterKnife;
  */
 class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.ViewHolder> {
     private final List<Album> albums;
+    private final OnAlbumClickedListener listener;
 
-    AlbumRecyclerViewAdapter(List<Album> albums) {
+    AlbumRecyclerViewAdapter(List<Album> albums, OnAlbumClickedListener listener) {
         this.albums = albums;
+        this.listener = listener;
     }
 
     @Override
@@ -45,7 +47,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         return albums.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.album_list_name)
         TextView albumName;
 
@@ -58,12 +60,22 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         @BindView(R.id.progress_bar)
         ProgressBar progressBar;
 
+        private Album album;
+
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            listener.albumClicked(this.album);
         }
 
         private void setAlbum(Album album) {
+            this.album = album;
+
             this.albumName.setText(album.getName());
             this.albumYear.setText(album.getYearReleased() == null ? "" : String.valueOf(album.getYearReleased()));
 

@@ -52,7 +52,7 @@ public class ArtistsFragment extends Fragment {
             if (this.artists.isEmpty()) {
                 loadAllArtists();
             }
-            this.adapter = new ArtistRecyclerViewAdapter(this.artists);
+            this.adapter = new ArtistRecyclerViewAdapter(this.artists, (OnArtistClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;

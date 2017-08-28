@@ -31,12 +31,16 @@ import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
+import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.main.music.MusicFragment;
+import org.willemsens.player.view.main.music.albums.OnAlbumClickedListener;
+import org.willemsens.player.view.main.music.artists.OnArtistClickedListener;
 import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.main.settings.SettingsFragment;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
@@ -53,6 +57,8 @@ import static org.willemsens.player.playback.PlayerCommand.PLAY;
 public class MainActivity extends AppCompatActivity
         implements DataAccessProvider,
         OnSongClickedListener,
+        OnArtistClickedListener,
+        OnAlbumClickedListener,
         NavigationView.OnNavigationItemSelectedListener {
     private static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
     private static final int PERMISSION_REQUEST_CODE_INTERNET = 2;
@@ -266,6 +272,16 @@ public class MainActivity extends AppCompatActivity
                 .setSong(song)
                 .setPlayerCommand(PLAY)
                 .buildAndSubmit();
+    }
+
+    @Override
+    public void albumClicked(Album album) {
+        Toast.makeText(this, "ALBUM", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void artistClicked(Artist artist) {
+        Toast.makeText(this, "ARTIST", Toast.LENGTH_SHORT).show();
     }
 
     @Override

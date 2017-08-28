@@ -22,9 +22,11 @@ import butterknife.ButterKnife;
  */
 class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
     private final List<Artist> artists;
+    private final OnArtistClickedListener listener;
 
-    ArtistRecyclerViewAdapter(List<Artist> artists) {
+    ArtistRecyclerViewAdapter(List<Artist> artists, OnArtistClickedListener listener) {
         this.artists = artists;
+        this.listener = listener;
     }
 
     @Override
@@ -44,19 +46,29 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         return artists.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.artist_list_name)
         TextView artistName;
 
         @BindView(R.id.artist_list_image)
         ImageView artistImage;
 
+        private Artist artist;
+
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            listener.artistClicked(this.artist);
         }
 
         private void setArtist(Artist artist) {
+            this.artist = artist;
+
             this.artistName.setText(artist.getName());
 
             if (artist.getImage() != null) {
