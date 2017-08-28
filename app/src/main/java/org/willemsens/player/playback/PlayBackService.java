@@ -215,9 +215,13 @@ public class PlayBackService extends Service
     }
 
     private void broadcastAndNotification() {
-        this.notificationBarSmall.update(this.currentSong, this.playStatus);
-        this.notificationBarBig.update(this.currentSong, this.playStatus);
-        this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+        if (this.playStatus == STOPPED) {
+            this.notificationManager.cancel(NotificationType.MUSIC_PLAYING.getCode());
+        } else {
+            this.notificationBarSmall.update(this.currentSong, this.playStatus);
+            this.notificationBarBig.update(this.currentSong, this.playStatus);
+            this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+        }
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         Intent broadcast = new Intent(getString(R.string.key_player_status_changed));
@@ -246,11 +250,9 @@ public class PlayBackService extends Service
                     nextSong = this.musicDao.findFirstSong(this.currentSong.getAlbum());
                     setCurrentSong(nextSong);
                 } else {
-                    // TODO: dismiss notification
-                    // TODO: make sure that the MainActivity removes the NowPlayingFragment when "STOPPED" broadcast is received.
                     this.playStatus = PlayStatus.STOPPED;
                     broadcastAndNotification();
-                    // TODO: END this service
+                    stopSelf();
                 }
             } else {
                 setCurrentSong(nextSong);

@@ -45,6 +45,7 @@ import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 
+import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PLAY;
 
 public class MainActivity extends AppCompatActivity
@@ -208,6 +209,16 @@ public class MainActivity extends AppCompatActivity
         nowPlayingFragment.update(song, playStatus);
     }
 
+    private void removeNowPlayingFragment() {
+        final FragmentManager manager = getSupportFragmentManager();
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment)manager.findFragmentById(R.id.now_playing_bar_container);
+        if (nowPlayingFragment != null) {
+            final FragmentTransaction transaction = manager.beginTransaction();
+            transaction.remove(nowPlayingFragment);
+            transaction.commit();
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -297,7 +308,11 @@ public class MainActivity extends AppCompatActivity
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = getMusicDao().findSong(songId);
                 final PlayStatus playStatus = PlayStatus.valueOf(intent.getStringExtra(getString(R.string.key_play_status)));
-                setNowPlayingFragment(song, playStatus);
+                if (playStatus == STOPPED) {
+                    removeNowPlayingFragment();
+                } else {
+                    setNowPlayingFragment(song, playStatus);
+                }
             }
         }
     }
