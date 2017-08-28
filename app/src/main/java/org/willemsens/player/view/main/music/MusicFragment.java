@@ -1,4 +1,4 @@
-package org.willemsens.player.view.main;
+package org.willemsens.player.view.main.music;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -6,19 +6,22 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.willemsens.player.R;
-import org.willemsens.player.view.albums.AlbumsFragment;
-import org.willemsens.player.view.artists.ArtistsFragment;
-import org.willemsens.player.view.songs.SongsFragment;
+import org.willemsens.player.view.main.music.albums.AlbumsFragment;
+import org.willemsens.player.view.main.music.artists.ArtistsFragment;
+import org.willemsens.player.view.main.music.songs.SongsFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainFragment extends Fragment
+public class MusicFragment extends Fragment
         implements BottomNavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
@@ -28,23 +31,44 @@ public class MainFragment extends Fragment
 
     private MenuItem previousMenuItem;
 
-    public MainFragment() {
+    public MusicFragment() {
     }
 
-    public static MainFragment newInstance() {
-        return new MainFragment();
+    public static MusicFragment newInstance() {
+        return new MusicFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        setHasOptionsMenu(true);
+        View view = inflater.inflate(R.layout.fragment_music, container, false);
         ButterKnife.bind(this, view);
 
         addEventHandlers();
         setupViewPager();
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_music_menu, menu);
+        getActivity().setTitle(R.string.title_music);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_filter) {
+            // TODO
+            Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -94,7 +118,7 @@ public class MainFragment extends Fragment
     }
 
     private void setupViewPager() {
-        MainViewPagerAdapter adapter = new MainViewPagerAdapter(getChildFragmentManager());
+        MusicViewPagerAdapter adapter = new MusicViewPagerAdapter(getChildFragmentManager());
         adapter.addFragment(AlbumsFragment.newInstance());
         adapter.addFragment(ArtistsFragment.newInstance());
         adapter.addFragment(SongsFragment.newInstance());

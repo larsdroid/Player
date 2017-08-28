@@ -1,4 +1,4 @@
-package org.willemsens.player.view.songs;
+package org.willemsens.player.view.main.music.songs;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,12 +6,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -20,13 +26,16 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
     private final List<Song> songs;
+    private final List<Song> allSongs;
     private final OnSongClickedListener listener;
+    private SongFilter songFilter;
 
-    SongRecyclerViewAdapter(List<Song> songs, OnSongClickedListener listener) {
-        this.songs = songs;
+    SongRecyclerViewAdapter(List<Song> allSongs, OnSongClickedListener listener) {
+        this.allSongs = allSongs;
         this.listener = listener;
+        this.songs = new ArrayList<>(allSongs);
     }
 
     @Override
@@ -104,6 +113,46 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             } else {
                 this.leftSectionOfDivider.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (this.songFilter == null) {
+            this.songFilter = new SongFilter();
+        }
+        return this.songFilter;
+    }
+
+    public class SongFilter extends Filter {
+        private Album album;
+
+        public void setAlbum(Album album) {
+            this.album = album;
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            FilterResults results = new FilterResults();
+            final List<Song> newList = new LinkedList<>(allSongs);
+            if (this.album != null) {
+                for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
+                    final Song song = i.next();
+                    if (song.getAlbum().equals(this.album)) {
+                        i.remove();
+                    }
+                }
+            }
+            results.values = newList;
+            results.count = newList.size();
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            songs.clear();
+            songs.addAll((List<Song>)filterResults.values);
+            notifyDataSetChanged();
         }
     }
 }

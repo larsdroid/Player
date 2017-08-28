@@ -1,4 +1,4 @@
-package org.willemsens.player.view.artists;
+package org.willemsens.player.view.main.music.albums;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.willemsens.player.R;
-import org.willemsens.player.model.Artist;
+import org.willemsens.player.model.Album;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
@@ -23,41 +23,40 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A fragment representing a list of Artists.
+ * A fragment representing a list of Albums.
  */
-public class ArtistsFragment extends Fragment {
+public class AlbumsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
-    private ArtistRecyclerViewAdapter adapter;
+    private AlbumRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
-    private final List<Artist> artists;
+    private final List<Album> albums;
 
-    public ArtistsFragment() {
+    public AlbumsFragment() {
         this.dbUpdateReceiver = new DBUpdateReceiver();
-        this.artists = new ArrayList<>();
+        this.albums = new ArrayList<>();
     }
 
-    public static ArtistsFragment newInstance() {
-        return new ArtistsFragment();
+    public static AlbumsFragment newInstance() {
+        return new AlbumsFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_artists_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
 
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-            if (this.artists.isEmpty()) {
-                loadAllArtists();
+            if (this.albums.isEmpty()) {
+                loadAllAlbums();
             }
-            this.adapter = new ArtistRecyclerViewAdapter(this.artists);
+            this.adapter = new AlbumRecyclerViewAdapter(this.albums);
             recyclerView.setAdapter(this.adapter);
         }
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -74,9 +73,9 @@ public class ArtistsFragment extends Fragment {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         IntentFilter filter = new IntentFilter();
-        filter.addAction(getString(R.string.key_artists_inserted));
-        filter.addAction(getString(R.string.key_artist_inserted));
-        filter.addAction(getString(R.string.key_artist_updated));
+        filter.addAction(getString(R.string.key_albums_inserted));
+        filter.addAction(getString(R.string.key_album_inserted));
+        filter.addAction(getString(R.string.key_album_updated));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -91,31 +90,31 @@ public class ArtistsFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(getString(R.string.key_artists_inserted))) {
-                loadAllArtists();
+            if (intentAction.equals(getString(R.string.key_albums_inserted))) {
+                loadAllAlbums();
                 adapter.notifyDataSetChanged();
-            } else if (intentAction.equals(getString(R.string.key_artist_inserted))) {
-                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
-                artists.add(artist);
-                Collections.sort(artists);
-                final int index = artists.indexOf(artist);
+            } else if (intentAction.equals(getString(R.string.key_album_inserted))) {
+                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                albums.add(album);
+                Collections.sort(albums);
+                final int index = albums.indexOf(album);
                 adapter.notifyItemInserted(index);
-            } else if (intentAction.equals(getString(R.string.key_artist_updated))) {
-                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
-                final int index = artists.indexOf(artist);
+            } else if (intentAction.equals(getString(R.string.key_album_updated))) {
+                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                final int index = albums.indexOf(album);
                 if (index != -1) {
-                    artists.set(index, artist);
+                    albums.set(index, album);
                     adapter.notifyItemChanged(index);
                 }
             }
         }
     }
 
-    private void loadAllArtists() {
-        artists.clear();
-        artists.addAll(dataAccessProvider.getMusicDao().getAllArtists());
-        Collections.sort(artists);
+    private void loadAllAlbums() {
+        albums.clear();
+        albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
+        Collections.sort(albums);
     }
 }

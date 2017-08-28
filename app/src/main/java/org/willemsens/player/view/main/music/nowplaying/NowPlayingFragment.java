@@ -1,4 +1,4 @@
-package org.willemsens.player.view.nowplaying;
+package org.willemsens.player.view.main.music.nowplaying;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

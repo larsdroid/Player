@@ -1,4 +1,4 @@
-package org.willemsens.player.view.albums;
+package org.willemsens.player.view.main.music.songs;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,15 +7,14 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
@@ -23,40 +22,41 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A fragment representing a list of Albums.
+ * A fragment representing a list of Songs.
  */
-public class AlbumsFragment extends Fragment {
+public class SongsFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
-    private AlbumRecyclerViewAdapter adapter;
+    private SongRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
-    private final List<Album> albums;
+    private final List<Song> songs;
 
-    public AlbumsFragment() {
+    public SongsFragment() {
         this.dbUpdateReceiver = new DBUpdateReceiver();
-        this.albums = new ArrayList<>();
+        this.songs = new ArrayList<>();
     }
 
-    public static AlbumsFragment newInstance() {
-        return new AlbumsFragment();
+    public static SongsFragment newInstance() {
+        return new SongsFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_songs_list, container, false);
 
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-            if (this.albums.isEmpty()) {
-                loadAllAlbums();
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+            if (this.songs.isEmpty()) {
+                loadAllSongs();
             }
-            this.adapter = new AlbumRecyclerViewAdapter(this.albums);
+            this.adapter = new SongRecyclerViewAdapter(this.songs, (OnSongClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -73,9 +73,7 @@ public class AlbumsFragment extends Fragment {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         IntentFilter filter = new IntentFilter();
-        filter.addAction(getString(R.string.key_albums_inserted));
-        filter.addAction(getString(R.string.key_album_inserted));
-        filter.addAction(getString(R.string.key_album_updated));
+        filter.addAction(getString(R.string.key_songs_inserted));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -90,31 +88,23 @@ public class AlbumsFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(getString(R.string.key_albums_inserted))) {
-                loadAllAlbums();
+            if (intentAction.equals(getString(R.string.key_songs_inserted))) {
+                loadAllSongs();
                 adapter.notifyDataSetChanged();
-            } else if (intentAction.equals(getString(R.string.key_album_inserted))) {
-                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
-                albums.add(album);
-                Collections.sort(albums);
-                final int index = albums.indexOf(album);
+            } else if (intentAction.equals(getString(R.string.key_song_inserted))) {
+                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+                final Song song = dataAccessProvider.getMusicDao().findSong(songId);
+                songs.add(song);
+                Collections.sort(songs);
+                final int index = songs.indexOf(song);
                 adapter.notifyItemInserted(index);
-            } else if (intentAction.equals(getString(R.string.key_album_updated))) {
-                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
-                final int index = albums.indexOf(album);
-                if (index != -1) {
-                    albums.set(index, album);
-                    adapter.notifyItemChanged(index);
-                }
             }
         }
     }
 
-    private void loadAllAlbums() {
-        albums.clear();
-        albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
-        Collections.sort(albums);
+    private void loadAllSongs() {
+        songs.clear();
+        songs.addAll(dataAccessProvider.getMusicDao().getAllSongs());
+        Collections.sort(songs);
     }
 }

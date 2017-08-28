@@ -1,4 +1,4 @@
-package org.willemsens.player.view.artists;
+package org.willemsens.player.view.main.music.artists;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

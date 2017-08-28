@@ -23,7 +23,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -37,9 +36,10 @@ import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.DataAccessProvider;
-import org.willemsens.player.view.nowplaying.NowPlayingFragment;
-import org.willemsens.player.view.settings.SettingsFragment;
-import org.willemsens.player.view.songs.OnSongClickedListener;
+import org.willemsens.player.view.main.music.MusicFragment;
+import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
+import org.willemsens.player.view.main.settings.SettingsFragment;
+import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.nav_view)
     NavigationView navigationView;
 
-    private Integer previousMenuItem;
+    private Integer currentMenuItem;
     private MusicDao musicDao;
     private PlayBackStatusReceiver playBackStatusReceiver;
     private HeadsetReceiver headsetReceiver;
@@ -172,22 +172,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setMainFragment(boolean replacePreviousFragment) {
-        Fragment mainFragment = MainFragment.newInstance();
+        Fragment musicFragment = MusicFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         if (replacePreviousFragment) {
-            transaction.replace(R.id.fragment_container, mainFragment);
+            transaction.replace(R.id.fragment_container, musicFragment);
             transaction.addToBackStack(null);
         } else {
-            transaction.add(R.id.fragment_container, mainFragment);
+            transaction.add(R.id.fragment_container, musicFragment);
         }
 
         transaction.commit();
     }
 
     private void setSettingsFragment() {
-        Fragment settingsFragment = SettingsFragment.newInstance("", "");
+        Fragment settingsFragment = SettingsFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragment_container, settingsFragment);
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (previousMenuItem == null || previousMenuItem != item.getItemId()) {
+        if (currentMenuItem == null || currentMenuItem != item.getItemId()) {
             switch (item.getItemId()) {
                 case R.id.nav_music_library:
                     setMainFragment(true);
@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity
                     // TODO
                     break;
             }
-            previousMenuItem = item.getItemId();
+            currentMenuItem = item.getItemId();
         }
 
         drawer.closeDrawer(GravityCompat.START);
@@ -266,25 +266,6 @@ public class MainActivity extends AppCompatActivity
                 .setSong(song)
                 .setPlayerCommand(PLAY)
                 .buildAndSubmit();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            // TODO
-            Toast.makeText(this, "SETTINGS", Toast.LENGTH_LONG).show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
