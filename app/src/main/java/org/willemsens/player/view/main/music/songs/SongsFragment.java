@@ -107,4 +107,8 @@ public class SongsFragment extends Fragment {
         songs.addAll(dataAccessProvider.getMusicDao().getAllSongs());
         Collections.sort(songs);
     }
+
+    public SongRecyclerViewAdapter getAdapter() {
+        return adapter;
+    }
 }

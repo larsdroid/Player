@@ -26,7 +26,7 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
     private final List<Song> songs;
     private final List<Song> allSongs;
     private final OnSongClickedListener listener;
@@ -132,13 +132,13 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         @Override
-        protected FilterResults performFiltering(CharSequence charSequence) {
+        public FilterResults performFiltering(CharSequence charSequence) {
             FilterResults results = new FilterResults();
             final List<Song> newList = new LinkedList<>(allSongs);
             if (this.album != null) {
                 for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
                     final Song song = i.next();
-                    if (song.getAlbum().equals(this.album)) {
+                    if (!song.getAlbum().equals(this.album)) {
                         i.remove();
                     }
                 }
@@ -149,7 +149,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         @Override
-        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+        public void publishResults(CharSequence charSequence, FilterResults filterResults) {
             songs.clear();
             songs.addAll((List<Song>)filterResults.values);
             notifyDataSetChanged();

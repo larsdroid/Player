@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity
 
         setupActionBarAndDrawer();
         if (savedInstanceState == null) {
-            setMainFragment(false);
+            setMusicFragment(false);
         }
     }
 
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    private void setMainFragment(boolean replacePreviousFragment) {
+    private void setMusicFragment(boolean replacePreviousFragment) {
         Fragment musicFragment = MusicFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         if (currentMenuItem == null || currentMenuItem != item.getItemId()) {
             switch (item.getItemId()) {
                 case R.id.nav_music_library:
-                    setMainFragment(true);
+                    setMusicFragment(true);
                     break;
                 case R.id.nav_settings:
                     setSettingsFragment();
@@ -276,12 +276,24 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void albumClicked(Album album) {
-        Toast.makeText(this, "ALBUM", Toast.LENGTH_SHORT).show();
+        FragmentManager manager = getSupportFragmentManager();
+        Fragment fragment = manager.findFragmentById(R.id.fragment_container);
+        if (fragment instanceof MusicFragment) {
+            MusicFragment musicFragment = (MusicFragment)fragment;
+            musicFragment.setCurrentFragment(MusicFragment.SubFragment.SONGS);
+            musicFragment.filterSongs(album);
+        }
     }
 
     @Override
     public void artistClicked(Artist artist) {
-        Toast.makeText(this, "ARTIST", Toast.LENGTH_SHORT).show();
+        FragmentManager manager = getSupportFragmentManager();
+        Fragment fragment = manager.findFragmentById(R.id.fragment_container);
+        if (fragment instanceof MusicFragment) {
+            MusicFragment musicFragment = (MusicFragment)fragment;
+            musicFragment.setCurrentFragment(MusicFragment.SubFragment.ALBUMS);
+            // TODO
+        }
     }
 
     @Override

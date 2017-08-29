@@ -1,6 +1,7 @@
 package org.willemsens.player.view.main.music;
 
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -14,8 +15,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
 import org.willemsens.player.view.main.music.albums.AlbumsFragment;
 import org.willemsens.player.view.main.music.artists.ArtistsFragment;
+import org.willemsens.player.view.main.music.songs.SongRecyclerViewAdapter;
 import org.willemsens.player.view.main.music.songs.SongsFragment;
 
 import butterknife.BindView;
@@ -71,25 +74,55 @@ public class MusicFragment extends Fragment
         return super.onOptionsItemSelected(item);
     }
 
+    public enum SubFragment {
+        ALBUMS(0, R.id.navigation_albums), ARTISTS(1, R.id.navigation_artists), SONGS(2, R.id.navigation_songs);
+
+        private int index;
+
+        @IdRes
+        private int menuItemResId;
+
+        SubFragment(int index, @IdRes int menuItemResId) {
+            this.index = index;
+            this.menuItemResId = menuItemResId;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public static SubFragment get(@IdRes int fragmentResId) {
+            for (SubFragment subFragment : values()) {
+                if (subFragment.menuItemResId == fragmentResId) {
+                    return subFragment;
+                }
+            }
+            return null;
+        }
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int newItemIndex = -1;
-        switch (item.getItemId()) {
-            case R.id.navigation_albums:
-                newItemIndex = 0;
-                break;
-            case R.id.navigation_artists:
-                newItemIndex = 1;
-                break;
-            case R.id.navigation_songs:
-                newItemIndex = 2;
-        }
-        if (viewPager.getCurrentItem() != newItemIndex) {
-            viewPager.setCurrentItem(newItemIndex);
+        final SubFragment subFragment = SubFragment.get(item.getItemId());
+        if (subFragment != null && viewPager.getCurrentItem() != subFragment.getIndex()) {
+            viewPager.setCurrentItem(subFragment.getIndex());
             return true;
         } else {
             return false;
         }
+    }
+
+    public void setCurrentFragment(SubFragment subFragment) {
+        if (viewPager.getCurrentItem() != subFragment.getIndex()) {
+            viewPager.setCurrentItem(subFragment.getIndex());
+        }
+    }
+
+    public void filterSongs(Album album) {
+        SongsFragment songsFragment = (SongsFragment)((MusicViewPagerAdapter)viewPager.getAdapter()).getItem(2);
+        SongRecyclerViewAdapter.SongFilter filter = (SongRecyclerViewAdapter.SongFilter)songsFragment.getAdapter().getFilter();
+        filter.setAlbum(album);
+        filter.filter(null);
     }
 
     private void addEventHandlers() {
