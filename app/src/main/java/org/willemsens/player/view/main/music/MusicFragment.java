@@ -80,7 +80,10 @@ public class MusicFragment extends Fragment
                     PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
                     popup.setOnMenuItemClickListener(this);
                     popup.inflate(R.menu.fragment_songs_filter_menu);
-                    // TODO check if "R.id.menu_item_filter_songs_show_all" should be disabled
+                    SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
+                    if (filter.getAlbum() == null) {
+                        popup.getMenu().findItem(R.id.menu_item_filter_songs_show_all).setEnabled(false);
+                    }
                     popup.show();
             }
             return true;
@@ -160,9 +163,12 @@ public class MusicFragment extends Fragment
         return SubFragment.getByIndex(viewPager.getCurrentItem());
     }
 
+    private SongsFragment getSongsFragment() {
+        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getItem(SubFragment.SONGS.getIndex());
+    }
+
     public void filterSongs(Album album) {
-        SongsFragment songsFragment = (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getItem(2);
-        SongRecyclerViewAdapter.SongFilter filter = (SongRecyclerViewAdapter.SongFilter) songsFragment.getAdapter().getFilter();
+        SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
         filter.setAlbum(album);
         filter.filter(null);
     }

@@ -131,6 +131,10 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             this.album = album;
         }
 
+        public Album getAlbum() {
+            return album;
+        }
+
         @Override
         public FilterResults performFiltering(CharSequence charSequence) {
             FilterResults results = new FilterResults();

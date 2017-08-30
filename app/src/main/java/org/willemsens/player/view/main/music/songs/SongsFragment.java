@@ -84,6 +84,10 @@ public class SongsFragment extends Fragment {
         super.onPause();
     }
 
+    public SongRecyclerViewAdapter.SongFilter getFilter() {
+         return (SongRecyclerViewAdapter.SongFilter) getAdapter().getFilter();
+    }
+
     private class DBUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
