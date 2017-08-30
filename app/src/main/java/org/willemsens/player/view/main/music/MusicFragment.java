@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +26,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MusicFragment extends Fragment
-        implements BottomNavigationView.OnNavigationItemSelectedListener {
+        implements BottomNavigationView.OnNavigationItemSelectedListener,
+        PopupMenu.OnMenuItemClickListener {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
@@ -66,12 +68,39 @@ public class MusicFragment extends Fragment
         int id = item.getItemId();
 
         if (id == R.id.action_filter) {
-            // TODO
-            Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
+            switch (getCurrentFragment()) {
+                case ALBUMS:
+                    Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
+                    break;
+                case ARTISTS:
+                    Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
+                    break;
+                case SONGS:
+                    View filterMenuItemView = getActivity().findViewById(R.id.action_filter);
+                    PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
+                    popup.setOnMenuItemClickListener(this);
+                    popup.inflate(R.menu.fragment_songs_filter_menu);
+                    // TODO check if "R.id.menu_item_filter_songs_show_all" should be disabled
+                    popup.show();
+            }
             return true;
+        } else {
+            return false;
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_item_filter_songs_show_all) {
+            // TODO
+            return true;
+        } else if (id == R.id.menu_item_filter_songs_by_album) {
+            // TODO
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public enum SubFragment {
@@ -99,6 +128,15 @@ public class MusicFragment extends Fragment
             }
             return null;
         }
+
+        public static SubFragment getByIndex(int index) {
+            for (SubFragment subFragment : values()) {
+                if (subFragment.index == index) {
+                    return subFragment;
+                }
+            }
+            return null;
+        }
     }
 
     @Override
@@ -118,9 +156,13 @@ public class MusicFragment extends Fragment
         }
     }
 
+    private SubFragment getCurrentFragment() {
+        return SubFragment.getByIndex(viewPager.getCurrentItem());
+    }
+
     public void filterSongs(Album album) {
-        SongsFragment songsFragment = (SongsFragment)((MusicViewPagerAdapter)viewPager.getAdapter()).getItem(2);
-        SongRecyclerViewAdapter.SongFilter filter = (SongRecyclerViewAdapter.SongFilter)songsFragment.getAdapter().getFilter();
+        SongsFragment songsFragment = (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getItem(2);
+        SongRecyclerViewAdapter.SongFilter filter = (SongRecyclerViewAdapter.SongFilter) songsFragment.getAdapter().getFilter();
         filter.setAlbum(album);
         filter.filter(null);
     }

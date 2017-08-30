@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_item_filter_songs_show_all"
+        android:title="@string/action_filter_songs_show_all"/>
+
+    <item android:id="@+id/menu_item_filter_songs_by_album"
+        android:title="@string/action_filter_songs_by_album"/>
+
+</menu>
