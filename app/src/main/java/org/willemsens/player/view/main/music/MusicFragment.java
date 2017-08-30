@@ -26,8 +26,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MusicFragment extends Fragment
-        implements BottomNavigationView.OnNavigationItemSelectedListener,
-        PopupMenu.OnMenuItemClickListener {
+        implements BottomNavigationView.OnNavigationItemSelectedListener {
     @BindView(R.id.viewpager)
     ViewPager viewPager;
 
@@ -78,7 +77,7 @@ public class MusicFragment extends Fragment
                 case SONGS:
                     View filterMenuItemView = getActivity().findViewById(R.id.action_filter);
                     PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
-                    popup.setOnMenuItemClickListener(this);
+                    popup.setOnMenuItemClickListener(getSongsFragment());
                     popup.inflate(R.menu.fragment_songs_filter_menu);
                     SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
                     if (filter.getAlbum() == null) {
@@ -86,20 +85,6 @@ public class MusicFragment extends Fragment
                     }
                     popup.show();
             }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.menu_item_filter_songs_show_all) {
-            // TODO
-            return true;
-        } else if (id == R.id.menu_item_filter_songs_by_album) {
-            // TODO
             return true;
         } else {
             return false;

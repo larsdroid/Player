@@ -8,12 +8,17 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+
 import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
 
@@ -21,10 +26,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.view.Menu.NONE;
+
 /**
  * A fragment representing a list of Songs.
  */
-public class SongsFragment extends Fragment {
+public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
     private DataAccessProvider dataAccessProvider;
     private SongRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
@@ -114,5 +121,40 @@ public class SongsFragment extends Fragment {
 
     public SongRecyclerViewAdapter getAdapter() {
         return adapter;
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_item_filter_songs_show_all) {
+            SongRecyclerViewAdapter.SongFilter filter = getFilter();
+            filter.setAlbum(null);
+            filter.filter(null);
+        } else if (id == R.id.menu_item_filter_songs_by_album) {
+            SubMenu albumsMenu = item.getSubMenu();
+            SongRecyclerViewAdapter.SongFilter filter = getFilter();
+            int i = 0;
+            for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
+                albumsMenu.add(NONE, (int)album.getId().longValue(), NONE, album.getName());
+                final MenuItem menuItem = albumsMenu.getItem(i++);
+                menuItem.setCheckable(true);
+                if (album.equals(filter.getAlbum())) {
+                    item.setChecked(true); // TODO
+                }
+            }
+        } else {
+            int albumId = item.getItemId();
+            Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+            SongRecyclerViewAdapter.SongFilter filter = getFilter();
+            if (album.equals(filter.getAlbum())) {
+                filter.setAlbum(null);
+                item.setChecked(false); // TODO
+            } else {
+                filter.setAlbum(album);
+                item.setChecked(true); // TODO
+            }
+            filter.filter(null);
+        }
+        return true;
     }
 }
