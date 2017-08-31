@@ -128,7 +128,7 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
         int id = item.getItemId();
         if (id == R.id.menu_item_filter_songs_show_all) {
             SongRecyclerViewAdapter.SongFilter filter = getFilter();
-            filter.setAlbum(null);
+            filter.clear();
             filter.filter(null);
         } else if (id == R.id.menu_item_filter_songs_by_album) {
             SubMenu albumsMenu = item.getSubMenu();
@@ -138,20 +138,18 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
                 albumsMenu.add(NONE, (int)album.getId().longValue(), NONE, album.getName());
                 final MenuItem menuItem = albumsMenu.getItem(i++);
                 menuItem.setCheckable(true);
-                if (album.equals(filter.getAlbum())) {
-                    item.setChecked(true); // TODO
+                if (filter.getAlbums().contains(album)) {
+                    menuItem.setChecked(true);
                 }
             }
         } else {
             int albumId = item.getItemId();
             Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
             SongRecyclerViewAdapter.SongFilter filter = getFilter();
-            if (album.equals(filter.getAlbum())) {
-                filter.setAlbum(null);
-                item.setChecked(false); // TODO
+            if (filter.getAlbums().contains(album)) {
+                filter.remove(album);
             } else {
-                filter.setAlbum(album);
-                item.setChecked(true); // TODO
+                filter.add(album);
             }
             filter.filter(null);
         }

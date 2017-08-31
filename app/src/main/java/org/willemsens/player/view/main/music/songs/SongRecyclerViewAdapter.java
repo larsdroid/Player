@@ -10,7 +10,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
@@ -19,9 +20,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -125,24 +123,39 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public class SongFilter extends Filter {
-        private Album album;
+        private final List<Album> albums;
 
-        public void setAlbum(Album album) {
-            this.album = album;
+        SongFilter() {
+            this.albums = new ArrayList<>();
         }
 
-        public Album getAlbum() {
-            return album;
+        /**
+         * Clears this filter. All songs will be shown.
+         */
+        public void clear() {
+            this.albums.clear();
+        }
+
+        public void add(Album album) {
+            this.albums.add(album);
+        }
+
+        void remove(Album album) {
+            this.albums.remove(album);
+        }
+
+        public List<Album> getAlbums() {
+            return this.albums;
         }
 
         @Override
         public FilterResults performFiltering(CharSequence charSequence) {
             FilterResults results = new FilterResults();
             final List<Song> newList = new LinkedList<>(allSongs);
-            if (this.album != null) {
+            if (!this.albums.isEmpty()) {
                 for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
                     final Song song = i.next();
-                    if (!song.getAlbum().equals(this.album)) {
+                    if (!this.albums.contains(song.getAlbum())) {
                         i.remove();
                     }
                 }

@@ -80,7 +80,7 @@ public class MusicFragment extends Fragment
                     popup.setOnMenuItemClickListener(getSongsFragment());
                     popup.inflate(R.menu.fragment_songs_filter_menu);
                     SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-                    if (filter.getAlbum() == null) {
+                    if (filter.getAlbums().isEmpty()) {
                         popup.getMenu().findItem(R.id.menu_item_filter_songs_show_all).setEnabled(false);
                     }
                     popup.show();
@@ -154,7 +154,8 @@ public class MusicFragment extends Fragment
 
     public void filterSongs(Album album) {
         SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-        filter.setAlbum(album);
+        filter.clear();
+        filter.add(album);
         filter.filter(null);
     }
 
