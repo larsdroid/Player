@@ -1,7 +1,13 @@
 package org.willemsens.player.view.main.music.songs;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +21,10 @@ import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,12 +36,26 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     private final List<Song> songs;
     private final List<Song> allSongs;
     private final OnSongClickedListener listener;
+    private final DataAccessProvider dataAccessProvider;
+    private final DBUpdateReceiver dbUpdateReceiver;
     private SongFilter songFilter;
 
-    SongRecyclerViewAdapter(List<Song> allSongs, OnSongClickedListener listener) {
-        this.allSongs = allSongs;
+    SongRecyclerViewAdapter(DataAccessProvider dataAccessProvider, OnSongClickedListener listener) {
+        this.dataAccessProvider = dataAccessProvider;
         this.listener = listener;
-        this.songs = new ArrayList<>(allSongs);
+        this.dbUpdateReceiver = new DBUpdateReceiver();
+        this.allSongs = new ArrayList<>();
+        this.songs = new ArrayList<>();
+
+        loadSongsFromDb();
+    }
+
+    private void loadSongsFromDb() {
+        allSongs.clear();
+        allSongs.addAll(dataAccessProvider.getMusicDao().getAllSongs());
+        Collections.sort(allSongs);
+
+        getFilter().filter(null);
     }
 
     @Override
@@ -60,6 +82,18 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public int getItemCount() {
         return songs.size();
+    }
+
+    void registerDbUpdateReceiver(FragmentActivity activity) {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(activity);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(activity.getString(R.string.key_songs_inserted));
+        lbm.registerReceiver(this.dbUpdateReceiver, filter);
+    }
+
+    void unregisterDbUpdateReceiver(FragmentActivity activity) {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(activity);
+        lbm.unregisterReceiver(this.dbUpdateReceiver);
     }
 
     class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -170,6 +204,22 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             songs.clear();
             songs.addAll((List<Song>)filterResults.values);
             notifyDataSetChanged();
+        }
+    }
+
+    private class DBUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String intentAction = intent.getAction();
+            if (intentAction.equals(context.getString(R.string.key_songs_inserted))) {
+                loadSongsFromDb();
+            } else if (intentAction.equals(context.getString(R.string.key_song_inserted))) {
+                final long songId = intent.getLongExtra(context.getString(R.string.key_song_id), -1);
+                final Song song = dataAccessProvider.getMusicDao().findSong(songId);
+                allSongs.add(song);
+                Collections.sort(allSongs);
+                getFilter().filter(null);
+            }
         }
     }
 }
