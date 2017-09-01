@@ -20,6 +20,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.view.DataAccessProvider;
 
@@ -102,7 +103,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         List<Album> filterAlbums = ((SongFilter)getFilter()).getAlbums();
         long[] filterAlbumIds = new long[filterAlbums.size()];
         int i = 0;
-        for (Album album : ((SongFilter)getFilter()).getAlbums()) {
+        for (Album album : filterAlbums) {
             filterAlbumIds[i++] = album.getId();
         }
         outState.putLongArray(context.getString(R.string.key_album_ids), filterAlbumIds);
@@ -179,9 +180,11 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public class SongFilter extends Filter {
         private final List<Album> albums;
+        private final List<Artist> artists;
 
         SongFilter() {
             this.albums = new ArrayList<>();
+            this.artists = new ArrayList<>();
         }
 
         /**
@@ -189,6 +192,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
          */
         public void clear() {
             this.albums.clear();
+            this.artists.clear();
         }
 
         public void add(Album album) {
@@ -199,8 +203,28 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             this.albums.remove(album);
         }
 
+        public void add(Artist artist) {
+            this.artists.add(artist);
+        }
+
+        void remove(Artist artist) {
+            this.artists.remove(artist);
+        }
+
         public List<Album> getAlbums() {
             return this.albums;
+        }
+
+        public List<Artist> getArtists() {
+            return this.artists;
+        }
+
+        public void addAllAlbums(List<Album> albums) {
+            this.albums.addAll(albums);
+        }
+
+        public void addAllArtists(List<Artist> artists) {
+            this.artists.addAll(artists);
         }
 
         @Override
@@ -211,6 +235,14 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
                     final Song song = i.next();
                     if (!this.albums.contains(song.getAlbum())) {
+                        i.remove();
+                    }
+                }
+            }
+            if (!this.artists.isEmpty()) {
+                for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
+                    final Song song = i.next();
+                    if (!this.artists.contains(song.getArtist())) {
                         i.remove();
                     }
                 }

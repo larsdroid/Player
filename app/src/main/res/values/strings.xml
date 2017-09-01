@@ -64,7 +64,10 @@
     <string name="action_filter">Filter</string>
 
     <string name="action_filter_songs_show_all">All songs</string>
-    <string name="action_filter_songs_by_album">Album</string>
+    <string name="action_filter_songs_by_album">Albums</string>
+    <string name="action_filter_songs_by_artist">Artists</string>
+    <string name="action_filter_all_albums">All</string>
+    <string name="action_filter_all_artists">All</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

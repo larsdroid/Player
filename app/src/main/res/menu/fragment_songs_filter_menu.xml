@@ -7,7 +7,18 @@
     <item android:id="@+id/menu_item_filter_songs_by_album"
         android:title="@string/action_filter_songs_by_album">
         <menu>
+            <item android:id="@+id/menu_item_filter_all_albums"
+                  android:title="@string/action_filter_all_albums">
+            </item>
+        </menu>
+    </item>
 
+    <item android:id="@+id/menu_item_filter_songs_by_artist"
+          android:title="@string/action_filter_songs_by_artist">
+        <menu>
+            <item android:id="@+id/menu_item_filter_all_artists"
+                  android:title="@string/action_filter_all_artists">
+            </item>
         </menu>
     </item>
 
