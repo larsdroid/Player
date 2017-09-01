@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v4.app.FragmentActivity;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -33,21 +33,35 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
 public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+    private final Context context;
     private final List<Song> songs;
     private final List<Song> allSongs;
     private final OnSongClickedListener listener;
     private final DataAccessProvider dataAccessProvider;
     private final DBUpdateReceiver dbUpdateReceiver;
-    private SongFilter songFilter;
+    private final SongFilter filter;
 
-    SongRecyclerViewAdapter(DataAccessProvider dataAccessProvider, OnSongClickedListener listener) {
+    SongRecyclerViewAdapter(Context context, DataAccessProvider dataAccessProvider, Bundle savedInstanceState) {
+        this.context = context;
         this.dataAccessProvider = dataAccessProvider;
-        this.listener = listener;
+        this.listener = (OnSongClickedListener) context;
         this.dbUpdateReceiver = new DBUpdateReceiver();
         this.allSongs = new ArrayList<>();
         this.songs = new ArrayList<>();
-
+        this.filter = new SongFilter();
+        loadSavedInstanceState(savedInstanceState);
         loadSongsFromDb();
+    }
+
+    private void loadSavedInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            long[] filterAlbumIds = savedInstanceState.getLongArray(context.getString(R.string.key_album_ids));
+            if (filterAlbumIds != null) {
+                for (long filterAlbumId : filterAlbumIds) {
+                    this.filter.add(this.dataAccessProvider.getMusicDao().findAlbum(filterAlbumId));
+                }
+            }
+        }
     }
 
     private void loadSongsFromDb() {
@@ -84,15 +98,25 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         return songs.size();
     }
 
-    void registerDbUpdateReceiver(FragmentActivity activity) {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(activity);
+    void onSaveInstanceState(Bundle outState) {
+        List<Album> filterAlbums = ((SongFilter)getFilter()).getAlbums();
+        long[] filterAlbumIds = new long[filterAlbums.size()];
+        int i = 0;
+        for (Album album : ((SongFilter)getFilter()).getAlbums()) {
+            filterAlbumIds[i++] = album.getId();
+        }
+        outState.putLongArray(context.getString(R.string.key_album_ids), filterAlbumIds);
+    }
+
+    void registerDbUpdateReceiver() {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         IntentFilter filter = new IntentFilter();
-        filter.addAction(activity.getString(R.string.key_songs_inserted));
+        filter.addAction(context.getString(R.string.key_songs_inserted));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
-    void unregisterDbUpdateReceiver(FragmentActivity activity) {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(activity);
+    void unregisterDbUpdateReceiver() {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         lbm.unregisterReceiver(this.dbUpdateReceiver);
     }
 
@@ -150,10 +174,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public Filter getFilter() {
-        if (this.songFilter == null) {
-            this.songFilter = new SongFilter();
-        }
-        return this.songFilter;
+        return this.filter;
     }
 
     public class SongFilter extends Filter {

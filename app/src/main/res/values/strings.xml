@@ -41,6 +41,7 @@
     <string name="key_albums_inserted">org.willemsens.ALBUMS_INSERTED</string>
     <string name="key_album_inserted">org.willemsens.ALBUM_INSERTED</string>
     <string name="key_album_updated">org.willemsens.ALBUM_UPDATED</string>
+    <string name="key_album_ids">org.willemsens.ALBUM_IDS</string>
     <string name="key_album_id">org.willemsens.ALBUM_ID</string>
 
     <string name="key_songs_inserted">org.willemsens.SONGS_INSERTED</string>

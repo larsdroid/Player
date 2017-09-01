@@ -52,7 +52,7 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             if (this.adapter == null) {
-                this.adapter = new SongRecyclerViewAdapter(this.dataAccessProvider, (OnSongClickedListener) context);
+                this.adapter = new SongRecyclerViewAdapter(context, this.dataAccessProvider, savedInstanceState);
             }
             recyclerView.setAdapter(this.adapter);
         }
@@ -62,13 +62,19 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
     @Override
     public void onResume() {
         super.onResume();
-        getAdapter().registerDbUpdateReceiver(this.getActivity());
+        getAdapter().registerDbUpdateReceiver();
     }
 
     @Override
     public void onPause() {
-        getAdapter().unregisterDbUpdateReceiver(this.getActivity());
+        getAdapter().unregisterDbUpdateReceiver();
         super.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        getAdapter().onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     public SongRecyclerViewAdapter.SongFilter getFilter() {

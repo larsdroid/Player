@@ -1,7 +1,6 @@
 package org.willemsens.player.view.main.music;
 
 import android.os.Bundle;
-import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
@@ -14,16 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.view.main.music.albums.AlbumsFragment;
-import org.willemsens.player.view.main.music.artists.ArtistsFragment;
-import org.willemsens.player.view.main.music.songs.SongRecyclerViewAdapter;
-import org.willemsens.player.view.main.music.songs.SongsFragment;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
+import org.willemsens.player.view.main.music.songs.SongRecyclerViewAdapter;
+import org.willemsens.player.view.main.music.songs.SongsFragment;
 
 public class MusicFragment extends Fragment
         implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -50,7 +45,8 @@ public class MusicFragment extends Fragment
         ButterKnife.bind(this, view);
 
         addEventHandlers();
-        setupViewPager();
+
+        viewPager.setAdapter(new MusicViewPagerAdapter(getChildFragmentManager()));
 
         return view;
     }
@@ -91,65 +87,31 @@ public class MusicFragment extends Fragment
         }
     }
 
-    public enum SubFragment {
-        ALBUMS(0, R.id.navigation_albums), ARTISTS(1, R.id.navigation_artists), SONGS(2, R.id.navigation_songs);
-
-        private int index;
-
-        @IdRes
-        private int menuItemResId;
-
-        SubFragment(int index, @IdRes int menuItemResId) {
-            this.index = index;
-            this.menuItemResId = menuItemResId;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public static SubFragment get(@IdRes int fragmentResId) {
-            for (SubFragment subFragment : values()) {
-                if (subFragment.menuItemResId == fragmentResId) {
-                    return subFragment;
-                }
-            }
-            return null;
-        }
-
-        public static SubFragment getByIndex(int index) {
-            for (SubFragment subFragment : values()) {
-                if (subFragment.index == index) {
-                    return subFragment;
-                }
-            }
-            return null;
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        final SubFragmentType subFragmentType = SubFragmentType.get(item.getItemId());
+        if (subFragmentType != null) {
+            return setCurrentFragment(subFragmentType);
+        } else {
+            return false;
         }
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        final SubFragment subFragment = SubFragment.get(item.getItemId());
-        if (subFragment != null && viewPager.getCurrentItem() != subFragment.getIndex()) {
-            viewPager.setCurrentItem(subFragment.getIndex());
+    public boolean setCurrentFragment(SubFragmentType subFragmentType) {
+        if (viewPager.getCurrentItem() != subFragmentType.getIndex()) {
+            viewPager.setCurrentItem(subFragmentType.getIndex());
             return true;
         } else {
             return false;
         }
     }
 
-    public void setCurrentFragment(SubFragment subFragment) {
-        if (viewPager.getCurrentItem() != subFragment.getIndex()) {
-            viewPager.setCurrentItem(subFragment.getIndex());
-        }
-    }
-
-    private SubFragment getCurrentFragment() {
-        return SubFragment.getByIndex(viewPager.getCurrentItem());
+    private SubFragmentType getCurrentFragment() {
+        return SubFragmentType.getByIndex(viewPager.getCurrentItem());
     }
 
     private SongsFragment getSongsFragment() {
-        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getItem(SubFragment.SONGS.getIndex());
+        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(SubFragmentType.SONGS);
     }
 
     public void filterSongs(Album album) {
@@ -182,13 +144,5 @@ public class MusicFragment extends Fragment
             public void onPageScrollStateChanged(int state) {
             }
         });
-    }
-
-    private void setupViewPager() {
-        MusicViewPagerAdapter adapter = new MusicViewPagerAdapter(getChildFragmentManager());
-        adapter.addFragment(AlbumsFragment.newInstance());
-        adapter.addFragment(ArtistsFragment.newInstance());
-        adapter.addFragment(SongsFragment.newInstance());
-        viewPager.setAdapter(adapter);
     }
 }
