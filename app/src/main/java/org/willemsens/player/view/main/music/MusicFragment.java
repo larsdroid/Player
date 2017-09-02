@@ -13,12 +13,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.view.main.music.songs.SongRecyclerViewAdapter;
 import org.willemsens.player.view.main.music.songs.SongsFragment;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MusicFragment extends Fragment
         implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -76,7 +78,7 @@ public class MusicFragment extends Fragment
                     popup.setOnMenuItemClickListener(getSongsFragment());
                     popup.inflate(R.menu.fragment_songs_filter_menu);
                     SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-                    if (filter.getAlbums().isEmpty()) {
+                    if (filter.hasAllAlbums() && filter.hasAllArtists()) {
                         popup.getMenu().findItem(R.id.menu_item_filter_songs_show_all).setEnabled(false);
                     }
                     popup.show();
@@ -116,7 +118,8 @@ public class MusicFragment extends Fragment
 
     public void filterSongs(Album album) {
         SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-        filter.clear();
+        filter.addAllArtists();
+        filter.removeAllAlbums();
         filter.add(album);
         filter.filter(null);
     }

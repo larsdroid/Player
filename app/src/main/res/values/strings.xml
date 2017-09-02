@@ -36,6 +36,7 @@
     <string name="key_artists_inserted">org.willemsens.ARTISTS_INSERTED</string>
     <string name="key_artist_inserted">org.willemsens.ARTIST_INSERTED</string>
     <string name="key_artist_updated">org.willemsens.ARTIST_UPDATED</string>
+    <string name="key_artist_ids">org.willemsens.ARTIST_IDS</string>
     <string name="key_artist_id">org.willemsens.ARTIST_ID</string>
 
     <string name="key_albums_inserted">org.willemsens.ALBUMS_INSERTED</string>

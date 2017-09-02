@@ -12,10 +12,14 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.view.DataAccessProvider;
+
+import java.util.Iterator;
+import java.util.Map;
 
 import static android.view.Menu.NONE;
 
@@ -89,69 +93,71 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         int id = item.getItemId();
+        final SongRecyclerViewAdapter.SongFilter filter = getFilter();
         if (id == R.id.menu_item_filter_songs_show_all) {
-            SongRecyclerViewAdapter.SongFilter filter = getFilter();
-            filter.clear();
+            filter.addAllAlbums();
+            filter.addAllArtists();
             filter.filter(null);
         } else if (id == R.id.menu_item_filter_songs_by_album) {
             SubMenu albumsMenu = item.getSubMenu();
-            SongRecyclerViewAdapter.SongFilter filter = getFilter();
             int i = 0;
-            // MenuItem "All":
-            MenuItem menuItem = albumsMenu.getItem(i++);
-            menuItem.setCheckable(true);
-            if (filter.getAlbums().isEmpty()) {
-                menuItem.setChecked(true);
-            }
-            for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
+            final MenuItem menuItemAll = albumsMenu.getItem(i++);
+            menuItemAll.setCheckable(true);
+            menuItemAll.setChecked(true);
+            for (Iterator<Map.Entry<Album, Boolean>> it = filter.getAlbumIterator(); it.hasNext();) {
+                final Map.Entry<Album, Boolean> entry = it.next();
+                final Album album = entry.getKey();
                 albumsMenu.add(NONE, (int)album.getId().longValue(), NONE, album.getName());
-                menuItem = albumsMenu.getItem(i++);
+                final MenuItem menuItem = albumsMenu.getItem(i++);
                 menuItem.setCheckable(true);
-                if (filter.getAlbums().isEmpty() || filter.getAlbums().contains(album)) {
+                if (entry.getValue()) {
                     menuItem.setChecked(true);
+                } else {
+                    menuItemAll.setChecked(false);
                 }
             }
         } else if (id == R.id.menu_item_filter_songs_by_artist) {
             SubMenu artistsMenu = item.getSubMenu();
-            SongRecyclerViewAdapter.SongFilter filter = getFilter();
             int i = 0;
-            // MenuItem "All":
-            MenuItem menuItem = artistsMenu.getItem(i++);
-            menuItem.setCheckable(true);
-            if (filter.getArtists().isEmpty()) {
-                menuItem.setChecked(true);
-            }
-            for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
+            final MenuItem menuItemAll = artistsMenu.getItem(i++);
+            menuItemAll.setCheckable(true);
+            menuItemAll.setChecked(true);
+            for (Iterator<Map.Entry<Artist, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Artist, Boolean> entry = it.next();
+                final Artist artist = entry.getKey();
                 // Negative ID means it's an artist
                 artistsMenu.add(NONE, (int)-artist.getId(), NONE, artist.getName());
-                menuItem = artistsMenu.getItem(i++);
+                final MenuItem menuItem = artistsMenu.getItem(i++);
                 menuItem.setCheckable(true);
-                if (filter.getArtists().isEmpty() || filter.getArtists().contains(artist)) {
+                if (entry.getValue()) {
                     menuItem.setChecked(true);
+                } else {
+                    menuItemAll.setChecked(false);
                 }
             }
         } else if (id == R.id.menu_item_filter_all_albums) {
-            // TODO: tri-state!
+            if (item.isChecked()) {
+                filter.removeAllAlbums();
+            } else {
+                filter.addAllAlbums();
+            }
+            filter.filter(null);
         } else if (id == R.id.menu_item_filter_all_artists) {
-            // TODO: tri-state!
+            if (item.isChecked()) {
+                filter.removeAllArtists();
+            } else {
+                filter.addAllArtists();
+            }
+            filter.filter(null);
         } else {
             int itemId = item.getItemId();
             if (itemId > 0) {
-                Album album = dataAccessProvider.getMusicDao().findAlbum(itemId);
-                SongRecyclerViewAdapter.SongFilter filter = getFilter();
-                if (filter.getAlbums().contains(album)) {
-                    filter.remove(album);
-                } else if (filter.getAlbums().isEmpty()) {
-                    filter.addAllAlbums(dataAccessProvider.getMusicDao().getAllAlbums());
-                    filter.remove(album);
-                } else {
-                    filter.add(album);
-                }
-                filter.filter(null);
+                filter.flipAlbum(itemId);
             } else {
-                itemId = -itemId;
-                // TODO: arists
+                // Negative ID means it's an artist
+                filter.flipArtist(-itemId);
             }
+            filter.filter(null);
         }
         return true;
     }

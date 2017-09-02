@@ -1,4 +1,3 @@
-* Album grid: the album year is not displayed if the album name is too long (overlap)
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
 * Settings fragment
@@ -18,6 +17,14 @@
     * Discogs method
     * Custom file (JPG/PNG/...) selection
 * Clean up/remove all unused icons
+
+Filters
+--
+* SongsFragment filter:
+  * The "All" (albums) and "All" artists menu checkboxes should be tri-state
+* SongsFragment filter: the artist-checkboxes should be tri-state:
+  * unchecking an album should put that album's artist in the "third"/"undetermined" state
+  * unchecking an artist should uncheck all albums of that artist (can be done in the filter class)
 
 Clean code
 --

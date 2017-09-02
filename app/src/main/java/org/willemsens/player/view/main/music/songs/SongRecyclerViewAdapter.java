@@ -16,8 +16,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -26,9 +25,14 @@ import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -50,19 +54,8 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         this.allSongs = new ArrayList<>();
         this.songs = new ArrayList<>();
         this.filter = new SongFilter();
-        loadSavedInstanceState(savedInstanceState);
+        this.filter.initialiseFilter(savedInstanceState);
         loadSongsFromDb();
-    }
-
-    private void loadSavedInstanceState(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            long[] filterAlbumIds = savedInstanceState.getLongArray(context.getString(R.string.key_album_ids));
-            if (filterAlbumIds != null) {
-                for (long filterAlbumId : filterAlbumIds) {
-                    this.filter.add(this.dataAccessProvider.getMusicDao().findAlbum(filterAlbumId));
-                }
-            }
-        }
     }
 
     private void loadSongsFromDb() {
@@ -100,13 +93,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     void onSaveInstanceState(Bundle outState) {
-        List<Album> filterAlbums = ((SongFilter)getFilter()).getAlbums();
-        long[] filterAlbumIds = new long[filterAlbums.size()];
-        int i = 0;
-        for (Album album : filterAlbums) {
-            filterAlbumIds[i++] = album.getId();
-        }
-        outState.putLongArray(context.getString(R.string.key_album_ids), filterAlbumIds);
+        filter.onSaveInstanceState(outState);
     }
 
     void registerDbUpdateReceiver() {
@@ -179,72 +166,166 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public class SongFilter extends Filter {
-        private final List<Album> albums;
-        private final List<Artist> artists;
+        private final Map<Album, Boolean> albums;
+        private final Map<Artist, Boolean> artists;
 
         SongFilter() {
-            this.albums = new ArrayList<>();
-            this.artists = new ArrayList<>();
+            this.albums = new HashMap<>();
+            for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
+                this.albums.put(album, true);
+            }
+            this.artists = new HashMap<>();
+            for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
+                this.artists.put(artist, true);
+            }
         }
 
-        /**
-         * Clears this filter. All songs will be shown.
-         */
-        public void clear() {
-            this.albums.clear();
-            this.artists.clear();
+        private void setAllAlbums(boolean b) {
+            for (Album key : this.albums.keySet()) {
+                this.albums.put(key, b);
+            }
+        }
+
+        private void setAllArtists(boolean b) {
+            for (Artist key : this.artists.keySet()) {
+                this.artists.put(key, b);
+            }
+        }
+
+        public boolean hasAllAlbums() {
+            for (Album key : this.albums.keySet()) {
+                if (!this.albums.get(key)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public boolean hasAllArtists() {
+            for (Artist key : this.artists.keySet()) {
+                if (!this.artists.get(key)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        void addAllAlbums() {
+            setAllAlbums(true);
+        }
+
+        public void addAllArtists() {
+            setAllArtists(true);
+        }
+
+        public void removeAllAlbums() {
+            setAllAlbums(false);
+        }
+
+        void removeAllArtists() {
+            setAllArtists(false);
         }
 
         public void add(Album album) {
-            this.albums.add(album);
+            this.albums.put(album, true);
         }
 
-        void remove(Album album) {
-            this.albums.remove(album);
+        void flipAlbum(int albumId) {
+            for (Album album : this.albums.keySet()) {
+                if (album.getId() == albumId) {
+                    this.albums.put(album, !this.albums.get(album));
+                }
+            }
         }
 
-        public void add(Artist artist) {
-            this.artists.add(artist);
+        void flipArtist(int artistId) {
+            for (Artist artist : this.artists.keySet()) {
+                if (artist.getId() == artistId) {
+                    this.artists.put(artist, !this.artists.get(artist));
+                }
+            }
         }
 
-        void remove(Artist artist) {
-            this.artists.remove(artist);
+        Iterator<Map.Entry<Album, Boolean>> getAlbumIterator() {
+            return this.albums.entrySet().iterator();
         }
 
-        public List<Album> getAlbums() {
-            return this.albums;
+        Iterator<Map.Entry<Artist, Boolean>> getArtistIterator() {
+            return this.artists.entrySet().iterator();
         }
 
-        public List<Artist> getArtists() {
-            return this.artists;
+        private void onSaveInstanceState(Bundle outState) {
+            List<Album> filterAlbums = new ArrayList<>();
+            for (Album album : this.albums.keySet()) {
+                if (this.albums.get(album)) {
+                    filterAlbums.add(album);
+                }
+            }
+            long[] filterAlbumIds = new long[filterAlbums.size()];
+            int i = 0;
+            for (Album album : filterAlbums) {
+                filterAlbumIds[i++] = album.getId();
+            }
+            outState.putLongArray(context.getString(R.string.key_album_ids), filterAlbumIds);
+
+            List<Artist> filterArtists = new ArrayList<>();
+            for (Artist artist : this.artists.keySet()) {
+                if (this.artists.get(artist)) {
+                    filterArtists.add(artist);
+                }
+            }
+            long[] filterArtistIds = new long[filterArtists.size()];
+            i = 0;
+            for (Artist artist : filterArtists) {
+                filterArtistIds[i++] = artist.getId();
+            }
+            outState.putLongArray(context.getString(R.string.key_artist_ids), filterArtistIds);
         }
 
-        public void addAllAlbums(List<Album> albums) {
-            this.albums.addAll(albums);
-        }
+        private void initialiseFilter(Bundle savedInstanceState) {
+            if (savedInstanceState != null) {
+                long[] filterAlbumIds = savedInstanceState.getLongArray(context.getString(R.string.key_album_ids));
+                if (filterAlbumIds != null) {
+                    for (Album album : this.albums.keySet()) {
+                        this.albums.put(album, false);
+                        for (long filterAlbumId : filterAlbumIds) {
+                            if (album.getId() == filterAlbumId) {
+                                this.albums.put(album, true);
+                                break;
+                            }
+                        }
+                    }
+                }
 
-        public void addAllArtists(List<Artist> artists) {
-            this.artists.addAll(artists);
+                long[] filterArtistIds = savedInstanceState.getLongArray(context.getString(R.string.key_artist_ids));
+                if (filterArtistIds != null) {
+                    for (Artist artist : this.artists.keySet()) {
+                        this.artists.put(artist, false);
+                        for (long filterArtistId : filterArtistIds) {
+                            if (artist.getId() == filterArtistId) {
+                                this.artists.put(artist, true);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         @Override
         public FilterResults performFiltering(CharSequence charSequence) {
             FilterResults results = new FilterResults();
             final List<Song> newList = new LinkedList<>(allSongs);
-            if (!this.albums.isEmpty()) {
-                for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
-                    final Song song = i.next();
-                    if (!this.albums.contains(song.getAlbum())) {
-                        i.remove();
-                    }
+            for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
+                final Song song = i.next();
+                if (!this.albums.get(song.getAlbum())) {
+                    i.remove();
                 }
             }
-            if (!this.artists.isEmpty()) {
-                for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
-                    final Song song = i.next();
-                    if (!this.artists.contains(song.getArtist())) {
-                        i.remove();
-                    }
+            for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
+                final Song song = i.next();
+                if (!this.artists.get(song.getArtist())) {
+                    i.remove();
                 }
             }
             results.values = newList;
