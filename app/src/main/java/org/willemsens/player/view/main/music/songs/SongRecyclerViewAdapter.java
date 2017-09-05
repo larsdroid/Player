@@ -37,7 +37,7 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.SongViewHolder> implements Filterable {
     private final Context context;
     private final List<Song> songs;
     private final List<Song> allSongs;
@@ -67,14 +67,14 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_song, parent, false);
         return new SongViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final SongViewHolder holder, int position) {
         final Song song = songs.get(position);
 
         final boolean showAlbumCover =
@@ -84,7 +84,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         final boolean showLongLine =
                 (songs.size() > position + 1) && !songs.get(position + 1).getAlbum().equals(song.getAlbum());
 
-        ((SongViewHolder)holder).setSong(song, showAlbumCover, showLongLine);
+        holder.setSong(song, showAlbumCover, showLongLine);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             }
         }
 
-        public boolean hasAllAlbums() {
+        boolean hasAllAlbums() {
             for (Album key : this.albums.keySet()) {
                 if (!this.albums.get(key)) {
                     return false;
@@ -205,7 +205,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             return true;
         }
 
-        public boolean hasAllArtists() {
+        boolean hasAllArtists() {
             for (Artist key : this.artists.keySet()) {
                 if (!this.artists.get(key)) {
                     return false;

@@ -5,14 +5,12 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.PopupMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
@@ -21,6 +19,8 @@ import org.willemsens.player.view.main.music.songs.SongsFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static org.willemsens.player.view.main.music.SubFragmentType.SONGS;
 
 public class MusicFragment extends Fragment
         implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -55,38 +55,8 @@ public class MusicFragment extends Fragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_music_menu, menu);
         getActivity().setTitle(R.string.title_music);
         super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_filter) {
-            switch (getCurrentFragment()) {
-                case ALBUMS:
-                    Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
-                    break;
-                case ARTISTS:
-                    Toast.makeText(getActivity(), "FILTER " + (viewPager.getCurrentItem() + 1), Toast.LENGTH_SHORT).show();
-                    break;
-                case SONGS:
-                    View filterMenuItemView = getActivity().findViewById(R.id.action_filter);
-                    PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
-                    popup.setOnMenuItemClickListener(getSongsFragment());
-                    popup.inflate(R.menu.fragment_songs_filter_menu);
-                    SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-                    if (filter.hasAllAlbums() && filter.hasAllArtists()) {
-                        popup.getMenu().findItem(R.id.menu_item_filter_songs_show_all).setEnabled(false);
-                    }
-                    popup.show();
-            }
-            return true;
-        } else {
-            return false;
-        }
     }
 
     @Override
@@ -108,12 +78,8 @@ public class MusicFragment extends Fragment
         }
     }
 
-    private SubFragmentType getCurrentFragment() {
-        return SubFragmentType.getByIndex(viewPager.getCurrentItem());
-    }
-
     private SongsFragment getSongsFragment() {
-        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(SubFragmentType.SONGS);
+        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(SONGS);
     }
 
     public void filterSongs(Album album) {

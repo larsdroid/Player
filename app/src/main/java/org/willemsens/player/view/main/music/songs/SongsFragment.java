@@ -8,6 +8,8 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
@@ -50,6 +52,7 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_songs_list, container, false);
 
         if (view instanceof RecyclerView) {
@@ -67,27 +70,49 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
     @Override
     public void onResume() {
         super.onResume();
-        getAdapter().registerDbUpdateReceiver();
+        adapter.registerDbUpdateReceiver();
     }
 
     @Override
     public void onPause() {
-        getAdapter().unregisterDbUpdateReceiver();
+        adapter.unregisterDbUpdateReceiver();
         super.onPause();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        getAdapter().onSaveInstanceState(outState);
+        adapter.onSaveInstanceState(outState);
         super.onSaveInstanceState(outState);
     }
 
-    public SongRecyclerViewAdapter.SongFilter getFilter() {
-         return (SongRecyclerViewAdapter.SongFilter) getAdapter().getFilter();
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_songs_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
-    public SongRecyclerViewAdapter getAdapter() {
-        return adapter;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_filter) {
+            View filterMenuItemView = getActivity().findViewById(R.id.action_filter);
+            PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
+            popup.setOnMenuItemClickListener(this);
+            popup.inflate(R.menu.fragment_songs_filter_menu);
+            SongRecyclerViewAdapter.SongFilter filter = getFilter();
+            if (filter.hasAllAlbums() && filter.hasAllArtists()) {
+                popup.getMenu().findItem(R.id.menu_item_filter_songs_show_all).setEnabled(false);
+            }
+            popup.show();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public SongRecyclerViewAdapter.SongFilter getFilter() {
+         return (SongRecyclerViewAdapter.SongFilter) adapter.getFilter();
     }
 
     @Override

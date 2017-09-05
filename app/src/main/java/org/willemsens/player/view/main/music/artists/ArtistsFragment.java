@@ -11,6 +11,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -43,6 +45,7 @@ public class ArtistsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_artists_list, container, false);
 
         if (view instanceof RecyclerView) {
@@ -85,6 +88,12 @@ public class ArtistsFragment extends Fragment {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         lbm.unregisterReceiver(this.dbUpdateReceiver);
         super.onPause();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_artists_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     private class DBUpdateReceiver extends BroadcastReceiver {

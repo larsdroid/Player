@@ -1,39 +1,37 @@
 package org.willemsens.player.view.main.music.albums;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Artist;
 import org.willemsens.player.view.DataAccessProvider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+
+import static android.view.Menu.NONE;
 
 /**
  * A fragment representing a list of Albums.
  */
-public class AlbumsFragment extends Fragment {
+public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
     private DataAccessProvider dataAccessProvider;
     private AlbumRecyclerViewAdapter adapter;
-    private final DBUpdateReceiver dbUpdateReceiver;
-    private final List<Album> albums;
 
     public AlbumsFragment() {
-        this.dbUpdateReceiver = new DBUpdateReceiver();
-        this.albums = new ArrayList<>();
     }
 
     public static AlbumsFragment newInstance() {
@@ -43,16 +41,16 @@ public class AlbumsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
 
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-            if (this.albums.isEmpty()) {
-                loadAllAlbums();
+            if (this.adapter == null) {
+                this.adapter = new AlbumRecyclerViewAdapter(context, this.dataAccessProvider, savedInstanceState);
             }
-            this.adapter = new AlbumRecyclerViewAdapter(this.albums, (OnAlbumClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;
@@ -71,50 +69,87 @@ public class AlbumsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(getString(R.string.key_albums_inserted));
-        filter.addAction(getString(R.string.key_album_inserted));
-        filter.addAction(getString(R.string.key_album_updated));
-        lbm.registerReceiver(this.dbUpdateReceiver, filter);
+        adapter.registerDbUpdateReceiver();
     }
 
     @Override
     public void onPause() {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
-        lbm.unregisterReceiver(this.dbUpdateReceiver);
+        adapter.unregisterDbUpdateReceiver();
         super.onPause();
     }
 
-    private class DBUpdateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String intentAction = intent.getAction();
-            if (intentAction.equals(getString(R.string.key_albums_inserted))) {
-                loadAllAlbums();
-                adapter.notifyDataSetChanged();
-            } else if (intentAction.equals(getString(R.string.key_album_inserted))) {
-                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
-                albums.add(album);
-                Collections.sort(albums);
-                final int index = albums.indexOf(album);
-                adapter.notifyItemInserted(index);
-            } else if (intentAction.equals(getString(R.string.key_album_updated))) {
-                final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
-                final int index = albums.indexOf(album);
-                if (index != -1) {
-                    albums.set(index, album);
-                    adapter.notifyItemChanged(index);
-                }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        adapter.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_albums_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_filter) {
+            View filterMenuItemView = getActivity().findViewById(R.id.action_filter);
+            PopupMenu popup = new PopupMenu(getContext(), filterMenuItemView);
+            popup.setOnMenuItemClickListener(this);
+            popup.inflate(R.menu.fragment_albums_filter_menu);
+            AlbumRecyclerViewAdapter.AlbumFilter filter = getFilter();
+            if (filter.hasAllArtists()) {
+                popup.getMenu().findItem(R.id.menu_item_filter_albums_show_all).setEnabled(false);
             }
+            popup.show();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void loadAllAlbums() {
-        albums.clear();
-        albums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
-        Collections.sort(albums);
+    public AlbumRecyclerViewAdapter.AlbumFilter getFilter() {
+        return (AlbumRecyclerViewAdapter.AlbumFilter) adapter.getFilter();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        final AlbumRecyclerViewAdapter.AlbumFilter filter = getFilter();
+        if (id == R.id.menu_item_filter_albums_show_all) {
+            filter.addAllArtists();
+            filter.filter(null);
+        } else if (id == R.id.menu_item_filter_albums_by_artist) {
+            SubMenu artistsMenu = item.getSubMenu();
+            int i = 0;
+            final MenuItem menuItemAll = artistsMenu.getItem(i++);
+            menuItemAll.setCheckable(true);
+            menuItemAll.setChecked(true);
+            for (Iterator<Map.Entry<Artist, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Artist, Boolean> entry = it.next();
+                final Artist artist = entry.getKey();
+                artistsMenu.add(NONE, (int)artist.getId().longValue(), NONE, artist.getName());
+                final MenuItem menuItem = artistsMenu.getItem(i++);
+                menuItem.setCheckable(true);
+                if (entry.getValue()) {
+                    menuItem.setChecked(true);
+                } else {
+                    menuItemAll.setChecked(false);
+                }
+            }
+        } else if (id == R.id.menu_item_filter_all_artists) {
+            if (item.isChecked()) {
+                filter.removeAllArtists();
+            } else {
+                filter.addAllArtists();
+            }
+            filter.filter(null);
+        } else {
+            filter.flipArtist(item.getItemId());
+            filter.filter(null);
+        }
+        return true;
     }
 }

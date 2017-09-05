@@ -67,6 +67,8 @@
     <string name="action_filter_songs_show_all">All songs</string>
     <string name="action_filter_songs_by_album">Albums</string>
     <string name="action_filter_songs_by_artist">Artists</string>
+    <string name="action_filter_albums_show_all">All albums</string>
+    <string name="action_filter_albums_by_artist">Artists</string>
     <string name="action_filter_all_albums">All</string>
     <string name="action_filter_all_artists">All</string>
 

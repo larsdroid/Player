@@ -20,7 +20,7 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Artist}.
  */
-class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ViewHolder> {
+class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistViewHolder> {
     private final List<Artist> artists;
     private final OnArtistClickedListener listener;
 
@@ -30,14 +30,14 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArtistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_artist, parent, false);
-        return new ViewHolder(view);
+        return new ArtistViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ArtistViewHolder holder, int position) {
         holder.setArtist(artists.get(position));
     }
 
@@ -46,7 +46,7 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         return artists.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.artist_list_name)
         TextView artistName;
 
@@ -55,7 +55,7 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
 
         private Artist artist;
 
-        ViewHolder(View view) {
+        ArtistViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
             view.setOnClickListener(this);
