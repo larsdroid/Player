@@ -154,7 +154,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             this.songName.setText(song.getName());
             this.songTrack.setText(String.valueOf(song.getTrack()));
             this.songAlbumName.setText(song.getArtist().getName() + " - " + song.getAlbum().getName());
-            this.songLength.setText(song.getLength() / 60 + ":" + song.getLength() % 60);
+            this.songLength.setText(String.format("%d:%02d", song.getLength() / 60, song.getLength() % 60));
 
             if (!showLongLine) {
                 this.leftSectionOfDivider.setVisibility(View.INVISIBLE);

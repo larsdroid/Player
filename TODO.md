@@ -41,6 +41,8 @@ File scanning features
   can be updated in the list after it is fetched
 * FileScannerService should start broadcasting sooner, not after ALL
   records have been inserted
+* The scanner should not only scan directories, but also files that are "listed"
+  in the Android media store (these should be done first actually)
 
 Fetching issues for album art
 --
