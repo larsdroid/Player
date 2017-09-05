@@ -27,6 +27,7 @@ import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -193,7 +194,12 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         private final Map<Artist, Boolean> artists;
 
         SongFilter() {
-            this.albums = new TreeMap<>();
+            this.albums = new TreeMap<>(new Comparator<Album>() {
+                @Override
+                public int compare(Album a, Album b) {
+                    return a.getName().compareTo(b.getName());
+                }
+            });
             this.artists = new TreeMap<>();
             fetchAllAlbums();
             fetchAllArtists();
