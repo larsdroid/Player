@@ -27,11 +27,10 @@
                     android:contentDescription="@string/album_cover_image_description"
                     android:background="@color/color_album_image_background"/>
 
-            <!-- TODO: The padding (dp value) for the Progressbar looks ok for a two-column system, but it's too specific -->
             <org.willemsens.player.view.customviews.HeightCalculatedProgressBar
-                android:id="@+id/progress_bar"
+                android:id="@+id/album_list_progress_bar"
                 style="?android:attr/progressBarStyleLarge"
-                android:padding="@dimen/progressbar_padding_two_columns"
+                android:padding="50dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 

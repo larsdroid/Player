@@ -28,6 +28,13 @@
                 android:contentDescription="@string/artist_image_description"
                 android:background="@color/color_artist_image_padding" />
 
+            <org.willemsens.player.view.customviews.HeightCalculatedProgressBar
+                    android:id="@+id/artist_list_progress_bar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:padding="50dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
             <TextView
                 android:id="@+id/artist_list_name"
                 android:layout_width="match_parent"

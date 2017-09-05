@@ -12,12 +12,19 @@
         android:orientation="vertical"
         android:layout_alignBottom="@+id/right_side_text_side">
 
-        <org.willemsens.player.view.customviews.WidthCalculatedImageView
+        <ImageView
             android:id="@+id/song_list_album_image"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:padding="@dimen/grid_cell_padding"
             android:contentDescription="@string/album_cover_image_description" />
+
+        <ProgressBar
+                android:id="@+id/song_list_progress_bar"
+                style="?android:attr/progressBarStyleSmall"
+                android:padding="5dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp" />
 
         <View
             android:id="@+id/left_section_of_divider"

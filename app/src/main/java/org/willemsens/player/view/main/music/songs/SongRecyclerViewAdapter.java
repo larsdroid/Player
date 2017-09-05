@@ -15,8 +15,10 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -30,9 +32,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -127,6 +126,9 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         @BindView(R.id.left_section_of_divider)
         View leftSectionOfDivider;
 
+        @BindView(R.id.song_list_progress_bar)
+        ProgressBar progressBar;
+
         private Song song;
 
         SongViewHolder(View view) {
@@ -147,8 +149,19 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
                 this.albumCover.setImageBitmap(bitmap);
+
+                this.albumCover.setVisibility(View.VISIBLE);
+                this.progressBar.setVisibility(View.GONE);
+            } else if (showAlbumCover) {
+                this.albumCover.setImageDrawable(null);
+
+                this.albumCover.setVisibility(View.GONE);
+                this.progressBar.setVisibility(View.VISIBLE);
             } else {
                 this.albumCover.setImageDrawable(null);
+
+                this.albumCover.setVisibility(View.VISIBLE);
+                this.progressBar.setVisibility(View.GONE);
             }
 
             this.songName.setText(song.getName());

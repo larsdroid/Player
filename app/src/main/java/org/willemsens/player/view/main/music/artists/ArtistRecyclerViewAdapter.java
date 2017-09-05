@@ -7,15 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Artist;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Artist}.
@@ -53,6 +52,9 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         @BindView(R.id.artist_list_image)
         ImageView artistImage;
 
+        @BindView(R.id.artist_list_progress_bar)
+        ProgressBar progressBar;
+
         private Artist artist;
 
         ArtistViewHolder(View view) {
@@ -75,8 +77,14 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
                         artist.getImage().getImageData(), 0, artist.getImage().getImageData().length);
                 this.artistImage.setImageBitmap(bitmap);
+
+                this.artistImage.setVisibility(View.VISIBLE);
+                this.progressBar.setVisibility(View.GONE);
             } else {
                 this.artistImage.setImageDrawable(null);
+
+                this.artistImage.setVisibility(View.GONE);
+                this.progressBar.setVisibility(View.VISIBLE);
             }
         }
     }

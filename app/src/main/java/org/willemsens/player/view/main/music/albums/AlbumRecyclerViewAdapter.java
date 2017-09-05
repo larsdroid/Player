@@ -17,7 +17,8 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -30,9 +31,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -111,7 +109,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         @BindView(R.id.album_list_image)
         ImageView albumCover;
 
-        @BindView(R.id.progress_bar)
+        @BindView(R.id.album_list_progress_bar)
         ProgressBar progressBar;
 
         private Album album;
@@ -154,7 +152,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         return this.filter;
     }
 
-    public class AlbumFilter extends Filter {
+    class AlbumFilter extends Filter {
         private final Map<Artist, Boolean> artists;
 
         AlbumFilter() {
@@ -252,9 +250,11 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
 
         @Override
         public void publishResults(CharSequence charSequence, FilterResults filterResults) {
-            albums.clear();
-            albums.addAll((List<Album>)filterResults.values);
-            notifyDataSetChanged();
+            if (filterResults.values != null) {
+                albums.clear();
+                albums.addAll((List<Album>) filterResults.values);
+                notifyDataSetChanged();
+            }
         }
     }
 
