@@ -81,7 +81,11 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        adapter.onSaveInstanceState(outState);
+        // It's possible that Android tries to save this instance even though it has never been shown
+        // (no call happened to onCreateView). As a result, the adapter can be null here.
+        if (adapter != null) {
+            adapter.onSaveInstanceState(outState);
+        }
         super.onSaveInstanceState(outState);
     }
 

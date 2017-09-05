@@ -27,11 +27,11 @@ import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -99,6 +99,12 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         IntentFilter filter = new IntentFilter();
         filter.addAction(context.getString(R.string.key_songs_inserted));
+        filter.addAction(context.getString(R.string.key_song_inserted));
+        filter.addAction(context.getString(R.string.key_artists_inserted));
+        filter.addAction(context.getString(R.string.key_artist_inserted));
+        filter.addAction(context.getString(R.string.key_albums_inserted));
+        filter.addAction(context.getString(R.string.key_album_inserted));
+        filter.addAction(context.getString(R.string.key_album_updated));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -187,11 +193,21 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         private final Map<Artist, Boolean> artists;
 
         SongFilter() {
-            this.albums = new HashMap<>();
+            this.albums = new TreeMap<>();
+            this.artists = new TreeMap<>();
+            fetchAllAlbums();
+            fetchAllArtists();
+        }
+
+        private void fetchAllAlbums() {
+            this.albums.clear();
             for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
                 this.albums.put(album, true);
             }
-            this.artists = new HashMap<>();
+        }
+
+        private void fetchAllArtists() {
+            this.artists.clear();
             for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
                 this.artists.put(artist, true);
             }
@@ -243,8 +259,13 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
             setAllArtists(false);
         }
 
+        // TODO: private (once MainActivity no longer calls this)
         public void add(Album album) {
             this.albums.put(album, true);
+        }
+
+        private void add(Artist artist) {
+            this.artists.put(artist, true);
         }
 
         void flipAlbum(int albumId) {
@@ -370,6 +391,26 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
                 allSongs.add(song);
                 Collections.sort(allSongs);
                 getFilter().filter(null);
+            } else if (intentAction.equals(context.getString(R.string.key_artists_inserted))) {
+                ((SongFilter)getFilter()).fetchAllArtists();
+            } else if (intentAction.equals(context.getString(R.string.key_artist_inserted))) {
+                final long artistId = intent.getLongExtra(context.getString(R.string.key_artist_id), -1);
+                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                ((SongFilter)getFilter()).add(artist);
+            } else if (intentAction.equals(context.getString(R.string.key_albums_inserted))) {
+                ((SongFilter)getFilter()).fetchAllAlbums();
+            } else if (intentAction.equals(context.getString(R.string.key_album_inserted))) {
+                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                ((SongFilter)getFilter()).add(album);
+            } else if (intentAction.equals(context.getString(R.string.key_album_updated))) {
+                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                for (int i = 0; i < songs.size(); i++) {
+                    if (songs.get(i).getAlbum().equals(album)) {
+                        notifyItemChanged(i);
+                    }
+                }
             }
         }
     }

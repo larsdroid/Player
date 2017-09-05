@@ -26,11 +26,11 @@ import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -91,6 +91,8 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         filter.addAction(context.getString(R.string.key_albums_inserted));
         filter.addAction(context.getString(R.string.key_album_inserted));
         filter.addAction(context.getString(R.string.key_album_updated));
+        filter.addAction(context.getString(R.string.key_artists_inserted));
+        filter.addAction(context.getString(R.string.key_artist_inserted));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -156,7 +158,12 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         private final Map<Artist, Boolean> artists;
 
         AlbumFilter() {
-            this.artists = new HashMap<>();
+            this.artists = new TreeMap<>();
+            fetchAllArtists();
+        }
+
+        private void fetchAllArtists() {
+            this.artists.clear();
             for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
                 this.artists.put(artist, true);
             }
@@ -177,7 +184,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
             return true;
         }
 
-        public void addAllArtists() {
+        void addAllArtists() {
             setAllArtists(true);
         }
 
@@ -185,7 +192,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
             setAllArtists(false);
         }
 
-        public void add(Artist artist) {
+        private void add(Artist artist) {
             this.artists.put(artist, true);
         }
 
@@ -279,6 +286,12 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
                     albums.set(index, album);
                     notifyItemChanged(index);
                 }
+            } else if (intentAction.equals(context.getString(R.string.key_artists_inserted))) {
+                ((AlbumFilter)getFilter()).fetchAllArtists();
+            } else if (intentAction.equals(context.getString(R.string.key_artist_inserted))) {
+                final long artistId = intent.getLongExtra(context.getString(R.string.key_artist_id), -1);
+                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                ((AlbumFilter)getFilter()).add(artist);
             }
         }
     }
