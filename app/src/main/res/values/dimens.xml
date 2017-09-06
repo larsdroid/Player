@@ -9,9 +9,9 @@
 
     <dimen name="grid_font_size">14sp</dimen>
 
-    <dimen name="song_list_small_font_size">12sp</dimen>
-    <dimen name="song_list_medium_font_size">14sp</dimen>
-    <dimen name="song_list_large_font_size">16sp</dimen>
+    <dimen name="list_small_font_size">12sp</dimen>
+    <dimen name="list_medium_font_size">14sp</dimen>
+    <dimen name="list_large_font_size">16sp</dimen>
 
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>

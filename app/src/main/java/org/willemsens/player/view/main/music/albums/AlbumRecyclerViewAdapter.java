@@ -17,8 +17,7 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -31,6 +30,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -105,6 +107,9 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         @BindView(R.id.album_list_name)
         TextView albumName;
 
+        @BindView(R.id.album_list_artist)
+        TextView albumArtist;
+
         @BindView(R.id.album_list_year)
         TextView albumYear;
 
@@ -132,6 +137,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
 
             this.albumName.setText(album.getName());
             this.albumYear.setText(album.getYearReleased() == null ? "" : String.valueOf(album.getYearReleased()));
+            this.albumArtist.setText(album.getArtist().getName());
 
             if (album.getImage() != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
