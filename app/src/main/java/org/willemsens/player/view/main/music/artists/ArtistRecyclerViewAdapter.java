@@ -31,7 +31,7 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
     @Override
     public ArtistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_artist, parent, false);
+                .inflate(R.layout.fragment_artist_list_item, parent, false);
         return new ArtistViewHolder(view);
     }
 

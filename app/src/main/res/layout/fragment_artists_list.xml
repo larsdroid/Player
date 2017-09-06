@@ -7,4 +7,4 @@
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
     tools:context=".view.main.music.artists.ArtistsFragment"
-    tools:listitem="@layout/fragment_artist" />
+    tools:listitem="@layout/fragment_artist_list_item" />
