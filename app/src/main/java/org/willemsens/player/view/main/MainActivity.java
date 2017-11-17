@@ -25,10 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
@@ -41,6 +38,7 @@ import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.view.main.album.AlbumFragment;
 import org.willemsens.player.view.main.music.MusicFragment;
 import org.willemsens.player.view.main.music.SubFragmentType;
 import org.willemsens.player.view.main.music.albums.OnAlbumClickedListener;
@@ -48,6 +46,11 @@ import org.willemsens.player.view.main.music.artists.OnArtistClickedListener;
 import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
@@ -275,13 +278,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void albumClicked(Album album) {
+        Fragment albumFragment = AlbumFragment.newInstance(this, album.getId());
         FragmentManager manager = getSupportFragmentManager();
-        Fragment fragment = manager.findFragmentById(R.id.fragment_container);
-        if (fragment instanceof MusicFragment) {
-            MusicFragment musicFragment = (MusicFragment)fragment;
-            musicFragment.setCurrentFragment(SubFragmentType.SONGS);
-            musicFragment.filterSongs(album);
-        }
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.fragment_container, albumFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     @Override
@@ -291,7 +293,7 @@ public class MainActivity extends AppCompatActivity
         if (fragment instanceof MusicFragment) {
             MusicFragment musicFragment = (MusicFragment)fragment;
             musicFragment.setCurrentFragment(SubFragmentType.ALBUMS);
-            // TODO
+            musicFragment.filterAlbums(artist);
         }
     }
 

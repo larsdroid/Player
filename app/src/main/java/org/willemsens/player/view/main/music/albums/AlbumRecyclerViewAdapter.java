@@ -37,7 +37,7 @@ import butterknife.ButterKnife;
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
  */
-class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.AlbumViewHolder> implements Filterable {
+public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAdapter.AlbumViewHolder> implements Filterable {
     private final Context context;
     private final List<Album> albums;
     private final List<Album> allAlbums;
@@ -160,7 +160,7 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
         return this.filter;
     }
 
-    class AlbumFilter extends Filter {
+    public class AlbumFilter extends Filter {
         private final Map<Artist, Boolean> artists;
 
         AlbumFilter() {
@@ -194,11 +194,11 @@ class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecyclerViewAda
             setAllArtists(true);
         }
 
-        void removeAllArtists() {
+        public void removeAllArtists() {
             setAllArtists(false);
         }
 
-        private void add(Artist artist) {
+        public void add(Artist artist) {
             this.artists.put(artist, true);
         }
 

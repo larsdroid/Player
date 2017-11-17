@@ -17,8 +17,7 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -34,10 +33,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
  */
-public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.SongViewHolder> implements Filterable {
+class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapter.SongViewHolder> implements Filterable {
     private final Context context;
     private final List<Song> songs;
     private final List<Song> allSongs;
@@ -189,7 +191,7 @@ public class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerVi
         return this.filter;
     }
 
-    public class SongFilter extends Filter {
+    class SongFilter extends Filter {
         private final Map<Album, Boolean> albums;
         private final Map<Artist, Boolean> artists;
 

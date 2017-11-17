@@ -13,14 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.view.main.music.songs.SongRecyclerViewAdapter;
-import org.willemsens.player.view.main.music.songs.SongsFragment;
+import org.willemsens.player.model.Artist;
+import org.willemsens.player.view.main.music.albums.AlbumRecyclerViewAdapter;
+import org.willemsens.player.view.main.music.albums.AlbumsFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static org.willemsens.player.view.main.music.SubFragmentType.SONGS;
+import static org.willemsens.player.view.main.music.SubFragmentType.ALBUMS;
 
 public class MusicFragment extends Fragment
         implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -78,15 +78,14 @@ public class MusicFragment extends Fragment
         }
     }
 
-    private SongsFragment getSongsFragment() {
-        return (SongsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(SONGS);
+    private AlbumsFragment getAlbumssFragment() {
+        return (AlbumsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(ALBUMS);
     }
 
-    public void filterSongs(Album album) {
-        SongRecyclerViewAdapter.SongFilter filter = getSongsFragment().getFilter();
-        filter.addAllArtists();
-        filter.removeAllAlbums();
-        filter.add(album);
+    public void filterAlbums(Artist artist) {
+        AlbumRecyclerViewAdapter.AlbumFilter filter = getAlbumssFragment().getFilter();
+        filter.removeAllArtists();
+        filter.add(artist);
         filter.filter(null);
     }
 
