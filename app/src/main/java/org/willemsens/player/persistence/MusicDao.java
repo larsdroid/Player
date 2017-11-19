@@ -102,6 +102,14 @@ public class MusicDao {
                 .get().firstOrNull();
     }
 
+    // TODO: isn't it possible to just do 'album.getSongs()'? Check requery!
+    public List<Song> getAllSongs(Album album) {
+        return this.dataStore.select(Song.class)
+                .where(Song.ALBUM.equal(album))
+                .orderBy(Song.TRACK.asc())
+                .get().toList();
+    }
+
     public Song findFirstSong(Album album) {
         return this.dataStore.select(Song.class)
                 .where(Song.ALBUM.equal(album))
@@ -119,9 +127,10 @@ public class MusicDao {
     /**
      * Checks albums in the DB. If an album exists, all songs with this album are updated to have
      * the corresponding album from the DB. If the album doesn't exist, it is inserted into the DB.
+     *
      * @param albums The set of albums to check for in the DB.
-     * @param songs The songs that may have to be updated in case their album turns out
-     *              to be in the DB already.
+     * @param songs  The songs that may have to be updated in case their album turns out
+     *               to be in the DB already.
      * @return The amount of new albums inserted into the DB.
      */
     public List<Long> checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
@@ -153,11 +162,12 @@ public class MusicDao {
      * Checks artists in the DB. If an artist exists, all songs and albums with this artist are
      * updated to have the corresponding artist from the DB. If the artist doesn't exist, it is
      * inserted into the DB.
+     *
      * @param artists The set of artists to check for in the DB.
-     * @param albums The albums that may have to be updated in case their artist turns out
-     *               to be in the DB already.
-     * @param songs The songs that may have to be updated in case their artist turns out
-     *              to be in the DB already.
+     * @param albums  The albums that may have to be updated in case their artist turns out
+     *                to be in the DB already.
+     * @param songs   The songs that may have to be updated in case their artist turns out
+     *                to be in the DB already.
      * @return The amount of new artists inserted into the DB.
      */
     public List<Long> checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
@@ -231,6 +241,7 @@ public class MusicDao {
     /**
      * Checks if a path is an existing directory and if so inserts it into the DB as default music
      * directory.
+     *
      * @param path The path to check.
      * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
      */
@@ -241,6 +252,7 @@ public class MusicDao {
     /**
      * Checks if a path is an existing directory and if so inserts it into the DB as default music
      * directory.
+     *
      * @param path The path to check.
      * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
      */
@@ -259,6 +271,7 @@ public class MusicDao {
 
     /**
      * Inserts the given path as a default music directory into the DB.
+     *
      * @param path The path to insert into the DB.
      */
     private void insertMusicPath(String path) {

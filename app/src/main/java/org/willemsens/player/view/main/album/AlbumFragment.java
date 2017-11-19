@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,9 +25,13 @@ import butterknife.ButterKnife;
 public class AlbumFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
     private Album album;
+    private AlbumSongAdapter adapter;
 
     @BindView(R.id.album_image)
     HeightCalculatedImageView albumImage;
+
+    @BindView(R.id.song_list)
+    RecyclerView songList;
 
     public static AlbumFragment newInstance(final Context context, final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -52,6 +58,13 @@ public class AlbumFragment extends Fragment {
             final Bitmap bitmap = BitmapFactory.decodeByteArray(
                     album.getImage().getImageData(), 0, album.getImage().getImageData().length);
             this.albumImage.setImageBitmap(bitmap);
+
+            Context context = view.getContext();
+            this.songList.setLayoutManager(new LinearLayoutManager(context));
+            if (this.adapter == null) {
+                this.adapter = new AlbumSongAdapter(this.dataAccessProvider, this.album);
+            }
+            this.songList.setAdapter(this.adapter);
         }
         return view;
     }

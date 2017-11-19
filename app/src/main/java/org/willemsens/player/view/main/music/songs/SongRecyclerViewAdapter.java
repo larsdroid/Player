@@ -22,6 +22,7 @@ import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
@@ -176,7 +177,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             this.songName.setText(song.getName());
             this.songTrack.setText(String.valueOf(song.getTrack()));
             this.songAlbumName.setText(song.getArtist().getName() + " - " + song.getAlbum().getName());
-            this.songLength.setText(String.format("%d:%02d", song.getLength() / 60, song.getLength() % 60));
+            this.songLength.setText(StringFormat.formatToSongLength(song.getLength()));
 
             if (!showLongLine) {
                 this.leftSectionOfDivider.setVisibility(View.INVISIBLE);
