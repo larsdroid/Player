@@ -1,26 +1,28 @@
 package org.willemsens.player.view.main.album;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.SongViewHolder> {
     private final List<Song> songs;
+    private final OnSongClickedListener listener;
 
-    AlbumSongAdapter(DataAccessProvider dataAccessProvider, Album album) {
+    AlbumSongAdapter(Context context, DataAccessProvider dataAccessProvider, Album album) {
+        this.listener = (OnSongClickedListener) context;
         // TODO: can requery handle 'album.getSongs()'?
         this.songs = dataAccessProvider.getMusicDao().getAllSongs(album);
     }
@@ -66,7 +68,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
         @Override
         public void onClick(View view) {
-            // TODO
+            listener.songClicked(this.song);
         }
 
         private void setSong(Song song) {

@@ -62,7 +62,7 @@ public class AlbumFragment extends Fragment {
             Context context = view.getContext();
             this.songList.setLayoutManager(new LinearLayoutManager(context));
             if (this.adapter == null) {
-                this.adapter = new AlbumSongAdapter(this.dataAccessProvider, this.album);
+                this.adapter = new AlbumSongAdapter(context, this.dataAccessProvider, this.album);
             }
             this.songList.setAdapter(this.adapter);
         }
