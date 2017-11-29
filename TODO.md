@@ -43,6 +43,7 @@ File scanning features
   records have been inserted
 * The scanner should not only scan directories, but also files that are "listed"
   in the Android media store (these should be done first actually)
+* PurgingService
 
 Fetching issues for album art
 --

@@ -243,10 +243,9 @@ public class MusicDao {
      * directory.
      *
      * @param path The path to check.
-     * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
      */
-    private boolean checkInsertMusicPath(String path) {
-        return checkInsertMusicPath(new File(path));
+    private void checkInsertMusicPath(String path) {
+        checkInsertMusicPath(new File(path));
     }
 
     /**
@@ -254,19 +253,16 @@ public class MusicDao {
      * directory.
      *
      * @param path The path to check.
-     * @return 'true' in case the path was inserted into the DB. 'false' otherwise.
      */
-    private boolean checkInsertMusicPath(File path) {
+    private void checkInsertMusicPath(File path) {
         try {
             final File canonicalPath = path.getCanonicalFile();
             if (canonicalPath.isDirectory() && canonicalPath.listFiles() != null) {
                 insertMusicPath(canonicalPath.getCanonicalPath());
-                return true;
             }
         } catch (IOException e) {
             Log.e(getClass().getName(), "Error while checking path: " + e.getMessage());
         }
-        return false;
     }
 
     /**
