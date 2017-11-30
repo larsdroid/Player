@@ -303,7 +303,7 @@ public class MainActivity extends AppCompatActivity
 
         this.playBackStatusReceiver = new PlayBackStatusReceiver();
         final LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status_changed));
+        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status));
         lbm.registerReceiver(this.playBackStatusReceiver, filter);
 
         this.headsetReceiver = new HeadsetReceiver();
@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(getString(R.string.key_player_status_changed))) {
+            if (intentAction.equals(getString(R.string.key_player_status))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = getMusicDao().findSong(songId);
                 final PlayStatus playStatus = PlayStatus.valueOf(intent.getStringExtra(getString(R.string.key_play_status)));

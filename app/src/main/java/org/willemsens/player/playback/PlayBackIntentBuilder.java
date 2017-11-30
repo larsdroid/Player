@@ -35,8 +35,7 @@ public class PlayBackIntentBuilder {
         return returnIntent;
     }
 
-    public PlayBackIntentBuilder buildAndSubmit() {
+    public void buildAndSubmit() {
         this.context.startService(build());
-        return this;
     }
 }

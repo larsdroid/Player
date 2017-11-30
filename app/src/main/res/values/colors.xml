@@ -3,6 +3,7 @@
     <color name="colorPrimary">#aa00ff</color>
     <color name="colorPrimaryDark">#7b1fa2</color>
     <color name="colorAccent">#ffa726</color>
+    <color name="colorBackground">#ffffff</color>
 
     <color name="color_album_image_background">#3d3939</color>
     <color name="color_artist_image_padding">#3d3939</color>

@@ -85,4 +85,16 @@ public class AlbumFragment extends Fragment {
             Log.e(getClass().getName(), "Context should be a DataAccessProvider.");
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter.registerPlayBackUpdateReceiver();
+    }
+
+    @Override
+    public void onPause() {
+        adapter.unregisterPlayBackUpdateReceiver();
+        super.onPause();
+    }
 }
