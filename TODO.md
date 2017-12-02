@@ -1,3 +1,6 @@
+* Start a song -> press pause -> dismiss the activity -> open the notification
+  -> notification shows the previously stored "current track"
+
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
 * Settings fragment

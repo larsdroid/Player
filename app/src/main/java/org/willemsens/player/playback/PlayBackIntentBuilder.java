@@ -34,6 +34,11 @@ public class PlayBackIntentBuilder {
         return this;
     }
 
+    public PlayBackIntentBuilder dismiss() {
+        this.intent.setAction(context.getString(R.string.key_action_dismiss));
+        return this;
+    }
+
     public Intent build() {
         final Intent returnIntent = this.intent;
         this.intent = new Intent(context, PlayBackService.class);

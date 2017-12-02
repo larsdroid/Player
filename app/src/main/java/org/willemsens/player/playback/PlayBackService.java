@@ -35,6 +35,7 @@ import static org.willemsens.player.playback.PlayMode.NO_REPEAT;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
+import static org.willemsens.player.playback.PlayerCommand.DISMISS;
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
@@ -103,7 +104,8 @@ public class PlayBackService extends Service
                 }
 
                 if (positionMillis != -1) {
-                    this.mediaPlayer.seekTo(positionMillis);
+                    // TODO: move to a specific position in a song (maybe after onPrepared)
+                    //this.mediaPlayer.seekTo(positionMillis);
                 }
             } else {
                 this.playBack.setPlayMode(NO_REPEAT);
@@ -137,7 +139,8 @@ public class PlayBackService extends Service
         this.notificationBarBig.setOnClickPendingIntent(R.id.button_play_pause_stop, pendingIntent);
 
         pendingIntent = PendingIntent.getService(
-                this, PREVIOUS.getRequestCode(),
+                this,
+                PREVIOUS.getRequestCode(),
                 intentBuilder.setPlayerCommand(PREVIOUS).build(),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         this.notificationBarSmall.setOnClickPendingIntent(R.id.button_previous, pendingIntent);
@@ -171,7 +174,9 @@ public class PlayBackService extends Service
         if (intent != null) {
             // TODO: Work with 'intent.getAction()' and also in the PlayBackIntentBuilder
             if (intent.getAction() != null && intent.getAction().equals(getString(R.string.key_action_setup))) {
-                // Currently, don't do anything (onCreate currently does everything... is this OK?).
+                notificationAndBroadcast();
+            } else if (intent.getAction() != null && intent.getAction().equals(getString(R.string.key_action_dismiss))) {
+                stopSelf();
             } else if (intent.hasExtra(getString(R.string.key_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = this.musicDao.findSong(songId);
@@ -254,12 +259,20 @@ public class PlayBackService extends Service
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent deleteIntent = PendingIntent.getService(
+                this,
+                DISMISS.getRequestCode(),
+                new PlayBackIntentBuilder(this).dismiss().build(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(getApplicationContext(), NotificationType.MUSIC_PLAYING.getChannel())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setAutoCancel(false)
                 .setOngoing(this.playBack.getPlayStatus() == PLAYING)
                 .setContentIntent(pendingIntent)
+                .setDeleteIntent(deleteIntent)
                 .setCustomBigContentView(this.notificationBarBig)
                 .setCustomContentView(this.notificationBarSmall);
 

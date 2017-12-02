@@ -62,6 +62,7 @@
     <string name="key_pref_play_position_millis">org.willemsens.PlayBackService.PREF_POSITION_MILLIS</string>
 
     <string name="key_action_setup">org.willemsens.PlayBackService.ACTION_SETUP</string>
+    <string name="key_action_dismiss">org.willemsens.PlayBackService.ACTION_DISMISS</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
