@@ -56,6 +56,13 @@
     <string name="key_player_status">org.willemsens.PLAYER_STATUS</string>
     <string name="key_query_player_status">org.willemsens.QUERY_PLAYER_STATUS</string>
 
+    <string name="key_pref_play_mode">org.willemsens.PlayBackService.PREF_PLAY_MODE</string>
+    <string name="key_pref_play_status">org.willemsens.PlayBackService.PREF_PLAY_STATUS</string>
+    <string name="key_pref_play_song_id">org.willemsens.PlayBackService.PREF_SONG_ID</string>
+    <string name="key_pref_play_position_millis">org.willemsens.PlayBackService.PREF_POSITION_MILLIS</string>
+
+    <string name="key_action_setup">org.willemsens.PlayBackService.ACTION_SETUP</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_music_library">Music Library</string>

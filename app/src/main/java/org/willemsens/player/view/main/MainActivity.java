@@ -113,6 +113,10 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             setMusicFragment(false);
         }
+
+        new PlayBackIntentBuilder(this)
+                .setup()
+                .buildAndSubmit();
     }
 
     private void handlePermission(@NonNull String permission, int requestCode, String deniedUserMessage, Runnable runnable) {

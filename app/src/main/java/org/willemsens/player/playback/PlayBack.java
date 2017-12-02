@@ -10,13 +10,6 @@ public class PlayBack {
     private static PlayBack instance;
 
     private PlayBack() {
-        this(PlayMode.NO_REPEAT, PlayStatus.STOPPED);
-    }
-
-    private PlayBack(PlayMode playMode, PlayStatus playStatus) {
-        this.currentSong = null;
-        this.playMode = playMode;
-        this.playStatus = playStatus;
     }
 
     public static PlayBack getInstance() {

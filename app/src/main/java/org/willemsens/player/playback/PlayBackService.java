@@ -6,16 +6,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
+
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
@@ -26,6 +27,9 @@ import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
 import java.io.IOException;
+
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayMode.NO_REPEAT;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
@@ -64,8 +68,6 @@ public class PlayBackService extends Service
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnCompletionListener(this);
 
-        this.playBack = PlayBack.getInstance();
-
         final AudioAttributes.Builder builder = new AudioAttributes.Builder();
         builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .setUsage(AudioAttributes.USAGE_MEDIA);
@@ -74,6 +76,50 @@ public class PlayBackService extends Service
 
         initNotificationBars();
         initNotificationManager();
+
+        this.playBack = PlayBack.getInstance();
+
+        readPlayBackFromPreferences();
+    }
+
+    private void readPlayBackFromPreferences() {
+        if (this.playBack.getPlayMode() == null) {
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            final String playModeName = preferences.getString(getString(R.string.key_pref_play_mode), null);
+            final String playStatusName = preferences.getString(getString(R.string.key_pref_play_status), null);
+            final long songId = preferences.getLong(getString(R.string.key_pref_play_song_id), -1);
+            final int positionMillis = preferences.getInt(getString(R.string.key_pref_play_position_millis), -1);
+
+            if (playModeName != null) {
+                this.playBack.setPlayMode(PlayMode.valueOf(playModeName));
+
+                if (playStatusName != null) {
+                    this.playBack.setPlayStatus(PlayStatus.valueOf(playStatusName));
+                }
+
+                if (songId != -1) {
+                    this.playBack.setCurrentSong(this.musicDao.findSong(songId));
+                    setCurrentSong(this.playBack.getCurrentSong());
+                }
+
+                if (positionMillis != -1) {
+                    this.mediaPlayer.seekTo(positionMillis);
+                }
+            } else {
+                this.playBack.setPlayMode(NO_REPEAT);
+                this.playBack.setPlayStatus(STOPPED);
+            }
+        }
+    }
+
+    private void savePlayBackToPreferences() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(getString(R.string.key_pref_play_mode), this.playBack.getPlayMode().name());
+        editor.putString(getString(R.string.key_pref_play_status), this.playBack.getPlayStatus().name());
+        editor.putLong(getString(R.string.key_pref_play_song_id), this.playBack.getCurrentSong().getId());
+        editor.putInt(getString(R.string.key_pref_play_position_millis), this.mediaPlayer.getCurrentPosition());
+        editor.apply();
     }
 
     private void initNotificationBars() {
@@ -124,7 +170,9 @@ public class PlayBackService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             // TODO: Work with 'intent.getAction()' and also in the PlayBackIntentBuilder
-            if (intent.hasExtra(getString(R.string.key_song_id))) {
+            if (intent.getAction() != null && intent.getAction().equals(getString(R.string.key_action_setup))) {
+                // Currently, don't do anything (onCreate currently does everything... is this OK?).
+            } else if (intent.hasExtra(getString(R.string.key_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = this.musicDao.findSong(songId);
 
@@ -273,11 +321,14 @@ public class PlayBackService extends Service
 
     @Override
     public void onDestroy() {
+        if (this.playBack.getPlayStatus() == PLAYING) {
+            this.playBack.setPlayStatus(PAUSED);
+        }
+        savePlayBackToPreferences();
+
         this.mediaPlayer.release();
         this.mediaPlayer = null;
         this.musicDao = null;
-        this.playBack.setPlayMode(NO_REPEAT);
-        this.playBack.setPlayStatus(STOPPED);
         super.onDestroy();
     }
 }
