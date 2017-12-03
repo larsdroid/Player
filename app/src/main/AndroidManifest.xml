@@ -43,7 +43,8 @@
         <service
                 android:name=".playback.PlayBackService"
                 android:description="@string/music_playing_service_description"
-                android:exported="false"/>
+                android:exported="false"
+                android:process=":AlbumPlayBack" />
     </application>
 
 </manifest>

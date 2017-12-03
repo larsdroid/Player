@@ -236,7 +236,7 @@ public class PlayBackService extends Service
                 Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand");
             }
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void setCurrentSong(Song song) {
@@ -285,7 +285,11 @@ public class PlayBackService extends Service
         } else {
             this.notificationBarSmall.update(this.playBack.getCurrentSong(), this.playBack.getPlayStatus());
             this.notificationBarBig.update(this.playBack.getCurrentSong(), this.playBack.getPlayStatus());
-            this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+            if (this.playBack.getPlayStatus() == PLAYING) {
+                startForeground(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+            } else {
+                this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
+            }
         }
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
