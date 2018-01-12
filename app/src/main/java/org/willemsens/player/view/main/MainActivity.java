@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 Toast.makeText(this, deniedUserMessage, Toast.LENGTH_LONG).show();
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{ permission }, requestCode);
+                ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
             }
         }
     }
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity
 
     private void setNowPlayingFragment(Song song, PlayStatus playStatus) {
         final FragmentManager manager = getSupportFragmentManager();
-        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment)manager.findFragmentById(R.id.now_playing_bar_container);
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) manager.findFragmentById(R.id.now_playing_bar_container);
         if (nowPlayingFragment == null) {
             nowPlayingFragment = NowPlayingFragment.newInstance();
 
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity
 
     private void removeNowPlayingFragment() {
         final FragmentManager manager = getSupportFragmentManager();
-        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment)manager.findFragmentById(R.id.now_playing_bar_container);
+        NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) manager.findFragmentById(R.id.now_playing_bar_container);
         if (nowPlayingFragment != null) {
             final FragmentTransaction transaction = manager.beginTransaction();
             transaction.remove(nowPlayingFragment);
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager manager = getSupportFragmentManager();
         Fragment fragment = manager.findFragmentById(R.id.fragment_container);
         if (fragment instanceof MusicFragment) {
-            MusicFragment musicFragment = (MusicFragment)fragment;
+            MusicFragment musicFragment = (MusicFragment) fragment;
             musicFragment.setCurrentFragment(SubFragmentType.ALBUMS);
             musicFragment.filterAlbums(artist);
         }
@@ -306,9 +306,8 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         this.playBackStatusReceiver = new PlayBackStatusReceiver();
-        final LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         IntentFilter filter = new IntentFilter(getString(R.string.key_player_status));
-        lbm.registerReceiver(this.playBackStatusReceiver, filter);
+        registerReceiver(this.playBackStatusReceiver, filter);
 
         this.headsetReceiver = new HeadsetReceiver();
         filter = new IntentFilter(AudioManager.ACTION_HEADSET_PLUG);
@@ -325,16 +324,14 @@ public class MainActivity extends AppCompatActivity
     private class PlayBackStatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String intentAction = intent.getAction();
-            if (intentAction.equals(getString(R.string.key_player_status))) {
-                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
-                final Song song = getMusicDao().findSong(songId);
-                final PlayStatus playStatus = PlayStatus.valueOf(intent.getStringExtra(getString(R.string.key_play_status)));
-                if (playStatus == STOPPED) {
-                    removeNowPlayingFragment();
-                } else {
-                    setNowPlayingFragment(song, playStatus);
-                }
+            // TODO: runOnUiThread(new Runnable() {    ?
+            final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+            final Song song = getMusicDao().findSong(songId);
+            final PlayStatus playStatus = PlayStatus.valueOf(intent.getStringExtra(getString(R.string.key_play_status)));
+            if (playStatus == STOPPED) {
+                removeNowPlayingFragment();
+            } else {
+                setNowPlayingFragment(song, playStatus);
             }
         }
     }

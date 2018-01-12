@@ -14,7 +14,6 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
@@ -290,13 +289,12 @@ public class PlayBackService extends Service
             }
         }
 
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         Intent broadcast = new Intent(getString(R.string.key_player_status));
         if (this.playBack.getCurrentSong() != null) {
             broadcast.putExtra(getString(R.string.key_song_id), this.playBack.getCurrentSong().getId());
         }
         broadcast.putExtra(getString(R.string.key_play_status), this.playBack.getPlayStatus().name());
-        lbm.sendBroadcast(broadcast);
+        sendBroadcast(broadcast);
     }
 
     @Override

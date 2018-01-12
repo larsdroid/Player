@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -103,24 +102,19 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
     }
 
     void registerPlayBackUpdateReceiver() {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         IntentFilter filter = new IntentFilter();
         filter.addAction(context.getString(R.string.key_player_status));
-        lbm.registerReceiver(this.playBackUpdateReceiver, filter);
+        context.registerReceiver(this.playBackUpdateReceiver, filter);
     }
 
     void unregisterPlayBackUpdateReceiver() {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
-        lbm.unregisterReceiver(this.playBackUpdateReceiver);
+        context.unregisterReceiver(this.playBackUpdateReceiver);
     }
 
     private class PlayBackUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String intentAction = intent.getAction();
-            if (intentAction.equals(context.getString(R.string.key_player_status))) {
-                notifyDataSetChanged();
-            }
+            notifyDataSetChanged();
             // TODO: listen to STOPPED --> set current song ID to -1
         }
     }

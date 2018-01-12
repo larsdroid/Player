@@ -1,3 +1,8 @@
+*** URGENT: PlayBack singleton shouldn't be accessed from inside
+*** the service since it runs in a separate process! So some global
+*** broadcast listener (a new one?) from the MAIN process should
+*** update the application state.
+
 * Start a song -> press pause -> dismiss the activity -> open the notification
   -> notification shows the previously stored "current track"
 
