@@ -16,7 +16,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
@@ -27,9 +28,6 @@ import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
 import java.io.IOException;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayMode.NO_REPEAT;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
