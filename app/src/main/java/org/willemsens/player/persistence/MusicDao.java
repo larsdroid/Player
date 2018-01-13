@@ -12,6 +12,7 @@ import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
 import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.playback.PlayMode;
 import org.willemsens.player.playback.PlayStatus;
 
 import java.io.File;
@@ -284,7 +285,7 @@ public class MusicDao {
                 .get().firstOrNull();
     }
 
-    public Long getCurrentSongId(Context context) {
+    private Long getCurrentSongId(Context context) {
         ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_song_id));
         if (stateSongId != null && stateSongId.getValue() != null) {
             return Long.parseLong(stateSongId.getValue());
@@ -293,7 +294,12 @@ public class MusicDao {
         }
     }
 
-    public void setCurrentSongId(Context context, Long songId) {
+    public Song getCurrentSong(Context context) {
+        final Long songId = getCurrentSongId(context);
+        return songId == null ? null : findSong(songId);
+    }
+
+    private void setCurrentSongId(Context context, Long songId) {
         if (songId == null) {
             this.dataStore.delete(ApplicationState.class)
                     .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_song_id)));
@@ -311,12 +317,16 @@ public class MusicDao {
         }
     }
 
+    public void setCurrentSong(Context context, Song song) {
+        setCurrentSongId(context, song == null ? null : song.getId());
+    }
+
     public PlayStatus getCurrentPlayStatus(Context context) {
         ApplicationState statePlayStatus = getApplicationState(context.getString(R.string.key_play_status));
         if (statePlayStatus != null && statePlayStatus.getValue() != null) {
             return PlayStatus.valueOf(statePlayStatus.getValue());
         } else {
-            return null;
+            return PlayStatus.STOPPED;
         }
     }
 
@@ -334,6 +344,33 @@ public class MusicDao {
             } else {
                 statePlayStatus.setValue(playStatus.name());
                 this.dataStore.update(statePlayStatus);
+            }
+        }
+    }
+
+    public PlayMode getCurrentPlayMode(Context context) {
+        ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_play_mode));
+        if (statePlayMode != null && statePlayMode.getValue() != null) {
+            return PlayMode.valueOf(statePlayMode.getValue());
+        } else {
+            return PlayMode.NO_REPEAT;
+        }
+    }
+
+    public void setCurrentPlayMode(Context context, PlayMode playMode) {
+        if (playMode == null) {
+            this.dataStore.delete(ApplicationState.class)
+                    .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_play_mode)));
+        } else {
+            ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_play_mode));
+            if (statePlayMode == null) {
+                statePlayMode = new ApplicationState();
+                statePlayMode.setProperty(context.getString(R.string.key_play_mode));
+                statePlayMode.setValue(playMode.name());
+                this.dataStore.insert(statePlayMode);
+            } else {
+                statePlayMode.setValue(playMode.name());
+                this.dataStore.update(statePlayMode);
             }
         }
     }

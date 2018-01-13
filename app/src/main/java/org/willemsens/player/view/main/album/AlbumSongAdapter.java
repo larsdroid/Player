@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
-import org.willemsens.player.playback.PlayBack;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
@@ -27,18 +27,16 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
     private final List<Song> songs;
     private final OnSongClickedListener listener;
     private final PlayBackUpdateReceiver playBackUpdateReceiver;
-
-    private PlayBack playBack;
+    private final MusicDao musicDao;
 
     AlbumSongAdapter(Context context, DataAccessProvider dataAccessProvider, Album album) {
         this.context = context;
         this.listener = (OnSongClickedListener) context;
         this.playBackUpdateReceiver = new PlayBackUpdateReceiver();
-
-        this.playBack = PlayBack.getInstance();
+        this.musicDao = dataAccessProvider.getMusicDao();
 
         // TODO: can requery handle 'album.getSongs()'?
-        this.songs = dataAccessProvider.getMusicDao().getAllSongs(album);
+        this.songs = this.musicDao.getAllSongs(album);
     }
 
     @Override
@@ -93,7 +91,8 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
             this.artistName.setText(song.getArtist().getName());
             this.songLength.setText(StringFormat.formatToSongLength(song.getLength()));
 
-            if (playBack.getCurrentSong() != null && playBack.getCurrentSong().getId().equals(song.getId())) {
+            final Song currentSong = musicDao.getCurrentSong(context);
+            if (currentSong != null && currentSong.getId().equals(song.getId())) {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorBackground));
