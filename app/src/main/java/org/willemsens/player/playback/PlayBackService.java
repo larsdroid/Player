@@ -263,6 +263,7 @@ public class PlayBackService extends Service
     public void onCompletion(MediaPlayer mediaPlayer) {
         if (this.musicDao.getCurrentPlayMode(this) == PlayMode.REPEAT_ONE && this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
             // TODO: the looping functionality of MediaPlayer can be used
+            //       ... but it probably shouldn't since we want to track the number of plays.
             this.mediaPlayer.start();
         } else {
             Song nextSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong(this));
@@ -291,6 +292,7 @@ public class PlayBackService extends Service
         if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
             this.musicDao.setCurrentPlayStatus(this, PAUSED);
         }
+        this.musicDao.setCurrentMillis(this, this.mediaPlayer.getCurrentPosition());
 
         this.mediaPlayer.release();
         this.mediaPlayer = null;

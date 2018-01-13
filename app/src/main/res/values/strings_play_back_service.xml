@@ -7,6 +7,14 @@
     <string name="key_action_setup">org.willemsens.PlayBackService.ACTION_SETUP</string>
     <string name="key_action_dismiss">org.willemsens.PlayBackService.ACTION_DISMISS</string>
 
+    <!-- Extras for intents targeted at the PlayBackService -->
+    <string name="key_player_command">org.willemsens.PLAYER_COMMAND</string>
+
     <!-- Actions for intents coming from the PlayBackService -->
     <string name="key_player_status_update">org.willemsens.PLAYER_STATUS_UPDATE</string>
+
+    <!-- Application State -->
+    <string name="key_play_mode">org.willemsens.PLAY_MODE</string>
+    <string name="key_play_status">org.willemsens.PLAY_STATUS</string>
+    <string name="key_current_millis">org.willemsens.CURRENT_MILLIS</string>
 </resources>

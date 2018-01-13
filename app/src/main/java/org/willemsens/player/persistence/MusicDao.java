@@ -374,4 +374,26 @@ public class MusicDao {
             }
         }
     }
+
+    public int getCurrentMillis(Context context) {
+        ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_current_millis));
+        if (statePlayMode != null && statePlayMode.getValue() != null) {
+            return Integer.parseInt(statePlayMode.getValue());
+        } else {
+            return 0;
+        }
+    }
+
+    public void setCurrentMillis(Context context, int millis) {
+        ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_current_millis));
+        if (statePlayMode == null) {
+            statePlayMode = new ApplicationState();
+            statePlayMode.setProperty(context.getString(R.string.key_current_millis));
+            statePlayMode.setValue(String.valueOf(millis));
+            this.dataStore.insert(statePlayMode);
+        } else {
+            statePlayMode.setValue(String.valueOf(millis));
+            this.dataStore.update(statePlayMode);
+        }
+    }
 }
