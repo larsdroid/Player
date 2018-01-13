@@ -306,7 +306,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         this.playBackStatusReceiver = new PlayBackStatusReceiver();
-        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status));
+        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status_update));
         registerReceiver(this.playBackStatusReceiver, filter);
 
         this.headsetReceiver = new HeadsetReceiver();

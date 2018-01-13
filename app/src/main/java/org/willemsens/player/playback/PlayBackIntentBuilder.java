@@ -20,12 +20,22 @@ public class PlayBackIntentBuilder {
     }
 
     public PlayBackIntentBuilder setSong(Song song) {
+        this.intent.setAction(context.getString(R.string.key_action_set_song_id));
         this.intent.putExtra(context.getString(R.string.key_song_id), song.getId());
         return this;
     }
 
     public PlayBackIntentBuilder setPlayerCommand(PlayerCommand playerCommand) {
-        this.intent.putExtra(context.getString(R.string.key_play_command), playerCommand.name());
+        if (this.intent.getAction() == null) {
+            this.intent.setAction(context.getString(R.string.key_action_player_command));
+        }
+        this.intent.putExtra(context.getString(R.string.key_player_command), playerCommand.name());
+        return this;
+    }
+
+    public PlayBackIntentBuilder setPlayMode(PlayMode playMode) {
+        this.intent.setAction(context.getString(R.string.key_action_set_play_mode));
+        this.intent.putExtra(context.getString(R.string.key_play_mode), playMode.name());
         return this;
     }
 

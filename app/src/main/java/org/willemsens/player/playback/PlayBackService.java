@@ -32,6 +32,7 @@ import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.DISMISS;
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
+import static org.willemsens.player.playback.PlayerCommand.PLAY;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
 import static org.willemsens.player.playback.PlayerCommand.STOP_PLAY_PAUSE;
 
@@ -119,27 +120,28 @@ public class PlayBackService extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            // TODO: Work with 'intent.getAction()' and also in the PlayBackIntentBuilder
-            if (intent.getAction() != null && intent.getAction().equals(getString(R.string.key_action_setup))) {
+        String intentAction = intent.getAction();
+        if (intentAction != null) {
+            if (intentAction.equals(getString(R.string.key_action_setup))) {
                 notificationAndBroadcast();
-            } else if (intent.getAction() != null && intent.getAction().equals(getString(R.string.key_action_dismiss))) {
+            } else if (intentAction.equals(getString(R.string.key_action_dismiss))) {
                 stopSelf();
-            } else if (intent.hasExtra(getString(R.string.key_song_id))) {
+            } else if (intentAction.equals(getString(R.string.key_action_set_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
                 final Song song = this.musicDao.findSong(songId);
 
-                if (intent.hasExtra(getString(R.string.key_play_command))) {
-                    final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
-                    switch (playerCommand) {
-                        case PLAY:
-                            this.musicDao.setCurrentPlayStatus(this, PLAYING);
+                if (intent.hasExtra(getString(R.string.key_player_command))) {
+                    final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
+                    if (playerCommand == PLAY) {
+                        this.musicDao.setCurrentPlayStatus(this, PLAYING);
+                    } else {
+                        Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
                     }
                 }
 
                 setCurrentSong(song);
-            } else if (intent.hasExtra(getString(R.string.key_play_command))) {
-                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_play_command)));
+            } else if (intentAction.equals(getString(R.string.key_action_player_command))) {
+                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
                 if (playerCommand == PREVIOUS || playerCommand == NEXT) {
                     Song newSong;
                     if (playerCommand == PREVIOUS) {
@@ -177,7 +179,7 @@ public class PlayBackService extends Service
                 } else {
                     Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
                 }
-            } else if (intent.hasExtra(getString(R.string.key_play_mode))) {
+            } else if (intentAction.equals(getString(R.string.key_action_set_play_mode))) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
                 // TODO
             } else {
@@ -240,7 +242,7 @@ public class PlayBackService extends Service
             }
         }
 
-        Intent broadcast = new Intent(getString(R.string.key_player_status));
+        Intent broadcast = new Intent(getString(R.string.key_player_status_update));
         sendBroadcast(broadcast);
     }
 

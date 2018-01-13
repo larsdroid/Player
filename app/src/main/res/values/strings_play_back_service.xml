@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Actions for intents targeted at the PlayBackService -->
+    <string name="key_action_set_song_id">org.willemsens.PlayBackService.ACTION_SET_SONG_ID</string>
+    <string name="key_action_set_play_mode">org.willemsens.PlayBackService.ACTION_SET_PLAY_MODE</string>
+    <string name="key_action_player_command">org.willemsens.PlayBackService.ACTION_PLAYER_COMMAND</string>
+    <string name="key_action_setup">org.willemsens.PlayBackService.ACTION_SETUP</string>
+    <string name="key_action_dismiss">org.willemsens.PlayBackService.ACTION_DISMISS</string>
+
+    <!-- Actions for intents coming from the PlayBackService -->
+    <string name="key_player_status_update">org.willemsens.PLAYER_STATUS_UPDATE</string>
+</resources>

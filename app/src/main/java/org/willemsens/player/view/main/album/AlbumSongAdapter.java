@@ -102,7 +102,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
     void registerPlayBackUpdateReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(context.getString(R.string.key_player_status));
+        filter.addAction(context.getString(R.string.key_player_status_update));
         context.registerReceiver(this.playBackUpdateReceiver, filter);
     }
 
