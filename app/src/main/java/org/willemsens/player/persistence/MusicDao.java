@@ -1,22 +1,24 @@
 package org.willemsens.player.persistence;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
+import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
+import org.willemsens.player.model.ApplicationState;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
 import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.playback.PlayStatus;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -274,5 +276,65 @@ public class MusicDao {
         final Directory directory = new Directory();
         directory.setPath(path);
         this.dataStore.insert(directory);
+    }
+
+    private ApplicationState getApplicationState(String property) {
+        return this.dataStore.select(ApplicationState.class)
+                .where(ApplicationState.PROPERTY.equal(property))
+                .get().firstOrNull();
+    }
+
+    public Long getCurrentSongId(Context context) {
+        ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_song_id));
+        if (stateSongId != null && stateSongId.getValue() != null) {
+            return Long.parseLong(stateSongId.getValue());
+        } else {
+            return null;
+        }
+    }
+
+    public void setCurrentSongId(Context context, Long songId) {
+        if (songId == null) {
+            this.dataStore.delete(ApplicationState.class)
+                    .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_song_id)));
+        } else {
+            ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_song_id));
+            if (stateSongId == null) {
+                stateSongId = new ApplicationState();
+                stateSongId.setProperty(context.getString(R.string.key_song_id));
+                stateSongId.setValue(String.valueOf(songId));
+                this.dataStore.insert(stateSongId);
+            } else {
+                stateSongId.setValue(String.valueOf(songId));
+                this.dataStore.update(stateSongId);
+            }
+        }
+    }
+
+    public PlayStatus getCurrentPlayStatus(Context context) {
+        ApplicationState statePlayStatus = getApplicationState(context.getString(R.string.key_play_status));
+        if (statePlayStatus != null && statePlayStatus.getValue() != null) {
+            return PlayStatus.valueOf(statePlayStatus.getValue());
+        } else {
+            return null;
+        }
+    }
+
+    public void setCurrentPlayStatus(Context context, PlayStatus playStatus) {
+        if (playStatus == null) {
+            this.dataStore.delete(ApplicationState.class)
+                    .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_play_status)));
+        } else {
+            ApplicationState statePlayStatus = getApplicationState(context.getString(R.string.key_play_status));
+            if (statePlayStatus == null) {
+                statePlayStatus = new ApplicationState();
+                statePlayStatus.setProperty(context.getString(R.string.key_play_status));
+                statePlayStatus.setValue(playStatus.name());
+                this.dataStore.insert(statePlayStatus);
+            } else {
+                statePlayStatus.setValue(playStatus.name());
+                this.dataStore.update(statePlayStatus);
+            }
+        }
     }
 }

@@ -290,10 +290,6 @@ public class PlayBackService extends Service
         }
 
         Intent broadcast = new Intent(getString(R.string.key_player_status));
-        if (this.playBack.getCurrentSong() != null) {
-            broadcast.putExtra(getString(R.string.key_song_id), this.playBack.getCurrentSong().getId());
-        }
-        broadcast.putExtra(getString(R.string.key_play_status), this.playBack.getPlayStatus().name());
         sendBroadcast(broadcast);
     }
 
