@@ -71,6 +71,11 @@ public class PlayBackService extends Service
 
         initNotificationBars();
         initNotificationManager();
+
+        final Song currentSong = this.musicDao.getCurrentSong(this);
+        if (currentSong != null) {
+            this.setCurrentSong(currentSong);
+        }
     }
 
     private void initNotificationBars() {
