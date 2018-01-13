@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="org.willemsens.player">
+    <application>
+        <!-- Don't start the service in a separate process in the debug build. -->
+        <service
+                android:name=".playback.PlayBackService"
+                tools:remove="android:process"/>
+    </application>
+</manifest>
