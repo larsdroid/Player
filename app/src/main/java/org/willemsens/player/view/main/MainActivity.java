@@ -17,7 +17,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -25,7 +24,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
@@ -46,11 +48,6 @@ import org.willemsens.player.view.main.music.artists.OnArtistClickedListener;
 import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
@@ -316,7 +313,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(this.playBackStatusReceiver);
+        unregisterReceiver(this.playBackStatusReceiver);
         unregisterReceiver(this.headsetReceiver);
         super.onPause();
     }

@@ -43,6 +43,7 @@ public class PlayBackService extends Service
     private NotificationBarSmall notificationBarSmall;
     private NotificationBarBig notificationBarBig;
     private NotificationManager notificationManager;
+    private int millis;
 
     @Nullable
     @Override
@@ -75,6 +76,7 @@ public class PlayBackService extends Service
         final Song currentSong = this.musicDao.getCurrentSong(this);
         if (currentSong != null) {
             this.setCurrentSong(currentSong);
+            this.millis = this.musicDao.getCurrentMillis(this);
         }
     }
 
@@ -127,9 +129,7 @@ public class PlayBackService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
         String intentAction = intent.getAction();
         if (intentAction != null) {
-            if (intentAction.equals(getString(R.string.key_action_setup))) {
-                notificationAndBroadcast();
-            } else if (intentAction.equals(getString(R.string.key_action_dismiss))) {
+            if (intentAction.equals(getString(R.string.key_action_dismiss))) {
                 stopSelf();
             } else if (intentAction.equals(getString(R.string.key_action_set_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
@@ -235,6 +235,11 @@ public class PlayBackService extends Service
     }
 
     private void notificationAndBroadcast() {
+        if (this.musicDao.getCurrentPlayStatus(this) != PLAYING
+                && android.os.Build.VERSION.SDK_INT >= 24) {
+            stopForeground(0);
+        }
+
         if (this.musicDao.getCurrentPlayStatus(this) == STOPPED) {
             this.notificationManager.cancel(NotificationType.MUSIC_PLAYING.getCode());
         } else {
@@ -253,6 +258,10 @@ public class PlayBackService extends Service
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        if (this.millis != 0) {
+            this.mediaPlayer.seekTo(this.millis);
+        }
+
         if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
             this.mediaPlayer.start();
         }
