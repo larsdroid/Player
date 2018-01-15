@@ -21,7 +21,7 @@ public abstract class InfoFetcherService extends IntentService {
     protected MusicDao getMusicDao() {
         if (this.musicDao == null) {
             final EntityDataStore<Persistable> dataStore = ((PlayerApplication)getApplication()).getData();
-            this.musicDao = new MusicDao(dataStore);
+            this.musicDao = new MusicDao(dataStore, this);
         }
         return this.musicDao;
     }

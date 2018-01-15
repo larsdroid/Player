@@ -91,7 +91,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
             this.artistName.setText(song.getArtist().getName());
             this.songLength.setText(StringFormat.formatToSongLength(song.getLength()));
 
-            final Song currentSong = musicDao.getCurrentSong(context);
+            final Song currentSong = musicDao.getCurrentSong();
             if (currentSong != null && currentSong.getId().equals(song.getId())) {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {

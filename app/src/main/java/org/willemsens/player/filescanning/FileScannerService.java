@@ -6,7 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import io.requery.Persistable;
+import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
@@ -22,9 +23,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
@@ -45,7 +43,7 @@ public class FileScannerService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         if (this.musicDao == null) {
             final EntityDataStore<Persistable> dataStore = ((PlayerApplication)getApplication()).getData();
-            this.musicDao = new MusicDao(dataStore);
+            this.musicDao = new MusicDao(dataStore, this);
         }
 
         Set<Song> songs = new HashSet<>();

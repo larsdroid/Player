@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
-        this.musicDao = new MusicDao(dataStore);
+        this.musicDao = new MusicDao(dataStore, this);
 
         handlePermission(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -322,8 +322,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: runOnUiThread(new Runnable() {    ?
-            final Song song = getMusicDao().getCurrentSong(MainActivity.this);
-            final PlayStatus playStatus = getMusicDao().getCurrentPlayStatus(MainActivity.this);
+            final Song song = getMusicDao().getCurrentSong();
+            final PlayStatus playStatus = getMusicDao().getCurrentPlayStatus();
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();
             } else {
