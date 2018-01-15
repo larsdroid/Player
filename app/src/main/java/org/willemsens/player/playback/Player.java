@@ -55,12 +55,16 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
 
         final Song currentSong = this.musicDao.getCurrentSong();
         if (currentSong != null) {
-            this.setCurrentSong(currentSong);
+            this.setCurrentSong(currentSong, false);
             this.millis = this.musicDao.getCurrentMillis();
         }
     }
 
     private void setCurrentSong(Song song) {
+        setCurrentSong(song, true);
+    }
+
+    private void setCurrentSong(Song song, boolean notifyListeners) {
         this.musicDao.setCurrentSong(song);
 
         MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
@@ -74,7 +78,9 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         }*/
 
         this.exoPlayer.setPlayWhenReady(getPlayStatus() == PLAYING);
-        this.onUpdateListener.onUpdate();
+        if (notifyListeners) {
+            this.onUpdateListener.onUpdate();
+        }
     }
 
     PlayStatus getPlayStatus() {
