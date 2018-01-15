@@ -2,29 +2,43 @@ package org.willemsens.player.playback;
 
 import android.app.Application;
 import android.content.Context;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
-import android.os.PowerManager;
+import android.net.Uri;
 import android.util.Log;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
+import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.persistence.MusicDao;
 
-import java.io.IOException;
+import java.io.File;
 
+import static com.google.android.exoplayer2.Player.STATE_ENDED;
 import static org.willemsens.player.playback.PlayStatus.PAUSED;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PLAY;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
 
-public class Player implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class Player extends com.google.android.exoplayer2.Player.DefaultEventListener {
     private final MusicDao musicDao;
-    private final MediaPlayer mediaPlayer;
+    private final SimpleExoPlayer exoPlayer;
     private final OnUpdateListener onUpdateListener;
-    private int millis;
+    private final DataSource.Factory dataSourceFactory;
+    private long millis;
 
     Player(Application application, Context context, OnUpdateListener onUpdateListener) {
         this.onUpdateListener = onUpdateListener;
@@ -32,17 +46,12 @@ public class Player implements MediaPlayer.OnErrorListener, MediaPlayer.OnPrepar
         final EntityDataStore<Persistable> dataStore = ((PlayerApplication) application).getData();
         this.musicDao = new MusicDao(dataStore, context);
 
-        this.mediaPlayer = new MediaPlayer();
-        this.mediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-
-        final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-        builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .setUsage(AudioAttributes.USAGE_MEDIA);
-        final AudioAttributes attributes = builder.build();
-        this.mediaPlayer.setAudioAttributes(attributes);
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        this.dataSourceFactory = new DefaultDataSourceFactory(context,
+                Util.getUserAgent(context, context.getString(R.string.app_name)), null);
 
         final Song currentSong = this.musicDao.getCurrentSong();
         if (currentSong != null) {
@@ -52,19 +61,20 @@ public class Player implements MediaPlayer.OnErrorListener, MediaPlayer.OnPrepar
     }
 
     private void setCurrentSong(Song song) {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-        mediaPlayer.reset();
-
         this.musicDao.setCurrentSong(song);
 
-        try {
-            mediaPlayer.setDataSource(song.getFile());
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            Log.e(getClass().getName(), "Can't play song: " + e.getMessage());
-        }
+        MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(Uri.fromFile(new File(song.getFile())));
+        this.exoPlayer.prepare(musicSource);
+
+        /*
+        TODO: seek to position
+        if (this.millis != 0) {
+            this.mediaPlayer.seekTo(this.millis);
+        }*/
+
+        this.exoPlayer.setPlayWhenReady(getPlayStatus() == PLAYING);
+        this.onUpdateListener.onUpdate();
     }
 
     PlayStatus getPlayStatus() {
@@ -110,18 +120,18 @@ public class Player implements MediaPlayer.OnErrorListener, MediaPlayer.OnPrepar
                     setCurrentSong(this.musicDao.getCurrentSong()); // TODO: not optimal to reload this song, I guess...
                 } else if (this.musicDao.getCurrentPlayStatus() == PAUSED) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
-                    this.mediaPlayer.start();
+                    this.exoPlayer.setPlayWhenReady(true);
                     this.onUpdateListener.onUpdate();
                 } else if (this.musicDao.getCurrentPlayStatus() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
-                    this.mediaPlayer.pause();
+                    this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
                 break;
             case PAUSE:
                 if (this.musicDao.getCurrentPlayStatus() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
-                    this.mediaPlayer.pause();
+                    this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
                 break;
@@ -131,51 +141,35 @@ public class Player implements MediaPlayer.OnErrorListener, MediaPlayer.OnPrepar
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
-        if (this.millis != 0) {
-            this.mediaPlayer.seekTo(this.millis);
-        }
-
-        if (getPlayStatus() == PLAYING) {
-            this.mediaPlayer.start();
-        }
-
-        this.onUpdateListener.onUpdate();
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-        if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ONE && getPlayStatus() == PLAYING) {
-            // TODO: the looping functionality of MediaPlayer can be used
-            //       ... but it probably shouldn't since we want to track the number of plays.
-            this.mediaPlayer.start();
-        } else {
-            Song nextSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong());
-            if (nextSong == null) {
-                if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ALL) {
-                    nextSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong().getAlbum());
-                    setCurrentSong(nextSong);
-                } else {
-                    this.musicDao.setCurrentPlayStatus(STOPPED);
-                    this.onUpdateListener.onUpdate();
-                }
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if (playbackState == STATE_ENDED) {
+            if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ONE && getPlayStatus() == PLAYING) {
+                // TODO: the looping functionality of MediaPlayer can be used
+                //       ... but it probably shouldn't since we want to track the number of plays.
+                this.exoPlayer.setPlayWhenReady(true);
             } else {
-                setCurrentSong(nextSong);
+                Song nextSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong());
+                if (nextSong == null) {
+                    if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ALL) {
+                        nextSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong().getAlbum());
+                        setCurrentSong(nextSong);
+                    } else {
+                        this.musicDao.setCurrentPlayStatus(STOPPED);
+                        this.onUpdateListener.onUpdate();
+                    }
+                } else {
+                    setCurrentSong(nextSong);
+                }
             }
         }
-    }
-
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
     }
 
     void release() {
         if (getPlayStatus() == PLAYING) {
             this.musicDao.setCurrentPlayStatus(PAUSED);
         }
-        this.musicDao.setCurrentMillis(this.mediaPlayer.getCurrentPosition());
-        this.mediaPlayer.release();
+        this.musicDao.setCurrentMillis(this.exoPlayer.getCurrentPosition());
+        this.exoPlayer.release();
     }
 
     interface OnUpdateListener {

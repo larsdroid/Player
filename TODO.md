@@ -1,5 +1,3 @@
-* MusicDao should have a Context attribute for convenience
-
 * Application state: save previous track position millis
 
 * Start a song -> press pause -> dismiss the activity -> open the notification

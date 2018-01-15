@@ -377,16 +377,16 @@ public class MusicDao {
         }
     }
 
-    public int getCurrentMillis() {
+    public long getCurrentMillis() {
         ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_current_millis));
         if (statePlayMode != null && statePlayMode.getValue() != null) {
-            return Integer.parseInt(statePlayMode.getValue());
+            return Long.parseLong(statePlayMode.getValue());
         } else {
             return 0;
         }
     }
 
-    public void setCurrentMillis(int millis) {
+    public void setCurrentMillis(long millis) {
         ApplicationState statePlayMode = getApplicationState(context.getString(R.string.key_current_millis));
         if (statePlayMode == null) {
             statePlayMode = new ApplicationState();
