@@ -6,44 +6,28 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
-import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Song;
-import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.notification.NotificationBarBig;
 import org.willemsens.player.playback.notification.NotificationBarSmall;
 import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
-import java.io.IOException;
-
-import static org.willemsens.player.playback.PlayStatus.PAUSED;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.DISMISS;
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
-import static org.willemsens.player.playback.PlayerCommand.PAUSE;
-import static org.willemsens.player.playback.PlayerCommand.PLAY;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
 import static org.willemsens.player.playback.PlayerCommand.STOP_PLAY_PAUSE;
 
-public class PlayBackService extends Service
-        implements MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
-    private MusicDao musicDao;
-    private MediaPlayer mediaPlayer;
+public class PlayBackService extends Service implements Player.OnUpdateListener {
     private NotificationBarSmall notificationBarSmall;
     private NotificationBarBig notificationBarBig;
     private NotificationManager notificationManager;
-    private int millis;
+    private Player player;
 
     @Nullable
     @Override
@@ -55,29 +39,10 @@ public class PlayBackService extends Service
     public void onCreate() {
         super.onCreate();
 
-        final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
-        this.musicDao = new MusicDao(dataStore);
-
-        this.mediaPlayer = new MediaPlayer();
-        this.mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-
-        final AudioAttributes.Builder builder = new AudioAttributes.Builder();
-        builder.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .setUsage(AudioAttributes.USAGE_MEDIA);
-        final AudioAttributes attributes = builder.build();
-        this.mediaPlayer.setAudioAttributes(attributes);
+        this.player = new Player(getApplication(), this, this);
 
         initNotificationBars();
         initNotificationManager();
-
-        final Song currentSong = this.musicDao.getCurrentSong(this);
-        if (currentSong != null) {
-            this.setCurrentSong(currentSong);
-            this.millis = this.musicDao.getCurrentMillis(this);
-        }
     }
 
     private void initNotificationBars() {
@@ -133,57 +98,14 @@ public class PlayBackService extends Service
                 stopSelf();
             } else if (intentAction.equals(getString(R.string.key_action_set_song_id))) {
                 final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
-                final Song song = this.musicDao.findSong(songId);
-
+                PlayerCommand playerCommand = null;
                 if (intent.hasExtra(getString(R.string.key_player_command))) {
-                    final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
-                    if (playerCommand == PLAY) {
-                        this.musicDao.setCurrentPlayStatus(this, PLAYING);
-                    } else {
-                        Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
-                    }
+                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
                 }
-
-                setCurrentSong(song);
+                this.player.setSong(songId, playerCommand);
             } else if (intentAction.equals(getString(R.string.key_action_player_command))) {
                 final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
-                if (playerCommand == PREVIOUS || playerCommand == NEXT) {
-                    Song newSong;
-                    if (playerCommand == PREVIOUS) {
-                        newSong = this.musicDao.findPreviousSong(this.musicDao.getCurrentSong(this));
-                        if (newSong == null) {
-                            newSong = this.musicDao.findLastSong(this.musicDao.getCurrentSong(this).getAlbum());
-                        }
-                    } else {
-                        newSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong(this));
-                        if (newSong == null) {
-                            newSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong(this).getAlbum());
-                        }
-                    }
-
-                    setCurrentSong(newSong);
-                } else if (playerCommand == STOP_PLAY_PAUSE) {
-                    if (this.musicDao.getCurrentPlayStatus(this) == STOPPED && this.musicDao.getCurrentSong(this) != null) {
-                        this.musicDao.setCurrentPlayStatus(this, PLAYING);
-                        setCurrentSong(this.musicDao.getCurrentSong(this)); // TODO: not optimal to reload this song, I guess...
-                    } else if (this.musicDao.getCurrentPlayStatus(this) == PAUSED) {
-                        this.musicDao.setCurrentPlayStatus(this, PLAYING);
-                        this.mediaPlayer.start();
-                        notificationAndBroadcast();
-                    } else if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
-                        this.musicDao.setCurrentPlayStatus(this, PAUSED);
-                        this.mediaPlayer.pause();
-                        notificationAndBroadcast();
-                    }
-                } else if (playerCommand == PAUSE) {
-                    if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
-                        this.musicDao.setCurrentPlayStatus(this, PAUSED);
-                        this.mediaPlayer.pause();
-                        notificationAndBroadcast();
-                    }
-                } else {
-                    Log.e(getClass().getName(), "Invalid PlayerCommand received in PlayBackService::onStartCommand");
-                }
+                this.player.processCommand(playerCommand);
             } else if (intentAction.equals(getString(R.string.key_action_set_play_mode))) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
                 // TODO
@@ -192,22 +114,6 @@ public class PlayBackService extends Service
             }
         }
         return START_NOT_STICKY;
-    }
-
-    private void setCurrentSong(Song song) {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-        mediaPlayer.reset();
-
-        this.musicDao.setCurrentSong(this, song);
-
-        try {
-            mediaPlayer.setDataSource(song.getFile());
-            mediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            Log.e(getClass().getName(), "Can't play song: " + e.getMessage());
-        }
     }
 
     private Notification createNotification() {
@@ -225,7 +131,7 @@ public class PlayBackService extends Service
                 .Builder(getApplicationContext(), NotificationType.MUSIC_PLAYING.getChannel())
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setAutoCancel(false)
-                .setOngoing(this.musicDao.getCurrentPlayStatus(this) == PLAYING)
+                .setOngoing(this.player.getPlayStatus() == PLAYING)
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(deleteIntent)
                 .setCustomBigContentView(this.notificationBarBig)
@@ -234,18 +140,19 @@ public class PlayBackService extends Service
         return builder.build();
     }
 
-    private void notificationAndBroadcast() {
-        if (this.musicDao.getCurrentPlayStatus(this) != PLAYING
-                && android.os.Build.VERSION.SDK_INT >= 24) {
+    @Override
+    public void onUpdate() {
+        if (this.player.getPlayStatus() != PLAYING && android.os.Build.VERSION.SDK_INT >= 24) {
             stopForeground(0);
         }
 
-        if (this.musicDao.getCurrentPlayStatus(this) == STOPPED) {
+        if (this.player.getPlayStatus() == STOPPED) {
             this.notificationManager.cancel(NotificationType.MUSIC_PLAYING.getCode());
+            stopSelf();
         } else {
-            this.notificationBarSmall.update(this.musicDao.getCurrentSong(this), this.musicDao.getCurrentPlayStatus(this));
-            this.notificationBarBig.update(this.musicDao.getCurrentSong(this), this.musicDao.getCurrentPlayStatus(this));
-            if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
+            this.notificationBarSmall.update(this.player.getSong(), this.player.getPlayStatus());
+            this.notificationBarBig.update(this.player.getSong(), this.player.getPlayStatus());
+            if (this.player.getPlayStatus() == PLAYING) {
                 startForeground(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
             } else {
                 this.notificationManager.notify(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
@@ -257,55 +164,8 @@ public class PlayBackService extends Service
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
-        if (this.millis != 0) {
-            this.mediaPlayer.seekTo(this.millis);
-        }
-
-        if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
-            this.mediaPlayer.start();
-        }
-        notificationAndBroadcast();
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-        if (this.musicDao.getCurrentPlayMode(this) == PlayMode.REPEAT_ONE && this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
-            // TODO: the looping functionality of MediaPlayer can be used
-            //       ... but it probably shouldn't since we want to track the number of plays.
-            this.mediaPlayer.start();
-        } else {
-            Song nextSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong(this));
-            if (nextSong == null) {
-                if (this.musicDao.getCurrentPlayMode(this) == PlayMode.REPEAT_ALL) {
-                    nextSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong(this).getAlbum());
-                    setCurrentSong(nextSong);
-                } else {
-                    this.musicDao.setCurrentPlayStatus(this, STOPPED);
-                    notificationAndBroadcast();
-                    stopSelf();
-                }
-            } else {
-                setCurrentSong(nextSong);
-            }
-        }
-    }
-
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        return false;
-    }
-
-    @Override
     public void onDestroy() {
-        if (this.musicDao.getCurrentPlayStatus(this) == PLAYING) {
-            this.musicDao.setCurrentPlayStatus(this, PAUSED);
-        }
-        this.musicDao.setCurrentMillis(this, this.mediaPlayer.getCurrentPosition());
-
-        this.mediaPlayer.release();
-        this.mediaPlayer = null;
-        this.musicDao = null;
+        this.player.release();
         super.onDestroy();
     }
 }
