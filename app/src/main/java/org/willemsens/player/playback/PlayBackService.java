@@ -84,8 +84,11 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             NotificationChannel channel = new NotificationChannel(
                     NotificationType.MUSIC_PLAYING.getChannel(),
                     getString(R.string.channel_name),
-                    NotificationManager.IMPORTANCE_HIGH);
+                    NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription(getString(R.string.channel_description));
+            channel.enableVibration(false);
+            channel.setSound(null, null);
+            channel.enableLights(false);
             this.notificationManager.createNotificationChannel(channel);
         }
     }
