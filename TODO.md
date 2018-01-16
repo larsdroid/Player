@@ -1,8 +1,6 @@
 * Application state: save previous track position millis
-
-* Start a song -> press pause -> dismiss the activity -> open the notification
-  -> notification shows the previously stored "current track"
-
+* When the Activity is terminated, pressing the notification should open the acticity
+ **in album view with the correct album selected and scrolled to the correct song**
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
 * Settings fragment
