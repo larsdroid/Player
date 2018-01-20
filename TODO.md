@@ -1,3 +1,4 @@
+* Calculate album length and show it in the GUI
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
   * Save album **play count** per album
