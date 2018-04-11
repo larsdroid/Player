@@ -38,4 +38,9 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
 
+    <!-- This style was removed from API 27. TODO: replace with a more up-to-date style. -->
+    <style name="TextAppearance.AppCompat.Notification">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
 </resources>
