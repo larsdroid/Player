@@ -47,6 +47,7 @@ import org.willemsens.player.view.main.music.albums.OnAlbumClickedListener;
 import org.willemsens.player.view.main.music.artists.OnArtistClickedListener;
 import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
+import org.willemsens.player.view.main.settings.OnSettingsFragmentListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
 
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         OnSongClickedListener,
         OnArtistClickedListener,
         OnAlbumClickedListener,
+        OnSettingsFragmentListener,
         NavigationView.OnNavigationItemSelectedListener {
     private static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
     private static final int PERMISSION_REQUEST_CODE_INTERNET = 2;
@@ -296,6 +298,21 @@ public class MainActivity extends AppCompatActivity
             musicFragment.setCurrentFragment(SubFragmentType.ALBUMS);
             musicFragment.filterAlbums(artist);
         }
+    }
+
+    @Override
+    public void onClearMusicCache() {
+        Toast.makeText(this, "CLEARING", Toast.LENGTH_LONG).show();
+        // TODO: clear songs
+        // TODO: clear albums
+        // TODO: clear artists
+        // TODO: clear all images
+        // TODO: clear directories ???
+
+        // TODO: make sure broadcasts are happening
+
+        // TODO: relaunch the file scanner service (mind that directories MAY have been cleared -->
+        //       see questions above.
     }
 
     @Override
