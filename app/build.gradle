@@ -28,11 +28,12 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    api(group: 'com.android.support.constraint', name: 'constraint-layout', version: '1.0.2')
 
-    api('com.android.support:appcompat-v7:27.1.1')
-    api('com.android.support:design:27.1.1')
-    api('com.android.support:support-v4:27.1.1')
-    api('com.android.support:recyclerview-v7:27.1.1')
+    api(group: 'com.android.support', name: 'appcompat-v7', version: '27.1.1')
+    api(group: 'com.android.support', name: 'design', version: '27.1.1')
+    api(group: 'com.android.support', name: 'support-v4', version: '27.1.1')
+    api(group: 'com.android.support', name: 'recyclerview-v7', version: '27.1.1')
 
     api(group: 'com.jakewharton', name: 'butterknife', version: '8.7.0')
     api(group: 'org', name: 'jaudiotagger', version: '2.0.3')
@@ -42,6 +43,8 @@ dependencies {
     api(group: 'io.requery', name: 'requery-android', version: '1.5.0')
     api(group: 'commons-io', name: 'commons-io', version: '2.5')
     api(group: 'com.google.android.exoplayer', name: 'exoplayer-core', version: '2.6.1')
+
+    api(group: 'org.willemsens', name: 'mp3-vbr-length', version: '1.0')
 
     annotationProcessor(group: 'io.requery', name: 'requery-processor', version: '1.4.0')
     annotationProcessor(group: 'com.jakewharton', name: 'butterknife-compiler', version: '8.7.0')

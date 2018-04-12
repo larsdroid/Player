@@ -12,10 +12,11 @@ allprojects {
     repositories {
         jcenter()
         google()
-    }
-    repositories {
         maven {
             url "https://maven.google.com"
+        }
+        maven {
+            url "https://dl.bintray.com/larsdroid/mp3-vbr-length"
         }
     }
 }

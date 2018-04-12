@@ -5,6 +5,7 @@ import android.util.Log;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
+import org.willemsens.mp3_vbr_length.Mp3Info;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
@@ -46,7 +47,13 @@ class AudioFileReader {
             songArtist.setName(songArtistName);
 
             final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
-            final int songLength = audioFile.getAudioHeader().getTrackLength();
+            final int songLength;
+            if (audioFile.getAudioHeader().isVariableBitRate()) {
+                final Mp3Info mp3Info = Mp3Info.of(file);
+                songLength = mp3Info.getSeconds();
+            } else {
+                songLength = audioFile.getAudioHeader().getTrackLength();
+            }
             final String songTrack = audioFile.getTag().getFirst(FieldKey.TRACK);
             final int track = songTrack != null && !songTrack.isEmpty() ? Integer.parseInt(songTrack) : -1;
             final Song song = new Song();
