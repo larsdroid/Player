@@ -17,7 +17,8 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
@@ -31,8 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -90,11 +94,11 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     void registerDbUpdateReceiver() {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         IntentFilter filter = new IntentFilter();
-        filter.addAction(context.getString(R.string.key_albums_inserted));
-        filter.addAction(context.getString(R.string.key_album_inserted));
-        filter.addAction(context.getString(R.string.key_album_updated));
-        filter.addAction(context.getString(R.string.key_artists_inserted));
-        filter.addAction(context.getString(R.string.key_artist_inserted));
+        filter.addAction(ALBUMS_INSERTED.getString(context));
+        filter.addAction(ALBUM_INSERTED.getString(context));
+        filter.addAction(ALBUM_UPDATED.getString(context));
+        filter.addAction(ARTISTS_INSERTED.getString(context));
+        filter.addAction(ARTIST_INSERTED.getString(context));
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -275,15 +279,15 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(context.getString(R.string.key_albums_inserted))) {
+            if (intentAction.equals(ALBUMS_INSERTED.getString(context))) {
                 loadAlbumsFromDb();
-            } else if (intentAction.equals(context.getString(R.string.key_album_inserted))) {
+            } else if (intentAction.equals(ALBUM_INSERTED.getString(context))) {
                 final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.add(album);
                 Collections.sort(allAlbums);
                 getFilter().filter(null);
-            } else if (intentAction.equals(context.getString(R.string.key_album_updated))) {
+            } else if (intentAction.equals(ALBUM_UPDATED.getString(context))) {
                 final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.set(allAlbums.indexOf(album), album);
@@ -292,9 +296,9 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
                     albums.set(index, album);
                     notifyItemChanged(index);
                 }
-            } else if (intentAction.equals(context.getString(R.string.key_artists_inserted))) {
+            } else if (intentAction.equals(ARTISTS_INSERTED.getString(context))) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
-            } else if (intentAction.equals(context.getString(R.string.key_artist_inserted))) {
+            } else if (intentAction.equals(ARTIST_INSERTED.getString(context))) {
                 final long artistId = intent.getLongExtra(context.getString(R.string.key_artist_id), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);

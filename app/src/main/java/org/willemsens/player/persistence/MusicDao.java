@@ -136,7 +136,7 @@ public class MusicDao {
      * @param albums The set of albums to check for in the DB.
      * @param songs  The songs that may have to be updated in case their album turns out
      *               to be in the DB already.
-     * @return The amount of new albums inserted into the DB.
+     * @return The ids of the new albums inserted into the DB.
      */
     public List<Long> checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
         final List<Album> databaseAlbums = getAllAlbums();
@@ -173,7 +173,7 @@ public class MusicDao {
      *                to be in the DB already.
      * @param songs   The songs that may have to be updated in case their artist turns out
      *                to be in the DB already.
-     * @return The amount of new artists inserted into the DB.
+     * @return The ids of the new artists inserted into the DB.
      */
     public List<Long> checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
         final List<Artist> databaseArtists = getAllArtists();

@@ -3,16 +3,20 @@ package org.willemsens.player.fetchers;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import org.willemsens.player.R;
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
-import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
+import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Image;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
+
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
 
 /**
  * A background service that iterates over the albums and artists in DB that don't have an image
@@ -30,18 +34,18 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         final ImageDownloader imageDownloader = new ImageDownloader();
-
-        long albumId = -1;
-        if (intent != null) {
-            albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
-        }
-
-        if (albumId != -1) {
-            final Album album = getMusicDao().findAlbum(albumId);
-            fetchAlbum(album, imageDownloader);
-        } else {
+        if (intent == null || intent.getAction() == null
+                || intent.getAction().equals(ALBUMS_INSERTED.getString(this))) {
+            // Scan all albums for missing information that can be fetched.
             final List<Album> albums = getMusicDao().getAllAlbumsMissingInfo();
             for (Album album : albums) {
+                fetchAlbum(album, imageDownloader);
+            }
+        } else if (intent.getAction().equals(ALBUM_INSERTED.getString(this))) {
+            // Fetch info for a single album.
+            final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+            if (albumId != -1) {
+                final Album album = getMusicDao().findAlbum(albumId);
                 fetchAlbum(album, imageDownloader);
             }
         }
@@ -100,10 +104,11 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
         if (isAlbumUpdated) {
             getMusicDao().updateAlbum(album);
 
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-            Intent broadcast = new Intent(getString(R.string.key_album_updated));
-            broadcast.putExtra(getString(R.string.key_album_id), album.getId());
-            lbm.sendBroadcast(broadcast);
+            MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+            builder
+                    .setType(ALBUM_UPDATED)
+                    .setAlbum(album)
+                    .buildAndSubmitBroadcast();
         }
 
         waitRateLimit();

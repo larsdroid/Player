@@ -34,6 +34,7 @@ dependencies {
     api(group: 'com.android.support', name: 'design', version: '27.1.1')
     api(group: 'com.android.support', name: 'support-v4', version: '27.1.1')
     api(group: 'com.android.support', name: 'recyclerview-v7', version: '27.1.1')
+    api(group: 'com.android.support', name: 'support-annotations', version: '27.1.1')
 
     api(group: 'com.jakewharton', name: 'butterknife', version: '8.7.0')
     api(group: 'org', name: 'jaudiotagger', version: '2.0.3')

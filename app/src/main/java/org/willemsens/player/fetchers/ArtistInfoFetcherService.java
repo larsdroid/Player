@@ -2,7 +2,6 @@ package org.willemsens.player.fetchers;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import org.willemsens.player.R;
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
@@ -10,8 +9,13 @@ import org.willemsens.player.fetchers.discogs.DiscogsInfoFetcher;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Image;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
+
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_UPDATED;
 
 public class ArtistInfoFetcherService extends InfoFetcherService {
     private final InfoFetcher infoFetcher;
@@ -25,18 +29,18 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         final ImageDownloader imageDownloader = new ImageDownloader();
-
-        long artistId = -1;
-        if (intent != null) {
-            artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
-        }
-
-        if (artistId != -1) {
-            final Artist artist = getMusicDao().findArtist(artistId);
-            fetchArtist(artist, imageDownloader);
-        } else {
+        if (intent == null || intent.getAction() == null
+                || intent.getAction().equals(ARTISTS_INSERTED.getString(this))) {
+            // Scan all artists for missing information that can be fetched.
             final List<Artist> artists = getMusicDao().getAllArtistsMissingImage();
             for (Artist artist : artists) {
+                fetchArtist(artist, imageDownloader);
+            }
+        } else if (intent.getAction().equals(ARTIST_INSERTED.getString(this))) {
+            // Fetch info for a single artist.
+            long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+            if (artistId != -1) {
+                final Artist artist = getMusicDao().findArtist(artistId);
                 fetchArtist(artist, imageDownloader);
             }
         }
@@ -78,10 +82,11 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
         if (isArtistUpdated) {
             getMusicDao().updateArtist(artist);
 
-            LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-            Intent broadcast = new Intent(getString(R.string.key_artist_updated));
-            broadcast.putExtra(getString(R.string.key_artist_id), artist.getId());
-            lbm.sendBroadcast(broadcast);
+            MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+            builder
+                    .setType(ARTIST_UPDATED)
+                    .setArtist(artist)
+                    .buildAndSubmitBroadcast();
         }
 
         waitRateLimit();

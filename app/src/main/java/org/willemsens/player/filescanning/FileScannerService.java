@@ -4,18 +4,19 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import io.requery.Persistable;
 import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
-import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastType;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
@@ -23,6 +24,16 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.SONG_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.SONGS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.SONG_INSERTED;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
@@ -61,23 +72,23 @@ public class FileScannerService extends IntentService {
 
                     newRecordsInserted(
                             artistIds,
-                            getString(R.string.key_artist_id),
-                            getString(R.string.key_artist_inserted),
-                            getString(R.string.key_artists_inserted),
+                            ARTIST_ID,
+                            ARTIST_INSERTED,
+                            ARTISTS_INSERTED,
                             ArtistInfoFetcherService.class);
 
                     newRecordsInserted(
                             albumIds,
-                            getString(R.string.key_album_id),
-                            getString(R.string.key_album_inserted),
-                            getString(R.string.key_albums_inserted),
+                            ALBUM_ID,
+                            ALBUM_INSERTED,
+                            ALBUMS_INSERTED,
                             AlbumInfoFetcherService.class);
 
                     newRecordsInserted(
                             songIds,
-                            getString(R.string.key_song_id),
-                            getString(R.string.key_song_inserted),
-                            getString(R.string.key_songs_inserted),
+                            SONG_ID,
+                            SONG_INSERTED,
+                            SONGS_INSERTED,
                             null);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
@@ -95,40 +106,44 @@ public class FileScannerService extends IntentService {
      * refresh" broadcasts in case the amount of new records didn't reach the threshold.
      * If a service class is provided as well, then the service in question is launched. Either for
      * a full refresh or for multiple single record updates, similar to the broadcast.
+     *
      * @param recordIds The IDs of the new records.
-     * @param intentKeyRecordId The intent key to use for submitting a single ID with an intent.
-     * @param intentActionSingleRecord The intent action to use when broadcasting for a single
-     *                                 record insert.
-     * @param intentActionMultipleRecords The intent action to use when broadcasting for a full
-     *                                    refresh.
+     * @param payloadType The intent extra payload key to use for submitting a single ID with an intent.
+     * @param broadcastTypeSingleRecord The broadcast type to use when broadcasting for a single
+     *                                  record insert.
+     * @param broadcastTypeMultipleRecords The broadcast type to use when broadcasting for a full
+     *                                     refresh.
      * @param clazz The service to trigger.
      */
     private void newRecordsInserted(@NonNull List<Long> recordIds,
-                                    @NonNull String intentKeyRecordId,
-                                    @NonNull String intentActionSingleRecord,
-                                    @NonNull String intentActionMultipleRecords,
+                                    @NonNull MusicLibraryBroadcastPayloadType payloadType,
+                                    @NonNull MusicLibraryBroadcastType broadcastTypeSingleRecord,
+                                    @NonNull MusicLibraryBroadcastType broadcastTypeMultipleRecords,
                                     @Nullable Class clazz) {
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
-        Intent broadcast;
+        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
 
         if (recordIds.size() > THRESHOLD_FULL_REFRESH) {
-            broadcast = new Intent(intentActionMultipleRecords);
-            lbm.sendBroadcast(broadcast);
+            builder
+                    .setType(broadcastTypeMultipleRecords)
+                    .buildAndSubmitBroadcast();
 
             if (clazz != null) {
-                broadcast = new Intent(this, clazz);
-                startService(broadcast);
+                builder
+                        .setClass(clazz)
+                        .buildAndSubmitService();
             }
         } else if (recordIds.size() > 0) {
             for (Long recordId : recordIds) {
-                broadcast = new Intent(intentActionSingleRecord);
-                broadcast.putExtra(intentKeyRecordId, recordId);
-                lbm.sendBroadcast(broadcast);
+                builder
+                        .setType(broadcastTypeSingleRecord)
+                        .setRecordId(payloadType, recordId)
+                        .buildAndSubmitBroadcast();
 
                 if (clazz != null) {
-                    broadcast = new Intent(this, clazz);
-                    broadcast.putExtra(intentKeyRecordId, recordId);
-                    startService(broadcast);
+                    builder
+                            .setClass(clazz)
+                            .setRecordId(payloadType, recordId)
+                            .buildAndSubmitService();
                 }
             }
         }
