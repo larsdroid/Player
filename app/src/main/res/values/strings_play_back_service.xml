@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="key_playback_song_id">org.willemsens.PlayBackService.SONG_ID</string>
+    <string name="key_play_mode">org.willemsens.PlayBackService.PLAY_MODE</string>
 
     <!-- Actions for intents targeted at the PlayBackService -->
     <string name="key_action_set_song_id">org.willemsens.PlayBackService.ACTION_SET_SONG_ID</string>
@@ -16,7 +17,8 @@
     <string name="key_player_status_update">org.willemsens.PLAYER_STATUS_UPDATE</string>
 
     <!-- Application State -->
-    <string name="key_play_mode">org.willemsens.PLAY_MODE</string>
-    <string name="key_play_status">org.willemsens.PLAY_STATUS</string>
-    <string name="key_current_millis">org.willemsens.CURRENT_MILLIS</string>
+    <string name="key_current_play_mode">org.willemsens.ApplicationStateProperty.CURRENT_PLAY_MODE</string>
+    <string name="key_current_play_status">org.willemsens.ApplicationStateProperty.CURRENT_PLAY_STATUS</string>
+    <string name="key_current_millis">org.willemsens.ApplicationStateProperty.CURRENT_MILLIS</string>
+    <string name="key_current_song_id">org.willemsens.ApplicationStateProperty.CURRENT_SONG_ID</string>
 </resources>
