@@ -288,7 +288,7 @@ public class MusicDao {
     }
 
     private Long getCurrentSongId() {
-        ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_song_id));
+        ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_playback_song_id));
         if (stateSongId != null && stateSongId.getValue() != null) {
             return Long.parseLong(stateSongId.getValue());
         } else {
@@ -304,12 +304,12 @@ public class MusicDao {
     private void setCurrentSongId(Long songId) {
         if (songId == null) {
             this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_song_id)));
+                    .where(ApplicationState.PROPERTY.equal(context.getString(R.string.key_playback_song_id)));
         } else {
-            ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_song_id));
+            ApplicationState stateSongId = getApplicationState(context.getString(R.string.key_playback_song_id));
             if (stateSongId == null) {
                 stateSongId = new ApplicationState();
-                stateSongId.setProperty(context.getString(R.string.key_song_id));
+                stateSongId.setProperty(context.getString(R.string.key_playback_song_id));
                 stateSongId.setValue(String.valueOf(songId));
                 this.dataStore.insert(stateSongId);
             } else {

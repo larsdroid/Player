@@ -2,7 +2,6 @@ package org.willemsens.player.fetchers;
 
 import android.content.Intent;
 import android.support.annotation.Nullable;
-import org.willemsens.player.R;
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.discogs.DiscogsInfoFetcher;
@@ -13,6 +12,7 @@ import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_UPDATED;
@@ -38,7 +38,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
             }
         } else if (intent.getAction().equals(ARTIST_INSERTED.getString(this))) {
             // Fetch info for a single artist.
-            long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+            long artistId = intent.getLongExtra(ARTIST_ID.getString(this), -1);
             if (artistId != -1) {
                 final Artist artist = getMusicDao().findArtist(artistId);
                 fetchArtist(artist, imageDownloader);

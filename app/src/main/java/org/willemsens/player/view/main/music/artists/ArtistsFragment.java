@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_UPDATED;
@@ -108,14 +109,14 @@ public class ArtistsFragment extends Fragment {
                 loadAllArtists();
                 adapter.notifyDataSetChanged();
             } else if (intentAction.equals(ARTIST_INSERTED.getString(ArtistsFragment.this))) {
-                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+                final long artistId = intent.getLongExtra(ARTIST_ID.getString(ArtistsFragment.this), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 artists.add(artist);
                 Collections.sort(artists);
                 final int index = artists.indexOf(artist);
                 adapter.notifyItemInserted(index);
             } else if (intentAction.equals(ARTIST_UPDATED.getString(ArtistsFragment.this))) {
-                final long artistId = intent.getLongExtra(getString(R.string.key_artist_id), -1);
+                final long artistId = intent.getLongExtra(ARTIST_ID.getString(ArtistsFragment.this), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 final int index = artists.indexOf(artist);
                 if (index != -1) {

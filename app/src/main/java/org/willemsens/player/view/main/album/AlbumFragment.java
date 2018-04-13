@@ -22,6 +22,8 @@ import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
+
 public class AlbumFragment extends Fragment {
     private DataAccessProvider dataAccessProvider;
     private Album album;
@@ -37,7 +39,7 @@ public class AlbumFragment extends Fragment {
         final AlbumFragment theInstance = new AlbumFragment();
 
         Bundle args = new Bundle();
-        args.putLong(context.getString(R.string.key_album_id), albumId);
+        args.putLong(ALBUM_ID.getString(context), albumId);
         theInstance.setArguments(args);
 
         return theInstance;
@@ -52,7 +54,7 @@ public class AlbumFragment extends Fragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            final long albumId = arguments.getLong(getString(R.string.key_album_id));
+            final long albumId = arguments.getLong(ALBUM_ID.getString(this));
             this.album = this.dataAccessProvider.getMusicDao().findAlbum(albumId);
 
             final Bitmap bitmap = BitmapFactory.decodeByteArray(

@@ -100,7 +100,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             if (intentAction.equals(getString(R.string.key_action_dismiss))) {
                 stopSelf();
             } else if (intentAction.equals(getString(R.string.key_action_set_song_id))) {
-                final long songId = intent.getLongExtra(getString(R.string.key_song_id), -1);
+                final long songId = intent.getLongExtra(getString(R.string.key_playback_song_id), -1);
                 PlayerCommand playerCommand = null;
                 if (intent.hasExtra(getString(R.string.key_player_command))) {
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));

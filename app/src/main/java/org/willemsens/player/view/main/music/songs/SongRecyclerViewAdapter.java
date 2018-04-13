@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
@@ -401,7 +404,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             if (intentAction.equals(SONGS_INSERTED.getString(context))) {
                 loadSongsFromDb();
             } else if (intentAction.equals(SONG_INSERTED.getString(context))) {
-                final long songId = intent.getLongExtra(context.getString(R.string.key_song_id), -1);
+                final long songId = intent.getLongExtra(SONG_ID.getString(context), -1);
                 final Song song = dataAccessProvider.getMusicDao().findSong(songId);
                 allSongs.add(song);
                 Collections.sort(allSongs);
@@ -409,17 +412,17 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             } else if (intentAction.equals(ARTISTS_INSERTED.getString(context))) {
                 ((SongFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(ARTIST_INSERTED.getString(context))) {
-                final long artistId = intent.getLongExtra(context.getString(R.string.key_artist_id), -1);
+                final long artistId = intent.getLongExtra(ARTIST_ID.getString(context), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 ((SongFilter)getFilter()).add(artist);
             } else if (intentAction.equals(ALBUMS_INSERTED.getString(context))) {
                 ((SongFilter)getFilter()).fetchAllAlbums();
             } else if (intentAction.equals(ALBUM_INSERTED.getString(context))) {
-                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 ((SongFilter)getFilter()).add(album);
             } else if (intentAction.equals(ALBUM_UPDATED.getString(context))) {
-                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 for (int i = 0; i < songs.size(); i++) {
                     if (songs.get(i).getAlbum().equals(album)) {

@@ -21,7 +21,7 @@ public class PlayBackIntentBuilder {
 
     public PlayBackIntentBuilder setSong(Song song) {
         this.intent.setAction(context.getString(R.string.key_action_set_song_id));
-        this.intent.putExtra(context.getString(R.string.key_song_id), song.getId());
+        this.intent.putExtra(context.getString(R.string.key_playback_song_id), song.getId());
         return this;
     }
 

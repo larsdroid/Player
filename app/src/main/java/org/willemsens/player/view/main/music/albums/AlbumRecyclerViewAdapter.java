@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
@@ -282,13 +284,13 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             if (intentAction.equals(ALBUMS_INSERTED.getString(context))) {
                 loadAlbumsFromDb();
             } else if (intentAction.equals(ALBUM_INSERTED.getString(context))) {
-                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.add(album);
                 Collections.sort(allAlbums);
                 getFilter().filter(null);
             } else if (intentAction.equals(ALBUM_UPDATED.getString(context))) {
-                final long albumId = intent.getLongExtra(context.getString(R.string.key_album_id), -1);
+                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.set(allAlbums.indexOf(album), album);
                 final int index = albums.indexOf(album);
@@ -299,7 +301,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             } else if (intentAction.equals(ARTISTS_INSERTED.getString(context))) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(ARTIST_INSERTED.getString(context))) {
-                final long artistId = intent.getLongExtra(context.getString(R.string.key_artist_id), -1);
+                final long artistId = intent.getLongExtra(ARTIST_ID.getString(context), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);
             }

@@ -3,7 +3,6 @@ package org.willemsens.player.fetchers;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import org.willemsens.player.R;
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
@@ -14,6 +13,7 @@ import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
@@ -43,7 +43,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
             }
         } else if (intent.getAction().equals(ALBUM_INSERTED.getString(this))) {
             // Fetch info for a single album.
-            final long albumId = intent.getLongExtra(getString(R.string.key_album_id), -1);
+            final long albumId = intent.getLongExtra(ALBUM_ID.getString(this), -1);
             if (albumId != -1) {
                 final Album album = getMusicDao().findAlbum(albumId);
                 fetchAlbum(album, imageDownloader);
