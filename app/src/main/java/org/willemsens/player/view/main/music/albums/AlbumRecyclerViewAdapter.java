@@ -32,14 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_IDS;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_IDS;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Album}.
@@ -97,11 +97,11 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     void registerDbUpdateReceiver() {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ALBUMS_INSERTED.getString(context));
-        filter.addAction(ALBUM_INSERTED.getString(context));
-        filter.addAction(ALBUM_UPDATED.getString(context));
-        filter.addAction(ARTISTS_INSERTED.getString(context));
-        filter.addAction(ARTIST_INSERTED.getString(context));
+        filter.addAction(MLBT_ALBUMS_INSERTED.name());
+        filter.addAction(MLBT_ALBUM_INSERTED.name());
+        filter.addAction(MLBT_ALBUM_UPDATED.name());
+        filter.addAction(MLBT_ARTISTS_INSERTED.name());
+        filter.addAction(MLBT_ARTIST_INSERTED.name());
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -233,12 +233,12 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             for (Artist artist : filterArtists) {
                 filterArtistIds[i++] = artist.getId();
             }
-            outState.putLongArray(ARTIST_IDS.getString(context), filterArtistIds);
+            outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                long[] filterArtistIds = savedInstanceState.getLongArray(ARTIST_IDS.getString(context));
+                long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
                     for (Artist artist : this.artists.keySet()) {
                         this.artists.put(artist, false);
@@ -282,16 +282,16 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(ALBUMS_INSERTED.getString(context))) {
+            if (intentAction.equals(MLBT_ALBUMS_INSERTED.name())) {
                 loadAlbumsFromDb();
-            } else if (intentAction.equals(ALBUM_INSERTED.getString(context))) {
-                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
+            } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
+                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.add(album);
                 Collections.sort(allAlbums);
                 getFilter().filter(null);
-            } else if (intentAction.equals(ALBUM_UPDATED.getString(context))) {
-                final long albumId = intent.getLongExtra(ALBUM_ID.getString(context), -1);
+            } else if (intentAction.equals(MLBT_ALBUM_UPDATED.name())) {
+                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 allAlbums.set(allAlbums.indexOf(album), album);
                 final int index = albums.indexOf(album);
@@ -299,10 +299,10 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
                     albums.set(index, album);
                     notifyItemChanged(index);
                 }
-            } else if (intentAction.equals(ARTISTS_INSERTED.getString(context))) {
+            } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
-            } else if (intentAction.equals(ARTIST_INSERTED.getString(context))) {
-                final long artistId = intent.getLongExtra(ARTIST_ID.getString(context), -1);
+            } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);
             }

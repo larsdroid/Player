@@ -12,10 +12,10 @@ import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_UPDATED;
 
 public class ArtistInfoFetcherService extends InfoFetcherService {
     private final InfoFetcher infoFetcher;
@@ -30,15 +30,15 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
     protected void onHandleIntent(@Nullable Intent intent) {
         final ImageDownloader imageDownloader = new ImageDownloader();
         if (intent == null || intent.getAction() == null
-                || intent.getAction().equals(ARTISTS_INSERTED.getString(this))) {
+                || intent.getAction().equals(MLBT_ARTISTS_INSERTED.name())) {
             // Scan all artists for missing information that can be fetched.
             final List<Artist> artists = getMusicDao().getAllArtistsMissingImage();
             for (Artist artist : artists) {
                 fetchArtist(artist, imageDownloader);
             }
-        } else if (intent.getAction().equals(ARTIST_INSERTED.getString(this))) {
+        } else if (intent.getAction().equals(MLBT_ARTIST_INSERTED.name())) {
             // Fetch info for a single artist.
-            long artistId = intent.getLongExtra(ARTIST_ID.getString(this), -1);
+            long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
             if (artistId != -1) {
                 final Artist artist = getMusicDao().findArtist(artistId);
                 fetchArtist(artist, imageDownloader);
@@ -84,7 +84,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
 
             MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
             builder
-                    .setType(ARTIST_UPDATED)
+                    .setType(MLBT_ARTIST_UPDATED)
                     .setArtist(artist)
                     .buildAndSubmitBroadcast();
         }

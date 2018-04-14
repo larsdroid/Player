@@ -16,13 +16,13 @@ import org.willemsens.player.playback.notification.NotificationBarSmall;
 import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
-import static org.willemsens.player.playback.PlayBackBroadcastType.PLAYER_STATUS_UPDATE;
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAYER_COMMAND;
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAY_MODE;
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_SONG_ID;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_PLAYER_COMMAND;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_PLAY_MODE;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_SONG_ID;
+import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_STATUS_UPDATE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_SONG_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.DISMISS;
@@ -104,20 +104,20 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     public int onStartCommand(Intent intent, int flags, int startId) {
         String intentAction = intent.getAction();
         if (intentAction != null) {
-            if (intentAction.equals(PlayBackIntentType.PLAYBACK_DISMISS.getString(this))) {
+            if (intentAction.equals(PlayBackIntentType.PBIT_DISMISS.name())) {
                 stopSelf();
-            } else if (intentAction.equals(PLAYBACK_SET_SONG_ID.getString(this))) {
-                final long songId = intent.getLongExtra(PLAYBACK_PAYLOAD_SONG_ID.getString(this), -1);
+            } else if (intentAction.equals(PBIT_SET_SONG_ID.name())) {
+                final long songId = intent.getLongExtra(PBIPT_SONG_ID.name(), -1);
                 PlayerCommand playerCommand = null;
-                if (intent.hasExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this))) {
-                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this)));
+                if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
+                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 }
                 this.player.setSong(songId, playerCommand);
-            } else if (intentAction.equals(PLAYBACK_PLAYER_COMMAND.getString(this))) {
-                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this)));
+            } else if (intentAction.equals(PBIT_PLAYER_COMMAND.name())) {
+                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 this.player.processCommand(playerCommand);
-            } else if (intentAction.equals(PLAYBACK_SET_PLAY_MODE.getString(this))) {
-                PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAY_MODE.getString(this)));
+            } else if (intentAction.equals(PBIT_SET_PLAY_MODE.name())) {
+                PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PBIPT_PLAY_MODE.name()));
                 // TODO
             } else {
                 Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand");
@@ -169,7 +169,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             }
         }
 
-        Intent broadcast = new Intent(PLAYER_STATUS_UPDATE.getString(this));
+        Intent broadcast = new Intent(PBBT_PLAYER_STATUS_UPDATE.name());
         sendBroadcast(broadcast);
     }
 

@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.willemsens.player.persistence.ApplicationStateProperty.CURRENT_MILLIS;
-import static org.willemsens.player.persistence.ApplicationStateProperty.CURRENT_PLAY_MODE;
-import static org.willemsens.player.persistence.ApplicationStateProperty.CURRENT_PLAY_STATUS;
-import static org.willemsens.player.persistence.ApplicationStateProperty.CURRENT_SONG_ID;
+import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_MILLIS;
+import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_MODE;
+import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_STATUS;
+import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_SONG_ID;
 
 public class MusicDao {
     private final EntityDataStore<Persistable> dataStore;
@@ -292,7 +292,7 @@ public class MusicDao {
     }
 
     private Long getCurrentSongId() {
-        ApplicationState stateSongId = getApplicationState(CURRENT_SONG_ID.getString(context));
+        ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
         if (stateSongId != null && stateSongId.getValue() != null) {
             return Long.parseLong(stateSongId.getValue());
         } else {
@@ -308,12 +308,12 @@ public class MusicDao {
     private void setCurrentSongId(Long songId) {
         if (songId == null) {
             this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(CURRENT_SONG_ID.getString(context)));
+                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_SONG_ID.name()));
         } else {
-            ApplicationState stateSongId = getApplicationState(CURRENT_SONG_ID.getString(context));
+            ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
             if (stateSongId == null) {
                 stateSongId = new ApplicationState();
-                stateSongId.setProperty(CURRENT_SONG_ID.getString(context));
+                stateSongId.setProperty(APPSTATE_CURRENT_SONG_ID.name());
                 stateSongId.setValue(String.valueOf(songId));
                 this.dataStore.insert(stateSongId);
             } else {
@@ -328,7 +328,7 @@ public class MusicDao {
     }
 
     public PlayStatus getCurrentPlayStatus() {
-        ApplicationState statePlayStatus = getApplicationState(CURRENT_PLAY_STATUS.getString(context));
+        ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
         if (statePlayStatus != null && statePlayStatus.getValue() != null) {
             return PlayStatus.valueOf(statePlayStatus.getValue());
         } else {
@@ -339,12 +339,12 @@ public class MusicDao {
     public void setCurrentPlayStatus(PlayStatus playStatus) {
         if (playStatus == null) {
             this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(CURRENT_PLAY_STATUS.getString(context)));
+                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_PLAY_STATUS.name()));
         } else {
-            ApplicationState statePlayStatus = getApplicationState(CURRENT_PLAY_STATUS.getString(context));
+            ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
             if (statePlayStatus == null) {
                 statePlayStatus = new ApplicationState();
-                statePlayStatus.setProperty(CURRENT_PLAY_STATUS.getString(context));
+                statePlayStatus.setProperty(APPSTATE_CURRENT_PLAY_STATUS.name());
                 statePlayStatus.setValue(playStatus.name());
                 this.dataStore.insert(statePlayStatus);
             } else {
@@ -355,7 +355,7 @@ public class MusicDao {
     }
 
     public PlayMode getCurrentPlayMode() {
-        ApplicationState statePlayMode = getApplicationState(CURRENT_PLAY_MODE.getString(context));
+        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
         if (statePlayMode != null && statePlayMode.getValue() != null) {
             return PlayMode.valueOf(statePlayMode.getValue());
         } else {
@@ -366,12 +366,12 @@ public class MusicDao {
     public void setCurrentPlayMode(PlayMode playMode) {
         if (playMode == null) {
             this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(CURRENT_PLAY_MODE.getString(context)));
+                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_PLAY_MODE.name()));
         } else {
-            ApplicationState statePlayMode = getApplicationState(CURRENT_PLAY_MODE.getString(context));
+            ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
             if (statePlayMode == null) {
                 statePlayMode = new ApplicationState();
-                statePlayMode.setProperty(CURRENT_PLAY_MODE.getString(context));
+                statePlayMode.setProperty(APPSTATE_CURRENT_PLAY_MODE.name());
                 statePlayMode.setValue(playMode.name());
                 this.dataStore.insert(statePlayMode);
             } else {
@@ -382,7 +382,7 @@ public class MusicDao {
     }
 
     public long getCurrentMillis() {
-        ApplicationState statePlayMode = getApplicationState(CURRENT_MILLIS.getString(context));
+        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
         if (statePlayMode != null && statePlayMode.getValue() != null) {
             return Long.parseLong(statePlayMode.getValue());
         } else {
@@ -391,10 +391,10 @@ public class MusicDao {
     }
 
     public void setCurrentMillis(long millis) {
-        ApplicationState statePlayMode = getApplicationState(CURRENT_MILLIS.getString(context));
+        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
         if (statePlayMode == null) {
             statePlayMode = new ApplicationState();
-            statePlayMode.setProperty(CURRENT_MILLIS.getString(context));
+            statePlayMode.setProperty(APPSTATE_CURRENT_MILLIS.name());
             statePlayMode.setValue(String.valueOf(millis));
             this.dataStore.insert(statePlayMode);
         } else {

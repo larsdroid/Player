@@ -13,10 +13,10 @@ import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_UPDATED;
 
 /**
  * A background service that iterates over the albums and artists in DB that don't have an image
@@ -35,15 +35,15 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     protected void onHandleIntent(@Nullable Intent intent) {
         final ImageDownloader imageDownloader = new ImageDownloader();
         if (intent == null || intent.getAction() == null
-                || intent.getAction().equals(ALBUMS_INSERTED.getString(this))) {
+                || intent.getAction().equals(MLBT_ALBUMS_INSERTED.name())) {
             // Scan all albums for missing information that can be fetched.
             final List<Album> albums = getMusicDao().getAllAlbumsMissingInfo();
             for (Album album : albums) {
                 fetchAlbum(album, imageDownloader);
             }
-        } else if (intent.getAction().equals(ALBUM_INSERTED.getString(this))) {
+        } else if (intent.getAction().equals(MLBT_ALBUM_INSERTED.name())) {
             // Fetch info for a single album.
-            final long albumId = intent.getLongExtra(ALBUM_ID.getString(this), -1);
+            final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
             if (albumId != -1) {
                 final Album album = getMusicDao().findAlbum(albumId);
                 fetchAlbum(album, imageDownloader);
@@ -106,7 +106,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
 
             MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
             builder
-                    .setType(ALBUM_UPDATED)
+                    .setType(MLBT_ALBUM_UPDATED)
                     .setAlbum(album)
                     .buildAndSubmitBroadcast();
         }

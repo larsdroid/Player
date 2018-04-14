@@ -25,15 +25,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.SONG_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.SONGS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.SONG_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONG_INSERTED;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
@@ -72,23 +72,23 @@ public class FileScannerService extends IntentService {
 
                     newRecordsInserted(
                             artistIds,
-                            ARTIST_ID,
-                            ARTIST_INSERTED,
-                            ARTISTS_INSERTED,
+                            MLBPT_ARTIST_ID,
+                            MLBT_ARTIST_INSERTED,
+                            MLBT_ARTISTS_INSERTED,
                             ArtistInfoFetcherService.class);
 
                     newRecordsInserted(
                             albumIds,
-                            ALBUM_ID,
-                            ALBUM_INSERTED,
-                            ALBUMS_INSERTED,
+                            MLBPT_ALBUM_ID,
+                            MLBT_ALBUM_INSERTED,
+                            MLBT_ALBUMS_INSERTED,
                             AlbumInfoFetcherService.class);
 
                     newRecordsInserted(
                             songIds,
-                            SONG_ID,
-                            SONG_INSERTED,
-                            SONGS_INSERTED,
+                            MLBPT_SONG_ID,
+                            MLBT_SONG_INSERTED,
+                            MLBT_SONGS_INSERTED,
                             null);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");

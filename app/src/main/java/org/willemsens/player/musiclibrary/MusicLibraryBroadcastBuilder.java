@@ -8,9 +8,9 @@ import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.SONG_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
 
 public class MusicLibraryBroadcastBuilder {
     private final Context context;
@@ -34,7 +34,7 @@ public class MusicLibraryBroadcastBuilder {
 
     public MusicLibraryBroadcastBuilder setType(@NonNull MusicLibraryBroadcastType type) {
         if (this.type == null) {
-            this.intent.setAction(type.getString(this.context));
+            this.intent.setAction(type.name());
             this.type = type;
             return this;
         } else {
@@ -43,20 +43,20 @@ public class MusicLibraryBroadcastBuilder {
     }
 
     public MusicLibraryBroadcastBuilder setSong(@NonNull Song song) {
-        return setRecordId(SONG_ID, song.getId());
+        return setRecordId(MLBPT_SONG_ID, song.getId());
     }
 
     public MusicLibraryBroadcastBuilder setAlbum(@NonNull Album album) {
-        return setRecordId(ALBUM_ID, album.getId());
+        return setRecordId(MLBPT_ALBUM_ID, album.getId());
     }
 
     public MusicLibraryBroadcastBuilder setArtist(@NonNull Artist artist) {
-        return setRecordId(ARTIST_ID, artist.getId());
+        return setRecordId(MLBPT_ARTIST_ID, artist.getId());
     }
 
     public MusicLibraryBroadcastBuilder setRecordId(@NonNull MusicLibraryBroadcastPayloadType payloadType, long recordId) {
         if (this.payloadType == null) {
-            this.intent.putExtra(payloadType.getString(this.context), recordId);
+            this.intent.putExtra(payloadType.name(), recordId);
             this.payloadType = payloadType;
             return this;
         } else {
@@ -80,28 +80,28 @@ public class MusicLibraryBroadcastBuilder {
         } else {
             boolean isValid = false;
             switch (this.type) {
-                case ARTIST_INSERTED:
-                    isValid = this.payloadType == ARTIST_ID;
+                case MLBT_ARTIST_INSERTED:
+                    isValid = this.payloadType == MLBPT_ARTIST_ID;
                     break;
-                case ARTISTS_INSERTED:
+                case MLBT_ARTISTS_INSERTED:
                     isValid = this.payloadType == null;
                     break;
-                case ARTIST_UPDATED:
-                    isValid = this.payloadType == ARTIST_ID;
+                case MLBT_ARTIST_UPDATED:
+                    isValid = this.payloadType == MLBPT_ARTIST_ID;
                     break;
-                case ALBUM_INSERTED:
-                    isValid = this.payloadType == ALBUM_ID;
+                case MLBT_ALBUM_INSERTED:
+                    isValid = this.payloadType == MLBPT_ALBUM_ID;
                     break;
-                case ALBUMS_INSERTED:
+                case MLBT_ALBUMS_INSERTED:
                     isValid = this.payloadType == null;
                     break;
-                case ALBUM_UPDATED:
-                    isValid = this.payloadType == ALBUM_ID;
+                case MLBT_ALBUM_UPDATED:
+                    isValid = this.payloadType == MLBPT_ALBUM_ID;
                     break;
-                case SONG_INSERTED:
-                    isValid = this.payloadType == SONG_ID;
+                case MLBT_SONG_INSERTED:
+                    isValid = this.payloadType == MLBPT_SONG_ID;
                     break;
-                case SONGS_INSERTED:
+                case MLBT_SONGS_INSERTED:
                     isValid = this.payloadType == null;
                     break;
             }

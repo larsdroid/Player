@@ -22,7 +22,7 @@ import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
 import java.util.List;
 
-import static org.willemsens.player.playback.PlayBackBroadcastType.PLAYER_STATUS_UPDATE;
+import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_STATUS_UPDATE;
 
 public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.SongViewHolder> {
     private final Context context;
@@ -104,7 +104,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
     void registerPlayBackUpdateReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(PLAYER_STATUS_UPDATE.getString(context));
+        filter.addAction(PBBT_PLAYER_STATUS_UPDATE.name());
         context.registerReceiver(this.playBackUpdateReceiver, filter);
     }
 

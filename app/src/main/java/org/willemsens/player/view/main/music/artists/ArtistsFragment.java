@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTISTS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ARTIST_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_UPDATED;
 
 /**
  * A fragment representing a list of Artists.
@@ -82,9 +82,9 @@ public class ArtistsFragment extends Fragment {
         super.onResume();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.getActivity());
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ARTISTS_INSERTED.getString(this));
-        filter.addAction(ARTIST_INSERTED.getString(this));
-        filter.addAction(ARTIST_UPDATED.getString(this));
+        filter.addAction(MLBT_ARTISTS_INSERTED.name());
+        filter.addAction(MLBT_ARTIST_INSERTED.name());
+        filter.addAction(MLBT_ARTIST_UPDATED.name());
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -105,18 +105,18 @@ public class ArtistsFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(ARTISTS_INSERTED.getString(ArtistsFragment.this))) {
+            if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 loadAllArtists();
                 adapter.notifyDataSetChanged();
-            } else if (intentAction.equals(ARTIST_INSERTED.getString(ArtistsFragment.this))) {
-                final long artistId = intent.getLongExtra(ARTIST_ID.getString(ArtistsFragment.this), -1);
+            } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 artists.add(artist);
                 Collections.sort(artists);
                 final int index = artists.indexOf(artist);
                 adapter.notifyItemInserted(index);
-            } else if (intentAction.equals(ARTIST_UPDATED.getString(ArtistsFragment.this))) {
-                final long artistId = intent.getLongExtra(ARTIST_ID.getString(ArtistsFragment.this), -1);
+            } else if (intentAction.equals(MLBT_ARTIST_UPDATED.name())) {
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 final int index = artists.indexOf(artist);
                 if (index != -1) {

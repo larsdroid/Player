@@ -4,14 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import org.willemsens.player.model.Song;
 
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAYER_COMMAND;
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAY_MODE;
-import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_SONG_ID;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_DISMISS;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_PLAYER_COMMAND;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SETUP;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_PLAY_MODE;
-import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_DISMISS;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SETUP;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_SONG_ID;
 
 /**
  * An Intent builder for creating Intents that are targeted AT the PlayBackService (not coming
@@ -27,32 +27,32 @@ public class PlayBackIntentBuilder {
     }
 
     public PlayBackIntentBuilder setSong(Song song) {
-        this.intent.setAction(PLAYBACK_SET_SONG_ID.getString(context));
-        this.intent.putExtra(PLAYBACK_PAYLOAD_SONG_ID.getString(context), song.getId());
+        this.intent.setAction(PBIT_SET_SONG_ID.name());
+        this.intent.putExtra(PBIPT_SONG_ID.name(), song.getId());
         return this;
     }
 
     public PlayBackIntentBuilder setPlayerCommand(PlayerCommand playerCommand) {
         if (this.intent.getAction() == null) {
-            this.intent.setAction(PLAYBACK_PLAYER_COMMAND.getString(context));
+            this.intent.setAction(PBIT_PLAYER_COMMAND.name());
         }
-        this.intent.putExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(context), playerCommand.name());
+        this.intent.putExtra(PBIPT_PLAYER_COMMAND.name(), playerCommand.name());
         return this;
     }
 
     public PlayBackIntentBuilder setPlayMode(PlayMode playMode) {
-        this.intent.setAction(PLAYBACK_SET_PLAY_MODE.getString(context));
-        this.intent.putExtra(PLAYBACK_PAYLOAD_PLAY_MODE.getString(context), playMode.name());
+        this.intent.setAction(PBIT_SET_PLAY_MODE.name());
+        this.intent.putExtra(PBIPT_PLAY_MODE.name(), playMode.name());
         return this;
     }
 
     public PlayBackIntentBuilder setup() {
-        this.intent.setAction(PLAYBACK_SETUP.getString(context));
+        this.intent.setAction(PBIT_SETUP.name());
         return this;
     }
 
     public PlayBackIntentBuilder dismiss() {
-        this.intent.setAction(PLAYBACK_DISMISS.getString(context));
+        this.intent.setAction(PBIT_DISMISS.name());
         return this;
     }
 
