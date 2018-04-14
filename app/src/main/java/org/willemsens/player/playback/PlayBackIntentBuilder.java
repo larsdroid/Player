@@ -2,9 +2,16 @@ package org.willemsens.player.playback;
 
 import android.content.Context;
 import android.content.Intent;
-
-import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
+
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_DISMISS;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SETUP;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_SONG_ID;
 
 /**
  * An Intent builder for creating Intents that are targeted AT the PlayBackService (not coming
@@ -20,32 +27,32 @@ public class PlayBackIntentBuilder {
     }
 
     public PlayBackIntentBuilder setSong(Song song) {
-        this.intent.setAction(context.getString(R.string.key_action_set_song_id));
-        this.intent.putExtra(context.getString(R.string.key_playback_song_id), song.getId());
+        this.intent.setAction(PLAYBACK_SET_SONG_ID.getString(context));
+        this.intent.putExtra(PLAYBACK_PAYLOAD_SONG_ID.getString(context), song.getId());
         return this;
     }
 
     public PlayBackIntentBuilder setPlayerCommand(PlayerCommand playerCommand) {
         if (this.intent.getAction() == null) {
-            this.intent.setAction(context.getString(R.string.key_action_player_command));
+            this.intent.setAction(PLAYBACK_PLAYER_COMMAND.getString(context));
         }
-        this.intent.putExtra(context.getString(R.string.key_player_command), playerCommand.name());
+        this.intent.putExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(context), playerCommand.name());
         return this;
     }
 
     public PlayBackIntentBuilder setPlayMode(PlayMode playMode) {
-        this.intent.setAction(context.getString(R.string.key_action_set_play_mode));
-        this.intent.putExtra(context.getString(R.string.key_play_mode), playMode.name());
+        this.intent.setAction(PLAYBACK_SET_PLAY_MODE.getString(context));
+        this.intent.putExtra(PLAYBACK_PAYLOAD_PLAY_MODE.getString(context), playMode.name());
         return this;
     }
 
     public PlayBackIntentBuilder setup() {
-        this.intent.setAction(context.getString(R.string.key_action_setup));
+        this.intent.setAction(PLAYBACK_SETUP.getString(context));
         return this;
     }
 
     public PlayBackIntentBuilder dismiss() {
-        this.intent.setAction(context.getString(R.string.key_action_dismiss));
+        this.intent.setAction(PLAYBACK_DISMISS.getString(context));
         return this;
     }
 

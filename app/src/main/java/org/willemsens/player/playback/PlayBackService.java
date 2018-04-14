@@ -16,6 +16,13 @@ import org.willemsens.player.playback.notification.NotificationBarSmall;
 import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
+import static org.willemsens.player.playback.PlayBackBroadcastType.PLAYER_STATUS_UPDATE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PLAYBACK_PAYLOAD_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_PLAY_MODE;
+import static org.willemsens.player.playback.PlayBackIntentType.PLAYBACK_SET_SONG_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.DISMISS;
@@ -97,20 +104,20 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     public int onStartCommand(Intent intent, int flags, int startId) {
         String intentAction = intent.getAction();
         if (intentAction != null) {
-            if (intentAction.equals(getString(R.string.key_action_dismiss))) {
+            if (intentAction.equals(PlayBackIntentType.PLAYBACK_DISMISS.getString(this))) {
                 stopSelf();
-            } else if (intentAction.equals(getString(R.string.key_action_set_song_id))) {
-                final long songId = intent.getLongExtra(getString(R.string.key_playback_song_id), -1);
+            } else if (intentAction.equals(PLAYBACK_SET_SONG_ID.getString(this))) {
+                final long songId = intent.getLongExtra(PLAYBACK_PAYLOAD_SONG_ID.getString(this), -1);
                 PlayerCommand playerCommand = null;
-                if (intent.hasExtra(getString(R.string.key_player_command))) {
-                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
+                if (intent.hasExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this))) {
+                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this)));
                 }
                 this.player.setSong(songId, playerCommand);
-            } else if (intentAction.equals(getString(R.string.key_action_player_command))) {
-                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(getString(R.string.key_player_command)));
+            } else if (intentAction.equals(PLAYBACK_PLAYER_COMMAND.getString(this))) {
+                final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAYER_COMMAND.getString(this)));
                 this.player.processCommand(playerCommand);
-            } else if (intentAction.equals(getString(R.string.key_action_set_play_mode))) {
-                PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(getString(R.string.key_play_mode)));
+            } else if (intentAction.equals(PLAYBACK_SET_PLAY_MODE.getString(this))) {
+                PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PLAYBACK_PAYLOAD_PLAY_MODE.getString(this)));
                 // TODO
             } else {
                 Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand");
@@ -162,7 +169,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             }
         }
 
-        Intent broadcast = new Intent(getString(R.string.key_player_status_update));
+        Intent broadcast = new Intent(PLAYER_STATUS_UPDATE.getString(this));
         sendBroadcast(broadcast);
     }
 

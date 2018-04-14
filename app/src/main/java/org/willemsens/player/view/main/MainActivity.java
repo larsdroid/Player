@@ -50,6 +50,7 @@ import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 import org.willemsens.player.view.main.settings.OnSettingsFragmentListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
 
+import static org.willemsens.player.playback.PlayBackBroadcastType.PLAYER_STATUS_UPDATE;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
 import static org.willemsens.player.playback.PlayerCommand.PLAY;
@@ -320,7 +321,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         this.playBackStatusReceiver = new PlayBackStatusReceiver();
-        IntentFilter filter = new IntentFilter(getString(R.string.key_player_status_update));
+        IntentFilter filter = new IntentFilter(PLAYER_STATUS_UPDATE.getString(this));
         registerReceiver(this.playBackStatusReceiver, filter);
 
         this.headsetReceiver = new HeadsetReceiver();

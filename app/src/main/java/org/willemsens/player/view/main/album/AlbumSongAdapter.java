@@ -22,6 +22,8 @@ import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
 import java.util.List;
 
+import static org.willemsens.player.playback.PlayBackBroadcastType.PLAYER_STATUS_UPDATE;
+
 public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.SongViewHolder> {
     private final Context context;
     private final List<Song> songs;
@@ -102,7 +104,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
     void registerPlayBackUpdateReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(context.getString(R.string.key_player_status_update));
+        filter.addAction(PLAYER_STATUS_UPDATE.getString(context));
         context.registerReceiver(this.playBackUpdateReceiver, filter);
     }
 
