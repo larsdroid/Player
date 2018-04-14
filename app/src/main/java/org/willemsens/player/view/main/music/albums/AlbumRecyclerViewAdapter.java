@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_UPDATED;
@@ -232,12 +233,12 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             for (Artist artist : filterArtists) {
                 filterArtistIds[i++] = artist.getId();
             }
-            outState.putLongArray(context.getString(R.string.key_artist_ids), filterArtistIds);
+            outState.putLongArray(ARTIST_IDS.getString(context), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                long[] filterArtistIds = savedInstanceState.getLongArray(context.getString(R.string.key_artist_ids));
+                long[] filterArtistIds = savedInstanceState.getLongArray(ARTIST_IDS.getString(context));
                 if (filterArtistIds != null) {
                     for (Artist artist : this.artists.keySet()) {
                         this.artists.put(artist, false);

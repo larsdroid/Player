@@ -36,7 +36,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ALBUM_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.ARTIST_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.ALBUM_INSERTED;
@@ -322,7 +324,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             for (Album album : filterAlbums) {
                 filterAlbumIds[i++] = album.getId();
             }
-            outState.putLongArray(context.getString(R.string.key_album_ids), filterAlbumIds);
+            outState.putLongArray(ALBUM_IDS.getString(context), filterAlbumIds);
 
             List<Artist> filterArtists = new ArrayList<>();
             for (Artist artist : this.artists.keySet()) {
@@ -335,12 +337,12 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             for (Artist artist : filterArtists) {
                 filterArtistIds[i++] = artist.getId();
             }
-            outState.putLongArray(context.getString(R.string.key_artist_ids), filterArtistIds);
+            outState.putLongArray(ARTIST_IDS.getString(context), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                long[] filterAlbumIds = savedInstanceState.getLongArray(context.getString(R.string.key_album_ids));
+                long[] filterAlbumIds = savedInstanceState.getLongArray(ALBUM_IDS.getString(context));
                 if (filterAlbumIds != null) {
                     for (Album album : this.albums.keySet()) {
                         this.albums.put(album, false);
@@ -353,7 +355,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                     }
                 }
 
-                long[] filterArtistIds = savedInstanceState.getLongArray(context.getString(R.string.key_artist_ids));
+                long[] filterArtistIds = savedInstanceState.getLongArray(ARTIST_IDS.getString(context));
                 if (filterArtistIds != null) {
                     for (Artist artist : this.artists.keySet()) {
                         this.artists.put(artist, false);
