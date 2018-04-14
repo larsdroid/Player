@@ -23,6 +23,11 @@ public class PlayBackIntentBuilder {
 
     public PlayBackIntentBuilder(Context context) {
         this.context = context;
+
+        resetInternalState();
+    }
+
+    private void resetInternalState() {
         this.intent = new Intent(context, PlayBackService.class);
     }
 
@@ -58,7 +63,9 @@ public class PlayBackIntentBuilder {
 
     public Intent build() {
         final Intent returnIntent = this.intent;
-        this.intent = new Intent(context, PlayBackService.class);
+
+        resetInternalState();
+
         return returnIntent;
     }
 

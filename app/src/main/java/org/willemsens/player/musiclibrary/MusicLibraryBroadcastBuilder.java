@@ -113,21 +113,21 @@ public class MusicLibraryBroadcastBuilder {
     }
 
     private Intent build() {
+        checkTypeAndPayloadValid();
+
         final Intent returnIntent = this.intent;
+
         resetInternalState();
+
         return returnIntent;
     }
 
     public void buildAndSubmitBroadcast() {
-        checkTypeAndPayloadValid();
-
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this.context);
         lbm.sendBroadcast(build());
     }
 
     public void buildAndSubmitService() {
-        checkTypeAndPayloadValid();
-
         if (!this.serviceClassSet) {
             throw new RuntimeException("Service class was not set!");
         } else {
