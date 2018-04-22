@@ -13,21 +13,28 @@ public class MusicDirectoryViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.directory_path)
     TextView directoryPath;
 
+    private final DirectoryDeleteListener listener;
+
     private Directory directory;
 
-    MusicDirectoryViewHolder(View view) {
+    MusicDirectoryViewHolder(View view, DirectoryDeleteListener listener) {
         super(view);
+        this.listener = listener;
         ButterKnife.bind(this, view);
     }
 
     @OnClick(R.id.delete_button)
-    public void onDeleteClicked(View v) {
-        // TODO
+    public void onDeleteClicked() {
+        this.listener.onDeleteDirectory(this.directory);
     }
 
     void setDirectory(Directory directory) {
         this.directory = directory;
 
         this.directoryPath.setText(directory.getPath());
+    }
+
+    interface DirectoryDeleteListener {
+        void onDeleteDirectory(Directory directory);
     }
 }

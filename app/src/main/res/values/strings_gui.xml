@@ -55,6 +55,7 @@
     <string name="manage_music_directories">Manage music directories</string>
     <string name="add">Add</string>
     <string name="reset">Reset</string>
+    <string name="invalid_path">Invalid path</string>
 
     <string name="delete">Delete</string>
 </resources>

@@ -10,15 +10,24 @@ import org.willemsens.player.model.Directory;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.view.DataAccessProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MusicDirectoryAdapter extends RecyclerView.Adapter<MusicDirectoryViewHolder> {
+public class MusicDirectoryAdapter
+        extends RecyclerView.Adapter<MusicDirectoryViewHolder>
+        implements MusicDirectoryViewHolder.DirectoryDeleteListener {
     private final List<Directory> directories;
     private final MusicDao musicDao;
 
     public MusicDirectoryAdapter(DataAccessProvider dataAccessProvider) {
+        this.directories = new ArrayList<>();
         this.musicDao = dataAccessProvider.getMusicDao();
-        this.directories = this.musicDao.getAllDirectories();
+        readAllDirectories();
+    }
+
+    public void readAllDirectories() {
+        this.directories.clear();
+        this.directories.addAll(this.musicDao.getAllDirectories());
     }
 
     @NonNull
@@ -26,7 +35,7 @@ public class MusicDirectoryAdapter extends RecyclerView.Adapter<MusicDirectoryVi
     public MusicDirectoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_settings_directory_list_item, parent, false);
-        return new MusicDirectoryViewHolder(view);
+        return new MusicDirectoryViewHolder(view, this);
     }
 
     @Override
@@ -38,5 +47,13 @@ public class MusicDirectoryAdapter extends RecyclerView.Adapter<MusicDirectoryVi
     @Override
     public int getItemCount() {
         return directories.size();
+    }
+
+    @Override
+    public void onDeleteDirectory(Directory directory) {
+        this.musicDao.deleteDirectory(directory);
+        int index = this.directories.indexOf(directory);
+        this.directories.remove(directory);
+        this.notifyItemRemoved(index);
     }
 }

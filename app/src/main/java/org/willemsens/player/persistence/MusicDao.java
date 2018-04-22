@@ -62,11 +62,6 @@ public class MusicDao {
                 .get().toList();
     }
 
-    public void saveImage(Image image) {
-        this.dataStore.insert(image);
-        Log.v(getClass().getName(), "Inserted Image: " + image);
-    }
-
     public void updateAlbum(Album album) {
         this.dataStore.update(album);
         Log.v(getClass().getName(), "Updated Album: " + album);
@@ -236,15 +231,55 @@ public class MusicDao {
     }
 
     /**
+     * Inserts a new music path into the DB. It is checked if this path exists.
+     * @param path The music path to insert into the DB.
+     * @return true if the path was successfully inserted, false otherwise.
+     */
+    public boolean insertMusicPath(File path) {
+        try {
+            final File canonicalPath = path.getCanonicalFile();
+            if (canonicalPath.isDirectory()) {
+                insertMusicPath(canonicalPath.getCanonicalPath());
+                return true;
+            } else {
+                Log.e(getClass().getName(), "Path '" + path + "' is not a valid directory.");
+            }
+        } catch (IOException e) {
+            Log.e(getClass().getName(), "Error while checking path: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public void insertImage(Image image) {
+        this.dataStore.insert(image);
+        Log.v(getClass().getName(), "Inserted Image: " + image);
+    }
+
+    /**
      * This helper method should only be called once, right after the app has been installed for
      * the first time. Should be called after READ_EXTERNAL_STORAGE has been granted and before
      * the FileScannerService is launched for the first time.
      */
-    public void afterInstallationSetup() {
+    public void initDefaultMusicDirectory() {
         checkInsertMusicPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC));
         if (System.getenv("SECONDARY_STORAGE") != null) {
             checkInsertMusicPath(System.getenv("SECONDARY_STORAGE") + "/" + Environment.DIRECTORY_MUSIC);
         }
+    }
+
+    public void deleteDirectory(Directory directory) {
+        this.dataStore.delete(directory);
+    }
+
+    public void deleteAllMusic() {
+        this.dataStore.delete(Artist.class).get().value();
+        this.dataStore.delete(Album.class).get().value();
+        this.dataStore.delete(Image.class).get().value();
+        this.dataStore.delete(Song.class).get().value();
+    }
+
+    public void deleteAllDirectories() {
+        this.dataStore.delete(Directory.class).get().value();
     }
 
     /**

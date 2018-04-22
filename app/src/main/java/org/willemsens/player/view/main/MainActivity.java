@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
     private void setupAfterPermissionReadExternalStorage() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPreferences.getBoolean(getString(R.string.key_first_app_execution), true)) {
-            this.musicDao.afterInstallationSetup();
+            this.musicDao.initDefaultMusicDirectory();
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(getString(R.string.key_first_app_execution), false);
@@ -303,12 +303,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClearMusicCache() {
-        Toast.makeText(this, "CLEARING", Toast.LENGTH_LONG).show();
-        // TODO: clear songs
-        // TODO: clear albums
-        // TODO: clear artists
-        // TODO: clear all images
-        // TODO: clear directories ???
+        this.musicDao.deleteAllMusic();
 
         // TODO: make sure broadcasts are happening
 

@@ -60,7 +60,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 final Image image = new Image();
                 image.setUrl(coverImageUrl);
                 image.setImageData(imageData);
-                getMusicDao().saveImage(image);
+                getMusicDao().insertImage(image);
                 album.setImage(image);
             } catch (NetworkClientException e) {
                 generateAlbumArt(album);
@@ -76,7 +76,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     private void generateAlbumArt(Album album) {
         final Image image = new Image();
         image.setImageData(ImageGenerator.generateAlbumCover(album));
-        getMusicDao().saveImage(image);
+        getMusicDao().insertImage(image);
         album.setImage(image);
     }
 

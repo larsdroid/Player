@@ -49,7 +49,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
     private void generateArtistImage(Artist artist) {
         final Image image = new Image();
         image.setImageData(ImageGenerator.generateArtistImage(artist));
-        getMusicDao().saveImage(image);
+        getMusicDao().insertImage(image);
         artist.setImage(image);
     }
 
@@ -67,7 +67,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
             image.setUrl(artistInfo.getImageUrl());
             image.setImageData(imageDownloader.downloadImage(image.getUrl()));
 
-            getMusicDao().saveImage(image);
+            getMusicDao().insertImage(image);
 
             artist.setImage(image);
 
