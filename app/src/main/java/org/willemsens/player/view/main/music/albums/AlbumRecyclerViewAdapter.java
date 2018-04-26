@@ -35,9 +35,11 @@ import java.util.TreeMap;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_IDS;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
 
@@ -100,8 +102,10 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         filter.addAction(MLBT_ALBUMS_INSERTED.name());
         filter.addAction(MLBT_ALBUM_INSERTED.name());
         filter.addAction(MLBT_ALBUM_UPDATED.name());
+        filter.addAction(MLBT_ALBUMS_DELETED.name());
         filter.addAction(MLBT_ARTISTS_INSERTED.name());
         filter.addAction(MLBT_ARTIST_INSERTED.name());
+        filter.addAction(MLBT_ARTISTS_DELETED.name());
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -173,6 +177,10 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         AlbumFilter() {
             this.artists = new TreeMap<>();
             fetchAllArtists();
+        }
+
+        private void clearAllArtists() {
+            this.artists.clear();
         }
 
         private void fetchAllArtists() {
@@ -299,12 +307,17 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
                     albums.set(index, album);
                     notifyItemChanged(index);
                 }
+            } else if (intentAction.equals(MLBT_ALBUMS_DELETED.name())) {
+                allAlbums.clear();
+                getFilter().filter(null);
             } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
                 final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);
+            } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
+                ((AlbumFilter)getFilter()).clearAllArtists();
             }
         }
     }

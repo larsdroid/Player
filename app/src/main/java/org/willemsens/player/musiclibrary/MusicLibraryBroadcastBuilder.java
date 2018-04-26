@@ -83,17 +83,11 @@ public class MusicLibraryBroadcastBuilder {
                 case MLBT_ARTIST_INSERTED:
                     isValid = this.payloadType == MLBPT_ARTIST_ID;
                     break;
-                case MLBT_ARTISTS_INSERTED:
-                    isValid = this.payloadType == null;
-                    break;
                 case MLBT_ARTIST_UPDATED:
                     isValid = this.payloadType == MLBPT_ARTIST_ID;
                     break;
                 case MLBT_ALBUM_INSERTED:
                     isValid = this.payloadType == MLBPT_ALBUM_ID;
-                    break;
-                case MLBT_ALBUMS_INSERTED:
-                    isValid = this.payloadType == null;
                     break;
                 case MLBT_ALBUM_UPDATED:
                     isValid = this.payloadType == MLBPT_ALBUM_ID;
@@ -101,7 +95,12 @@ public class MusicLibraryBroadcastBuilder {
                 case MLBT_SONG_INSERTED:
                     isValid = this.payloadType == MLBPT_SONG_ID;
                     break;
+                case MLBT_ALBUMS_INSERTED:
                 case MLBT_SONGS_INSERTED:
+                case MLBT_ARTISTS_INSERTED:
+                case MLBT_ALBUMS_DELETED:
+                case MLBT_SONGS_DELETED:
+                case MLBT_ARTISTS_DELETED:
                     isValid = this.payloadType == null;
                     break;
             }

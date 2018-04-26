@@ -141,6 +141,7 @@ public class FileScannerService extends IntentService {
 
                 if (clazz != null) {
                     builder
+                            .setType(broadcastTypeSingleRecord)
                             .setClass(clazz)
                             .setRecordId(payloadType, recordId)
                             .buildAndSubmitService();

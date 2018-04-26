@@ -36,6 +36,7 @@ import org.willemsens.player.filescanning.FileScannerService;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
@@ -50,6 +51,9 @@ import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 import org.willemsens.player.view.main.settings.OnSettingsFragmentListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
 
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_DELETED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_DELETED;
 import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_STATUS_UPDATE;
 import static org.willemsens.player.playback.PlayStatus.STOPPED;
 import static org.willemsens.player.playback.PlayerCommand.PAUSE;
@@ -141,8 +145,7 @@ public class MainActivity extends AppCompatActivity
             editor.apply();
         }
 
-        final Intent intent = new Intent(this, FileScannerService.class);
-        startService(intent);
+        startService(new Intent(this, FileScannerService.class));
     }
 
     private void setupAfterPermissionInternet() {
@@ -303,12 +306,26 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClearMusicCache() {
+        final Intent fileScannerIntent = new Intent(this, FileScannerService.class);
+        stopService(fileScannerIntent);
+        final Intent artistFetcherIntent = new Intent(this, ArtistInfoFetcherService.class);
+        stopService(artistFetcherIntent);
+        final Intent albumFetcherIntent = new Intent(this, AlbumInfoFetcherService.class);
+        stopService(albumFetcherIntent);
+
         this.musicDao.deleteAllMusic();
 
-        // TODO: make sure broadcasts are happening
+        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+        builder.setType(MLBT_ALBUMS_DELETED)
+                .buildAndSubmitBroadcast();
+        builder.setType(MLBT_ARTISTS_DELETED)
+                .buildAndSubmitBroadcast();
+        builder.setType(MLBT_SONGS_DELETED)
+                .buildAndSubmitBroadcast();
 
-        // TODO: relaunch the file scanner service (mind that directories MAY have been cleared -->
-        //       see questions above.
+        startService(albumFetcherIntent);
+        startService(artistFetcherIntent);
+        startService(fileScannerIntent);
     }
 
     @Override

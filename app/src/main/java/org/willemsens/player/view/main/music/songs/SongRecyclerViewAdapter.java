@@ -40,11 +40,14 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadTyp
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_UPDATED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONG_INSERTED;
 
@@ -115,11 +118,14 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         IntentFilter filter = new IntentFilter();
         filter.addAction(MLBT_SONGS_INSERTED.name());
         filter.addAction(MLBT_SONG_INSERTED.name());
+        filter.addAction(MLBT_SONGS_DELETED.name());
         filter.addAction(MLBT_ARTISTS_INSERTED.name());
         filter.addAction(MLBT_ARTIST_INSERTED.name());
+        filter.addAction(MLBT_ARTISTS_DELETED.name());
         filter.addAction(MLBT_ALBUMS_INSERTED.name());
         filter.addAction(MLBT_ALBUM_INSERTED.name());
         filter.addAction(MLBT_ALBUM_UPDATED.name());
+        filter.addAction(MLBT_ALBUMS_DELETED.name());
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -219,11 +225,19 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             fetchAllArtists();
         }
 
+        private void clearAllAlbums() {
+            this.albums.clear();
+        }
+
         private void fetchAllAlbums() {
             this.albums.clear();
             for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
                 this.albums.put(album, true);
             }
+        }
+
+        private void clearAllArtists() {
+            this.artists.clear();
         }
 
         private void fetchAllArtists() {
@@ -411,12 +425,17 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 allSongs.add(song);
                 Collections.sort(allSongs);
                 getFilter().filter(null);
+            } else if (intentAction.equals(MLBT_SONGS_DELETED.name())) {
+                allSongs.clear();
+                getFilter().filter(null);
             } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((SongFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
                 final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
-                ((SongFilter)getFilter()).add(artist);
+                ((SongFilter) getFilter()).add(artist);
+            } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
+                ((SongFilter)getFilter()).clearAllArtists();
             } else if (intentAction.equals(MLBT_ALBUMS_INSERTED.name())) {
                 ((SongFilter)getFilter()).fetchAllAlbums();
             } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
@@ -431,6 +450,8 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                         notifyItemChanged(i);
                     }
                 }
+            } else if (intentAction.equals(MLBT_ALBUMS_DELETED.name())) {
+                ((SongFilter)getFilter()).clearAllAlbums();
             }
         }
     }

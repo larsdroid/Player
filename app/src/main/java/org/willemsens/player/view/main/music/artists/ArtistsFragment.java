@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_UPDATED;
@@ -85,6 +86,7 @@ public class ArtistsFragment extends Fragment {
         filter.addAction(MLBT_ARTISTS_INSERTED.name());
         filter.addAction(MLBT_ARTIST_INSERTED.name());
         filter.addAction(MLBT_ARTIST_UPDATED.name());
+        filter.addAction(MLBT_ARTISTS_DELETED.name());
         lbm.registerReceiver(this.dbUpdateReceiver, filter);
     }
 
@@ -123,6 +125,8 @@ public class ArtistsFragment extends Fragment {
                     artists.set(index, artist);
                     adapter.notifyItemChanged(index);
                 }
+            } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
+                artists.clear();
             }
         }
     }
