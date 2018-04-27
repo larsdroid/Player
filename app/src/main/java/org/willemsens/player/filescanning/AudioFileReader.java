@@ -48,7 +48,8 @@ class AudioFileReader {
 
             final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
             final int songLength;
-            if (audioFile.getAudioHeader().isVariableBitRate()) {
+            if (file.toString().endsWith(".mp3")) {
+                // This takes a while!!
                 final Mp3Info mp3Info = Mp3Info.of(file);
                 songLength = mp3Info.getSeconds();
             } else {
