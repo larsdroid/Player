@@ -97,6 +97,9 @@ public class FileScannerService extends IntentService {
                 e.printStackTrace();
             }
         }
+
+        // TODO: scan files from the MediaStore
+        // https://stackoverflow.com/questions/11982195/how-to-access-music-files-from-android-programatically
     }
 
     /**
