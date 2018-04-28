@@ -8,8 +8,6 @@
  **in album view with the correct album selected and scrolled to the correct song**
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fecthed
-* Music fragment: bottom tabs should **clearly** show which tab is currently
-  highlighted
 * Album Fragment: toolbar should have some back button of a quick way to
   get back to the music fragment
 * Pick album art Activity

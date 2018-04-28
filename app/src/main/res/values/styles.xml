@@ -17,8 +17,8 @@
 
     <style name="PlayerBottomNavigationStyle">
         <item name="itemBackground">@color/colorPrimary</item>
-        <item name="itemIconTint">@android:color/white</item>
-        <item name="itemTextColor">@android:color/white</item>
+        <item name="itemIconTint">@drawable/color_bottombar_text</item>
+        <item name="itemTextColor">@drawable/color_bottombar_text</item>
     </style>
 
     <style name="PlayerNowPlayingStyle">
