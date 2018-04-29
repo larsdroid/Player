@@ -128,88 +128,69 @@ public class MusicDao {
                 .get().firstOrNull();
     }
 
-    /**
-     * Checks albums in the DB. If an album exists, all songs with this album are updated to have
-     * the corresponding album from the DB. If the album doesn't exist, it is inserted into the DB.
-     *
-     * @param albums The set of albums to check for in the DB.
-     * @param songs  The songs that may have to be updated in case their album turns out
-     *               to be in the DB already.
-     * @return The ids of the new albums inserted into the DB.
-     */
-    public List<Long> checkAlbumsSelectInsert(Set<Album> albums, Set<Song> songs) {
-        final List<Album> databaseAlbums = getAllAlbums();
+    public List<Long> insertAlbumsIfNotExist(Set<Album> albums) {
         final List<Long> insertedIds = new ArrayList<>();
         for (Album album : albums) {
-            if (databaseAlbums.contains(album)) {
-                for (Album databaseAlbum : databaseAlbums) {
-                    if (album.equals(databaseAlbum)) {
-                        for (Song song : songs) {
-                            if (song.getAlbum().equals(album)) {
-                                song.setAlbum(databaseAlbum);
-                            }
-                        }
-                        break;
-                    }
+            if (album.getId() == null) {
+                if (album.getArtist().getId() == null) {
+                    Artist dbArtist = this.dataStore.select(Artist.class)
+                            .where(Artist.NAME.equal(album.getArtist().getName()))
+                            .get().firstOrNull();
+                    album.setArtist(dbArtist);
                 }
-            } else {
-                // TODO: calculate total length for all songs in 'album'
-                //       simply iterate all songs and
-                insertAlbum(album);
-                insertedIds.add(album.getId());
+                Album dbAlbum = this.dataStore.select(Album.class)
+                        .where(Album.NAME.equal(album.getName()))
+                        .and(Album.ARTIST.equal(album.getArtist()))
+                        .get().firstOrNull();
+                if (dbAlbum == null) {
+                    insertAlbum(album);
+                    insertedIds.add(album.getId());
+                }
             }
         }
         return insertedIds;
     }
 
-    /**
-     * Checks artists in the DB. If an artist exists, all songs and albums with this artist are
-     * updated to have the corresponding artist from the DB. If the artist doesn't exist, it is
-     * inserted into the DB.
-     *
-     * @param artists The set of artists to check for in the DB.
-     * @param albums  The albums that may have to be updated in case their artist turns out
-     *                to be in the DB already.
-     * @param songs   The songs that may have to be updated in case their artist turns out
-     *                to be in the DB already.
-     * @return The ids of the new artists inserted into the DB.
-     */
-    public List<Long> checkArtistsSelectInsert(Set<Artist> artists, Set<Album> albums, Set<Song> songs) {
-        final List<Artist> databaseArtists = getAllArtists();
+    public List<Long> insertArtistsIfNotExist(Set<Artist> artists) {
         final List<Long> insertedIds = new ArrayList<>();
         for (Artist artist : artists) {
-            if (databaseArtists.contains(artist)) {
-                for (Artist databaseArtist : databaseArtists) {
-                    if (artist.equals(databaseArtist)) {
-                        for (Album album : albums) {
-                            if (album.getArtist().equals(artist)) {
-                                album.setArtist(databaseArtist);
-                            }
-                        }
-                        for (Song song : songs) {
-                            if (song.getArtist().equals(artist)) {
-                                song.setArtist(databaseArtist);
-                            }
-                        }
-                        break;
-                    }
+            if (artist.getId() == null) {
+                Artist dbArtist = this.dataStore.select(Artist.class)
+                        .where(Artist.NAME.equal(artist.getName()))
+                        .get().firstOrNull();
+                if (dbArtist == null) {
+                    insertArtist(artist);
+                    insertedIds.add(artist.getId());
                 }
-            } else {
-                insertArtist(artist);
-                insertedIds.add(artist.getId());
             }
         }
         return insertedIds;
     }
 
-    public List<Long> checkSongsSelectInsert(Set<Song> songs) {
-        List<Song> dbSongs;
+    public List<Long> insertSongsIfNotExist(Set<Song> songs) {
         final List<Long> insertedIds = new ArrayList<>();
         for (Song song : songs) {
-            dbSongs = this.dataStore.select(Song.class).where(Song.FILE.equal(song.getFile())).get().toList();
-            if (dbSongs.size() == 0) {
-                insertSong(song);
-                insertedIds.add(song.getId());
+            if (song.getId() == null) {
+                if (song.getArtist().getId() == null) {
+                    Artist dbArtist = this.dataStore.select(Artist.class)
+                            .where(Artist.NAME.equal(song.getArtist().getName()))
+                            .get().firstOrNull();
+                    song.setArtist(dbArtist);
+                }
+                if (song.getAlbum().getId() == null) {
+                    Album dbAlbum = this.dataStore.select(Album.class)
+                            .where(Album.NAME.equal(song.getName()))
+                            .and(Album.ARTIST.equal(song.getArtist()))
+                            .get().firstOrNull();
+                    song.setAlbum(dbAlbum);
+                }
+                Song dbSong = this.dataStore.select(Song.class)
+                        .where(Song.FILE.equal(song.getFile()))
+                        .get().firstOrNull();
+                if (dbSong == null) {
+                    insertSong(song);
+                    insertedIds.add(song.getId());
+                }
             }
         }
         return insertedIds;

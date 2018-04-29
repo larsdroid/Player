@@ -1,4 +1,6 @@
 * Calculate album length and show it in the GUI
+  * Full scan of an MP3 file should be done in a separate thread
+    followed by a new type of broadcast: 'SONG_UPDATED'
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
   * Save album **play count** per album
@@ -31,8 +33,7 @@ File scanning features
   can be updated in the list after it is fetched
 * FileScannerService should start broadcasting sooner, not after ALL
   records have been inserted
-* The scanner should not only scan directories, but also files that are "listed"
-  in the Android media store (these should be done first actually)
+  * Replace 'FileScannerService::insertRecords' with 'FileScannerService::insertRecord'
 * PurgingService
 
 Fetching issues for album art

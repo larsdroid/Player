@@ -1,7 +1,11 @@
 package org.willemsens.player.filescanning;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -53,43 +57,65 @@ public class FileScannerService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         if (this.musicDao == null) {
-            final EntityDataStore<Persistable> dataStore = ((PlayerApplication)getApplication()).getData();
+            final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
             this.musicDao = new MusicDao(dataStore, this);
         }
 
-        Set<Song> songs = new HashSet<>();
-        Set<Album> albums = new HashSet<>();
-        Set<Artist> artists = new HashSet<>();
+        scanMediaStoreFiles();
+        scanCustomDirectories();
+    }
 
+    private void scanMediaStoreFiles(Uri musicUri) {
+        String[] proj = {MediaStore.Audio.Media.DATA};
+        String[] selectionArgs = {"%/audio/ui/%"};
+        ContentResolver musicResolver = getContentResolver();
+        Cursor musicCursor = musicResolver.query(musicUri, proj,
+                MediaStore.Audio.Media.IS_MUSIC + "=1 AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ?",
+                selectionArgs, null);
+
+        if (musicCursor != null) {
+            if (musicCursor.moveToFirst()) {
+                final int fileColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+
+                Set<Song> songs = new HashSet<>();
+                Set<Album> albums = new HashSet<>();
+                Set<Artist> artists = new HashSet<>();
+
+                do {
+                    Log.d("FileScannerService", musicCursor.getString(fileColumn));
+
+                    final File file = new File(musicCursor.getString(fileColumn));
+                    try {
+                        final File canonicalFile = file.getCanonicalFile();
+                        processSingleFile(canonicalFile, songs, albums, artists);
+                    } catch (IOException e) {
+                        Log.e("FileScannerService", e.getMessage());
+                    }
+                } while (musicCursor.moveToNext());
+
+                insertRecords(songs, albums, artists);
+            }
+            musicCursor.close();
+        }
+    }
+
+    private void scanMediaStoreFiles() {
+        scanMediaStoreFiles(MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
+        scanMediaStoreFiles(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+    }
+
+    private void scanCustomDirectories() {
         for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
+                    Set<Song> songs = new HashSet<>();
+                    Set<Album> albums = new HashSet<>();
+                    Set<Artist> artists = new HashSet<>();
+
                     processDirectory(root, songs, albums, artists);
-                    final List<Long> artistIds = this.musicDao.checkArtistsSelectInsert(artists, albums, songs);
-                    final List<Long> albumIds = this.musicDao.checkAlbumsSelectInsert(albums, songs);
-                    final List<Long> songIds = this.musicDao.checkSongsSelectInsert(songs);
 
-                    newRecordsInserted(
-                            artistIds,
-                            MLBPT_ARTIST_ID,
-                            MLBT_ARTIST_INSERTED,
-                            MLBT_ARTISTS_INSERTED,
-                            ArtistInfoFetcherService.class);
-
-                    newRecordsInserted(
-                            albumIds,
-                            MLBPT_ALBUM_ID,
-                            MLBT_ALBUM_INSERTED,
-                            MLBT_ALBUMS_INSERTED,
-                            AlbumInfoFetcherService.class);
-
-                    newRecordsInserted(
-                            songIds,
-                            MLBPT_SONG_ID,
-                            MLBT_SONG_INSERTED,
-                            MLBT_SONGS_INSERTED,
-                            null);
+                    insertRecords(songs, albums, artists);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }
@@ -97,9 +123,33 @@ public class FileScannerService extends IntentService {
                 e.printStackTrace();
             }
         }
+    }
 
-        // TODO: scan files from the MediaStore
-        // https://stackoverflow.com/questions/11982195/how-to-access-music-files-from-android-programatically
+    private void insertRecords(Set<Song> songs, Set<Album> albums, Set<Artist> artists) {
+        final List<Long> artistIds = this.musicDao.insertArtistsIfNotExist(artists);
+        final List<Long> albumIds = this.musicDao.insertAlbumsIfNotExist(albums);
+        final List<Long> songIds = this.musicDao.insertSongsIfNotExist(songs);
+
+        newRecordsInserted(
+                artistIds,
+                MLBPT_ARTIST_ID,
+                MLBT_ARTIST_INSERTED,
+                MLBT_ARTISTS_INSERTED,
+                ArtistInfoFetcherService.class);
+
+        newRecordsInserted(
+                albumIds,
+                MLBPT_ALBUM_ID,
+                MLBT_ALBUM_INSERTED,
+                MLBT_ALBUMS_INSERTED,
+                AlbumInfoFetcherService.class);
+
+        newRecordsInserted(
+                songIds,
+                MLBPT_SONG_ID,
+                MLBT_SONG_INSERTED,
+                MLBT_SONGS_INSERTED,
+                null);
     }
 
     /**
@@ -110,13 +160,13 @@ public class FileScannerService extends IntentService {
      * If a service class is provided as well, then the service in question is launched. Either for
      * a full refresh or for multiple single record updates, similar to the broadcast.
      *
-     * @param recordIds The IDs of the new records.
-     * @param payloadType The intent extra payload key to use for submitting a single ID with an intent.
-     * @param broadcastTypeSingleRecord The broadcast type to use when broadcasting for a single
-     *                                  record insert.
+     * @param recordIds                    The IDs of the new records.
+     * @param payloadType                  The intent extra payload key to use for submitting a single ID with an intent.
+     * @param broadcastTypeSingleRecord    The broadcast type to use when broadcasting for a single
+     *                                     record insert.
      * @param broadcastTypeMultipleRecords The broadcast type to use when broadcasting for a full
      *                                     refresh.
-     * @param clazz The service to trigger.
+     * @param clazz                        The service to trigger.
      */
     private void newRecordsInserted(@NonNull List<Long> recordIds,
                                     @NonNull MusicLibraryBroadcastPayloadType payloadType,
@@ -156,49 +206,53 @@ public class FileScannerService extends IntentService {
     private void processDirectory(File currentRoot, Set<Song> songs, Set<Album> albums, Set<Artist> artists) throws IOException {
         final File[] files = currentRoot.listFiles();
         if (files != null) {
-            Song song;
-
             for (File file : files) {
                 final File canonicalFile = file.getCanonicalFile();
                 if (canonicalFile.isDirectory()) {
                     processDirectory(canonicalFile, songs, albums, artists);
-                } else if (isMusicFile(canonicalFile)) {
-                    song = AudioFileReader.readSong(canonicalFile);
-                    if (song != null) {
-                        songs.add(song);
+                } else {
+                    processSingleFile(canonicalFile, songs, albums, artists);
+                }
+            }
+        }
+    }
 
-                        if (artists.contains(song.getArtist())) {
-                            for (Artist artist : artists) {
-                                if (artist.equals(song.getArtist())) {
-                                    song.setArtist(artist);
-                                    break;
-                                }
-                            }
-                        } else {
-                            artists.add(song.getArtist());
-                        }
+    private void processSingleFile(File canonicalFile, Set<Song> songs, Set<Album> albums, Set<Artist> artists) {
+        if (isMusicFile(canonicalFile)) {
+            Song song = AudioFileReader.readSong(canonicalFile);
+            if (song != null) {
+                songs.add(song);
 
-                        if (albums.contains(song.getAlbum())) {
-                            for (Album album : albums) {
-                                if (album.equals(song.getAlbum())) {
-                                    song.setAlbum(album);
-                                    break;
-                                }
-                            }
-                        } else {
-                            if (artists.contains(song.getAlbum().getArtist())) {
-                                for (Artist artist : artists) {
-                                    if (artist.equals(song.getAlbum().getArtist())) {
-                                        song.getAlbum().setArtist(artist);
-                                        break;
-                                    }
-                                }
-                            } else {
-                                artists.add(song.getAlbum().getArtist());
-                            }
-                            albums.add(song.getAlbum());
+                if (artists.contains(song.getArtist())) {
+                    for (Artist artist : artists) {
+                        if (artist.equals(song.getArtist())) {
+                            song.setArtist(artist);
+                            break;
                         }
                     }
+                } else {
+                    artists.add(song.getArtist());
+                }
+
+                if (albums.contains(song.getAlbum())) {
+                    for (Album album : albums) {
+                        if (album.equals(song.getAlbum())) {
+                            song.setAlbum(album);
+                            break;
+                        }
+                    }
+                } else {
+                    if (artists.contains(song.getAlbum().getArtist())) {
+                        for (Artist artist : artists) {
+                            if (artist.equals(song.getAlbum().getArtist())) {
+                                song.getAlbum().setArtist(artist);
+                                break;
+                            }
+                        }
+                    } else {
+                        artists.add(song.getAlbum().getArtist());
+                    }
+                    albums.add(song.getAlbum());
                 }
             }
         }
