@@ -1,10 +1,9 @@
 package org.willemsens.player.persistence;
 
-import android.content.Context;
+import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Query;
 import android.os.Environment;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.ApplicationState;
 import org.willemsens.player.model.Artist;
@@ -25,18 +24,10 @@ import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTAT
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_STATUS;
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_SONG_ID;
 
-public class MusicDao {
-    private final EntityDataStore<Persistable> dataStore;
-    private final Context context;
-
-    public MusicDao(EntityDataStore<Persistable> dataStore, Context context) {
-        this.dataStore = dataStore;
-        this.context = context;
-    }
-
-    public List<Directory> getAllDirectories() {
-        return this.dataStore.select(Directory.class).get().toList();
-    }
+@Dao
+public interface MusicDao {
+    @Query("SELECT * FROM directory")
+    List<Directory> getAllDirectories();
 
     public List<Album> getAllAlbums() {
         return this.dataStore.select(Album.class).get().toList();
