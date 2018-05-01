@@ -1,3 +1,7 @@
+* AudioFileReader: 33, 47,48, 55
+  Complete overhaul: insert album, artist and song in the file reader
+  --> broadcast!
+
 * Calculate album length and show it in the GUI
   * Full scan of an MP3 file should be done in a separate thread
     followed by a new type of broadcast: 'SONG_UPDATED'

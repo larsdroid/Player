@@ -1,8 +1,13 @@
 package org.willemsens.player.persistence;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
+import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.ApplicationState;
@@ -15,7 +20,6 @@ import org.willemsens.player.playback.PlayStatus;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,181 +29,119 @@ import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTAT
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_SONG_ID;
 
 @Dao
-public interface MusicDao {
+public abstract class MusicDao {
     @Query("SELECT * FROM directory")
-    List<Directory> getAllDirectories();
+    public abstract List<Directory> getAllDirectories();
 
-    public List<Album> getAllAlbums() {
-        return this.dataStore.select(Album.class).get().toList();
-    }
+    @Query("SELECT * FROM album")
+    public abstract List<Album> getAllAlbums();
 
-    public List<Artist> getAllArtists() {
-        return this.dataStore.select(Artist.class).get().toList();
-    }
+    @Query("SELECT * FROM artist")
+    public abstract List<Artist> getAllArtists();
 
-    public List<Song> getAllSongs() {
-        return this.dataStore.select(Song.class).get().toList();
-    }
+    @Query("SELECT * FROM song")
+    public abstract List<Song> getAllSongs();
 
-    public List<Album> getAllAlbumsMissingInfo() {
-        return this.dataStore.select(Album.class)
-                .where(Album.IMAGE.isNull().or(Album.YEAR_RELEASED.isNull()))
-                .get().toList();
-    }
+    @Query("SELECT * FROM album WHERE imageId IS NULL OR yearReleased IS NULL")
+    public abstract List<Album> getAllAlbumsMissingInfo();
 
-    public List<Artist> getAllArtistsMissingImage() {
-        return this.dataStore.select(Artist.class)
-                .where(Artist.IMAGE.isNull())
-                .get().toList();
-    }
+    @Query("SELECT * FROM artist WHERE imageId IS NULL")
+    public abstract List<Artist> getAllArtistsMissingImage();
 
-    public void updateAlbum(Album album) {
-        this.dataStore.update(album);
-        Log.v(getClass().getName(), "Updated Album: " + album);
-    }
+    @Query("SELECT * FROM album WHERE id = :id")
+    public abstract Album findAlbum(long id);
 
-    public void updateArtist(Artist artist) {
-        this.dataStore.update(artist);
-        Log.v(getClass().getName(), "Updated Artist: " + artist);
-    }
+    @Query("SELECT * FROM artist WHERE id = :id")
+    public abstract Artist findArtist(long id);
 
-    public Album findAlbum(long id) {
-        return this.dataStore.select(Album.class)
-                .where(Album.ID.equal(id))
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM artist WHERE name = :name")
+    abstract Artist findArtist(@NonNull String name);
 
-    public Artist findArtist(long id) {
-        return this.dataStore.select(Artist.class)
-                .where(Artist.ID.equal(id))
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM song WHERE id = :id")
+    public abstract Song findSong(long id);
 
-    public Song findSong(long id) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ID.equal(id))
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM song WHERE albumId = :albumId AND track > :previousTrack ORDER BY track ASC LIMIT 1")
+    public abstract Song findNextSong(int albumId, int previousTrack);
 
-    public Song findNextSong(Song song) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ALBUM.equal(song.getAlbum())
-                        .and(Song.TRACK.greaterThan(song.getTrack())))
-                .orderBy(Song.TRACK.asc())
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM song WHERE albumId = :albumId AND track < :followingTrack ORDER BY track DESC LIMIT 1")
+    public abstract Song findPreviousSong(int albumId, int followingTrack);
 
-    public Song findPreviousSong(Song song) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ALBUM.equal(song.getAlbum())
-                        .and(Song.TRACK.lessThan(song.getTrack())))
-                .orderBy(Song.TRACK.desc())
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
+    public abstract List<Song> getAllSongs(int albumId);
 
-    // TODO: isn't it possible to just do 'album.getSongs()'? Check requery!
-    public List<Song> getAllSongs(Album album) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ALBUM.equal(album))
-                .orderBy(Song.TRACK.asc())
-                .get().toList();
-    }
+    @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
+    public abstract Song findFirstSong(int albumId);
 
-    public Song findFirstSong(Album album) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ALBUM.equal(album))
-                .orderBy(Song.TRACK.asc())
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track DESC LIMIT 1")
+    public abstract Song findLastSong(int albumId);
 
-    public Song findLastSong(Album album) {
-        return this.dataStore.select(Song.class)
-                .where(Song.ALBUM.equal(album))
-                .orderBy(Song.TRACK.desc())
-                .get().firstOrNull();
-    }
+    @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
+    abstract ApplicationState getApplicationState(String property);
 
-    public List<Long> insertAlbumsIfNotExist(Set<Album> albums) {
-        final List<Long> insertedIds = new ArrayList<>();
-        for (Album album : albums) {
-            if (album.getId() == null) {
-                if (album.getArtist().getId() == null) {
-                    Artist dbArtist = this.dataStore.select(Artist.class)
-                            .where(Artist.NAME.equal(album.getArtist().getName()))
-                            .get().firstOrNull();
-                    album.setArtist(dbArtist);
-                }
-                Album dbAlbum = this.dataStore.select(Album.class)
-                        .where(Album.NAME.equal(album.getName()))
-                        .and(Album.ARTIST.equal(album.getArtist()))
-                        .get().firstOrNull();
-                if (dbAlbum == null) {
-                    insertAlbum(album);
-                    insertedIds.add(album.getId());
-                }
-            }
+    @Update
+    public abstract void updateAlbum(Album album);
+
+    @Update
+    public abstract void updateArtist(Artist artist);
+
+    @Update
+    abstract void updateApplicationState(ApplicationState applicationState);
+
+    @Insert
+    abstract void insertAlbum(Album album);
+
+    @Insert
+    abstract void insertArtist(Artist artist);
+
+    @Insert
+    abstract void insertSong(Song song);
+
+    @Insert
+    abstract void insertDirectory(Directory directory);
+
+    @Insert
+    abstract void insertApplicationState(ApplicationState applicationState);
+
+    @Insert
+    public abstract void insertImage(Image image);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract List<Long> insertArtistsIfNotExist(Set<Artist> artists);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract List<Long> insertAlbumsIfNotExist(Set<Album> albums);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract List<Long> insertSongsIfNotExist(Set<Song> songs);
+
+    @Delete
+    public abstract void deleteDirectory(Directory directory);
+
+    @Query("DELETE FROM directory")
+    public abstract void deleteAllDirectories();
+
+    @Query("DELETE FROM artist")
+    abstract void deleteAllArtists();
+
+    @Query("DELETE FROM album")
+    abstract void deleteAllAlbums();
+
+    @Query("DELETE FROM image")
+    abstract void deleteAllImages();
+
+    @Query("DELETE FROM song")
+    abstract void deleteAllSongs();
+
+    @Query("DELETE FROM applicationstate WHERE property = :property")
+    public abstract void deleteApplicationState(String property);
+
+    public Artist findOrCreateArtist(String name) {
+        Artist artist = findArtist(name);
+        if (artist == null) {
+            artist = new Artist(name);
+            insertArtist(artist);
         }
-        return insertedIds;
-    }
-
-    public List<Long> insertArtistsIfNotExist(Set<Artist> artists) {
-        final List<Long> insertedIds = new ArrayList<>();
-        for (Artist artist : artists) {
-            if (artist.getId() == null) {
-                Artist dbArtist = this.dataStore.select(Artist.class)
-                        .where(Artist.NAME.equal(artist.getName()))
-                        .get().firstOrNull();
-                if (dbArtist == null) {
-                    insertArtist(artist);
-                    insertedIds.add(artist.getId());
-                }
-            }
-        }
-        return insertedIds;
-    }
-
-    public List<Long> insertSongsIfNotExist(Set<Song> songs) {
-        final List<Long> insertedIds = new ArrayList<>();
-        for (Song song : songs) {
-            if (song.getId() == null) {
-                if (song.getArtist().getId() == null) {
-                    Artist dbArtist = this.dataStore.select(Artist.class)
-                            .where(Artist.NAME.equal(song.getArtist().getName()))
-                            .get().firstOrNull();
-                    song.setArtist(dbArtist);
-                }
-                if (song.getAlbum().getId() == null) {
-                    Album dbAlbum = this.dataStore.select(Album.class)
-                            .where(Album.NAME.equal(song.getName()))
-                            .and(Album.ARTIST.equal(song.getArtist()))
-                            .get().firstOrNull();
-                    song.setAlbum(dbAlbum);
-                }
-                Song dbSong = this.dataStore.select(Song.class)
-                        .where(Song.FILE.equal(song.getFile()))
-                        .get().firstOrNull();
-                if (dbSong == null) {
-                    insertSong(song);
-                    insertedIds.add(song.getId());
-                }
-            }
-        }
-        return insertedIds;
-    }
-
-    private void insertAlbum(Album album) {
-        this.dataStore.insert(album);
-        Log.v(getClass().getName(), "Inserted Album: " + album);
-    }
-
-    private void insertArtist(Artist artist) {
-        this.dataStore.insert(artist);
-        Log.v(getClass().getName(), "Inserted Artist: " + artist);
-    }
-
-    private void insertSong(Song song) {
-        this.dataStore.insert(song);
-        Log.v(getClass().getName(), "Inserted Song: " + song);
+        return artist;
     }
 
     /**
@@ -222,11 +164,6 @@ public interface MusicDao {
         return false;
     }
 
-    public void insertImage(Image image) {
-        this.dataStore.insert(image);
-        Log.v(getClass().getName(), "Inserted Image: " + image);
-    }
-
     /**
      * This helper method should only be called once, right after the app has been installed for
      * the first time. Should be called after READ_EXTERNAL_STORAGE has been granted and before
@@ -239,19 +176,11 @@ public interface MusicDao {
         }
     }
 
-    public void deleteDirectory(Directory directory) {
-        this.dataStore.delete(directory);
-    }
-
     public void deleteAllMusic() {
-        this.dataStore.delete(Artist.class).get().value();
-        this.dataStore.delete(Album.class).get().value();
-        this.dataStore.delete(Image.class).get().value();
-        this.dataStore.delete(Song.class).get().value();
-    }
-
-    public void deleteAllDirectories() {
-        this.dataStore.delete(Directory.class).get().value();
+        deleteAllArtists();
+        deleteAllAlbums();
+        deleteAllImages();
+        deleteAllSongs();
     }
 
     /**
@@ -287,21 +216,14 @@ public interface MusicDao {
      * @param path The path to insert into the DB.
      */
     private void insertMusicPath(String path) {
-        final Directory directory = new Directory();
-        directory.setPath(path);
-        this.dataStore.insert(directory);
-    }
-
-    private ApplicationState getApplicationState(String property) {
-        return this.dataStore.select(ApplicationState.class)
-                .where(ApplicationState.PROPERTY.equal(property))
-                .get().firstOrNull();
+        final Directory directory = new Directory(path);
+        insertDirectory(directory);
     }
 
     private Long getCurrentSongId() {
         ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
-        if (stateSongId != null && stateSongId.getValue() != null) {
-            return Long.parseLong(stateSongId.getValue());
+        if (stateSongId != null) {
+            return Long.parseLong(stateSongId.value);
         } else {
             return null;
         }
@@ -312,32 +234,29 @@ public interface MusicDao {
         return songId == null ? null : findSong(songId);
     }
 
-    private void setCurrentSongId(Long songId) {
+    private void setCurrentSongId(Integer songId) {
         if (songId == null) {
-            this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_SONG_ID.name()));
+            deleteApplicationState(APPSTATE_CURRENT_SONG_ID.name());
         } else {
             ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
             if (stateSongId == null) {
-                stateSongId = new ApplicationState();
-                stateSongId.setProperty(APPSTATE_CURRENT_SONG_ID.name());
-                stateSongId.setValue(String.valueOf(songId));
-                this.dataStore.insert(stateSongId);
+                stateSongId = new ApplicationState(APPSTATE_CURRENT_SONG_ID.name(), String.valueOf(songId));
+                insertApplicationState(stateSongId);
             } else {
-                stateSongId.setValue(String.valueOf(songId));
-                this.dataStore.update(stateSongId);
+                stateSongId.value = String.valueOf(songId);
+                updateApplicationState(stateSongId);
             }
         }
     }
 
     public void setCurrentSong(Song song) {
-        setCurrentSongId(song == null ? null : song.getId());
+        setCurrentSongId(song == null ? null : song.id);
     }
 
     public PlayStatus getCurrentPlayStatus() {
         ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
-        if (statePlayStatus != null && statePlayStatus.getValue() != null) {
-            return PlayStatus.valueOf(statePlayStatus.getValue());
+        if (statePlayStatus != null) {
+            return PlayStatus.valueOf(statePlayStatus.value);
         } else {
             return PlayStatus.STOPPED;
         }
@@ -345,26 +264,23 @@ public interface MusicDao {
 
     public void setCurrentPlayStatus(PlayStatus playStatus) {
         if (playStatus == null) {
-            this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_PLAY_STATUS.name()));
+            deleteApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
         } else {
             ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
             if (statePlayStatus == null) {
-                statePlayStatus = new ApplicationState();
-                statePlayStatus.setProperty(APPSTATE_CURRENT_PLAY_STATUS.name());
-                statePlayStatus.setValue(playStatus.name());
-                this.dataStore.insert(statePlayStatus);
+                statePlayStatus = new ApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name(), playStatus.name());
+                insertApplicationState(statePlayStatus);
             } else {
-                statePlayStatus.setValue(playStatus.name());
-                this.dataStore.update(statePlayStatus);
+                statePlayStatus.value = playStatus.name();
+                updateApplicationState(statePlayStatus);
             }
         }
     }
 
     public PlayMode getCurrentPlayMode() {
         ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
-        if (statePlayMode != null && statePlayMode.getValue() != null) {
-            return PlayMode.valueOf(statePlayMode.getValue());
+        if (statePlayMode != null) {
+            return PlayMode.valueOf(statePlayMode.value);
         } else {
             return PlayMode.NO_REPEAT;
         }
@@ -372,26 +288,23 @@ public interface MusicDao {
 
     public void setCurrentPlayMode(PlayMode playMode) {
         if (playMode == null) {
-            this.dataStore.delete(ApplicationState.class)
-                    .where(ApplicationState.PROPERTY.equal(APPSTATE_CURRENT_PLAY_MODE.name()));
+            deleteApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
         } else {
             ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
             if (statePlayMode == null) {
-                statePlayMode = new ApplicationState();
-                statePlayMode.setProperty(APPSTATE_CURRENT_PLAY_MODE.name());
-                statePlayMode.setValue(playMode.name());
-                this.dataStore.insert(statePlayMode);
+                statePlayMode = new ApplicationState(APPSTATE_CURRENT_PLAY_MODE.name(), playMode.name());
+                insertApplicationState(statePlayMode);
             } else {
-                statePlayMode.setValue(playMode.name());
-                this.dataStore.update(statePlayMode);
+                statePlayMode.value = playMode.name();
+                updateApplicationState(statePlayMode);
             }
         }
     }
 
     public long getCurrentMillis() {
         ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
-        if (statePlayMode != null && statePlayMode.getValue() != null) {
-            return Long.parseLong(statePlayMode.getValue());
+        if (statePlayMode != null) {
+            return Long.parseLong(statePlayMode.value);
         } else {
             return 0;
         }
@@ -400,13 +313,11 @@ public interface MusicDao {
     public void setCurrentMillis(long millis) {
         ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
         if (statePlayMode == null) {
-            statePlayMode = new ApplicationState();
-            statePlayMode.setProperty(APPSTATE_CURRENT_MILLIS.name());
-            statePlayMode.setValue(String.valueOf(millis));
-            this.dataStore.insert(statePlayMode);
+            statePlayMode = new ApplicationState(APPSTATE_CURRENT_MILLIS.name(), String.valueOf(millis));
+            insertApplicationState(statePlayMode);
         } else {
-            statePlayMode.setValue(String.valueOf(millis));
-            this.dataStore.update(statePlayMode);
+            statePlayMode.value = String.valueOf(millis);
+            updateApplicationState(statePlayMode);
         }
     }
 }

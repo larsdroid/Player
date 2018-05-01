@@ -9,8 +9,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
@@ -219,7 +217,7 @@ public class FileScannerService extends IntentService {
 
     private void processSingleFile(File canonicalFile, Set<Song> songs, Set<Album> albums, Set<Artist> artists) {
         if (isMusicFile(canonicalFile)) {
-            Song song = AudioFileReader.readSong(canonicalFile);
+            Song song = AudioFileReader.readSong(canonicalFile, this.musicDao);
             if (song != null) {
                 songs.add(song);
 

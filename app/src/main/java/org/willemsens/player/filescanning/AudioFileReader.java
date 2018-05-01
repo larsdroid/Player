@@ -9,6 +9,7 @@ import org.willemsens.mp3_vbr_length.Mp3Info;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -19,13 +20,17 @@ class AudioFileReader {
         Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
     }
 
-    static Song readSong(File file) {
+    static Song readSong(File file, MusicDao musicDao) {
         try {
             final AudioFile audioFile = AudioFileIO.read(file);
 
             final String albumArtistName = audioFile.getTag().getFirst(FieldKey.ALBUM_ARTIST);
-            final Artist albumArtist = new Artist();
-            albumArtist.setName(albumArtistName);
+            if (albumArtistName == null || albumArtistName.trim().isEmpty()) {
+                Log.e(AudioFileReader.class.getName(), "Albums's artist is mandatory! File: '" + file + "'");
+                return null;
+            }
+            final Artist albumArtist = musicDao.findOrCreateArtist(albumArtistName);
+            // TODO: perhaps broadcast!
 
             final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
             String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
@@ -36,15 +41,18 @@ class AudioFileReader {
                 }
                 albumYear = Integer.parseInt(yearString);
             }
-            final Album album = new Album();
-            album.setName(albumName);
-            album.setArtist(albumArtist);
-            album.setYearReleased(albumYear);
-            album.setLength(0);
+            final Album album = new Album(albumName, albumArtist.id);
+            album.yearReleased = albumYear;
 
-            final String songArtistName = audioFile.getTag().getFirst(FieldKey.ARTIST);
-            final Artist songArtist = new Artist();
-            songArtist.setName(songArtistName);
+            // TODO: INSERT album here!!!!
+            // TODO: immediate broadcast!!!!
+
+            String songArtistName = audioFile.getTag().getFirst(FieldKey.ARTIST);
+            if (songArtistName == null || songArtistName.trim().isEmpty()) {
+                songArtistName = albumArtistName;
+            }
+            final Artist songArtist = musicDao.findOrCreateArtist(songArtistName);
+            // TODO: perhaps broadcast!
 
             final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
             final int songLength;
@@ -57,21 +65,8 @@ class AudioFileReader {
             }
             final String songTrack = audioFile.getTag().getFirst(FieldKey.TRACK);
             final int track = songTrack != null && !songTrack.isEmpty() ? Integer.parseInt(songTrack) : -1;
-            final Song song = new Song();
-            song.setName(songName);
-            song.setArtist(songArtist);
-            song.setAlbum(album);
-            song.setTrack(track);
-            song.setLength(songLength);
-            song.setFile(file.getCanonicalPath());
-
-            if ((albumArtistName == null || albumArtistName.trim().isEmpty()) && songArtistName != null && !songArtistName.trim().isEmpty()) {
-                song.getAlbum().setArtist(songArtist);
-            }
-
-            if ((songArtistName == null || songArtistName.trim().isEmpty()) && albumArtistName != null && !albumArtistName.trim().isEmpty()) {
-                song.setArtist(albumArtist);
-            }
+            final Song song = new Song(songName, songArtist.id, album.id, track, file.getCanonicalPath());
+            song.length = songLength;
 
             Log.v(AudioFileReader.class.getName(), "SONG: " + song);
 
