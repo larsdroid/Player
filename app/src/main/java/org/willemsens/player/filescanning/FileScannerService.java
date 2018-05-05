@@ -47,6 +47,7 @@ public class FileScannerService extends IntentService {
     private static final String[] SUPPORTED_FORMATS = {"flac", "mkv", "mp3", "ogg", "wav"};
 
     private MusicDao musicDao;
+    private AudioFileReader audioFileReader;
 
     public FileScannerService() {
         super(FileScannerService.class.getName());
@@ -57,6 +58,10 @@ public class FileScannerService extends IntentService {
         if (this.musicDao == null) {
             final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
             this.musicDao = new MusicDao(dataStore, this);
+        }
+
+        if (this.audioFileReader == null) {
+            this.audioFileReader = new AudioFileReader(this.musicDao, this);
         }
 
         scanMediaStoreFiles();
@@ -107,13 +112,7 @@ public class FileScannerService extends IntentService {
             try {
                 File root = new File(dir.getPath()).getCanonicalFile();
                 if (root.isDirectory()) {
-                    Set<Song> songs = new HashSet<>();
-                    Set<Album> albums = new HashSet<>();
-                    Set<Artist> artists = new HashSet<>();
-
-                    processDirectory(root, songs, albums, artists);
-
-                    insertRecords(songs, albums, artists);
+                    processDirectory(root);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }
@@ -123,136 +122,23 @@ public class FileScannerService extends IntentService {
         }
     }
 
-    private void insertRecords(Set<Song> songs, Set<Album> albums, Set<Artist> artists) {
-        final List<Long> artistIds = this.musicDao.insertArtistsIfNotExist(artists);
-        final List<Long> albumIds = this.musicDao.insertAlbumsIfNotExist(albums);
-        final List<Long> songIds = this.musicDao.insertSongsIfNotExist(songs);
-
-        newRecordsInserted(
-                artistIds,
-                MLBPT_ARTIST_ID,
-                MLBT_ARTIST_INSERTED,
-                MLBT_ARTISTS_INSERTED,
-                ArtistInfoFetcherService.class);
-
-        newRecordsInserted(
-                albumIds,
-                MLBPT_ALBUM_ID,
-                MLBT_ALBUM_INSERTED,
-                MLBT_ALBUMS_INSERTED,
-                AlbumInfoFetcherService.class);
-
-        newRecordsInserted(
-                songIds,
-                MLBPT_SONG_ID,
-                MLBT_SONG_INSERTED,
-                MLBT_SONGS_INSERTED,
-                null);
-    }
-
-    /**
-     * Call this method after new records have been inserted into the DB. This method will send
-     * broadcasts to refresh other parts of the application. Either a single "full refresh"
-     * broadcast in case the amount of new records reached a certain threshold, or a few "record
-     * refresh" broadcasts in case the amount of new records didn't reach the threshold.
-     * If a service class is provided as well, then the service in question is launched. Either for
-     * a full refresh or for multiple single record updates, similar to the broadcast.
-     *
-     * @param recordIds                    The IDs of the new records.
-     * @param payloadType                  The intent extra payload key to use for submitting a single ID with an intent.
-     * @param broadcastTypeSingleRecord    The broadcast type to use when broadcasting for a single
-     *                                     record insert.
-     * @param broadcastTypeMultipleRecords The broadcast type to use when broadcasting for a full
-     *                                     refresh.
-     * @param clazz                        The service to trigger.
-     */
-    private void newRecordsInserted(@NonNull List<Long> recordIds,
-                                    @NonNull MusicLibraryBroadcastPayloadType payloadType,
-                                    @NonNull MusicLibraryBroadcastType broadcastTypeSingleRecord,
-                                    @NonNull MusicLibraryBroadcastType broadcastTypeMultipleRecords,
-                                    @Nullable Class clazz) {
-        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
-
-        if (recordIds.size() > THRESHOLD_FULL_REFRESH) {
-            builder
-                    .setType(broadcastTypeMultipleRecords)
-                    .buildAndSubmitBroadcast();
-
-            if (clazz != null) {
-                builder
-                        .setClass(clazz)
-                        .buildAndSubmitService();
-            }
-        } else if (recordIds.size() > 0) {
-            for (Long recordId : recordIds) {
-                builder
-                        .setType(broadcastTypeSingleRecord)
-                        .setRecordId(payloadType, recordId)
-                        .buildAndSubmitBroadcast();
-
-                if (clazz != null) {
-                    builder
-                            .setType(broadcastTypeSingleRecord)
-                            .setClass(clazz)
-                            .setRecordId(payloadType, recordId)
-                            .buildAndSubmitService();
-                }
-            }
-        }
-    }
-
-    private void processDirectory(File currentRoot, Set<Song> songs, Set<Album> albums, Set<Artist> artists) throws IOException {
+    private void processDirectory(File currentRoot) throws IOException {
         final File[] files = currentRoot.listFiles();
         if (files != null) {
             for (File file : files) {
                 final File canonicalFile = file.getCanonicalFile();
                 if (canonicalFile.isDirectory()) {
-                    processDirectory(canonicalFile, songs, albums, artists);
+                    processDirectory(canonicalFile);
                 } else {
-                    processSingleFile(canonicalFile, songs, albums, artists);
+                    processSingleFile(canonicalFile);
                 }
             }
         }
     }
 
-    private void processSingleFile(File canonicalFile, Set<Song> songs, Set<Album> albums, Set<Artist> artists) {
+    private void processSingleFile(File canonicalFile) {
         if (isMusicFile(canonicalFile)) {
-            Song song = AudioFileReader.readSong(canonicalFile, this.musicDao);
-            if (song != null) {
-                songs.add(song);
-
-                if (artists.contains(song.getArtist())) {
-                    for (Artist artist : artists) {
-                        if (artist.equals(song.getArtist())) {
-                            song.setArtist(artist);
-                            break;
-                        }
-                    }
-                } else {
-                    artists.add(song.getArtist());
-                }
-
-                if (albums.contains(song.getAlbum())) {
-                    for (Album album : albums) {
-                        if (album.equals(song.getAlbum())) {
-                            song.setAlbum(album);
-                            break;
-                        }
-                    }
-                } else {
-                    if (artists.contains(song.getAlbum().getArtist())) {
-                        for (Artist artist : artists) {
-                            if (artist.equals(song.getAlbum().getArtist())) {
-                                song.getAlbum().setArtist(artist);
-                                break;
-                            }
-                        }
-                    } else {
-                        artists.add(song.getAlbum().getArtist());
-                    }
-                    albums.add(song.getAlbum());
-                }
-            }
+            this.audioFileReader.readSong(canonicalFile);
         }
     }
 

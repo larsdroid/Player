@@ -59,6 +59,12 @@ public abstract class MusicDao {
     @Query("SELECT * FROM artist WHERE name = :name")
     abstract Artist findArtist(@NonNull String name);
 
+    @Query("SELECT * FROM album WHERE name = :name AND artistId = :artistId")
+    abstract Album findAlbum(@NonNull String name, int artistId);
+
+    @Query("SELECT * FROM song WHERE file = :file")
+    abstract Song findSong(@NonNull String file);
+
     @Query("SELECT * FROM song WHERE id = :id")
     public abstract Song findSong(long id);
 
@@ -137,14 +143,37 @@ public abstract class MusicDao {
     @Query("DELETE FROM applicationstate WHERE property = :property")
     public abstract void deleteApplicationState(String property);
 
-    public Artist findOrCreateArtist(String name, Consumer<Artist> handleInsertedArtist) {
-        Artist artist = findArtist(name);
+    public Artist findOrCreateArtist(String artistName, Consumer<Artist> handleInsertedArtist) {
+        Artist artist = findArtist(artistName);
         if (artist == null) {
-            artist = new Artist(name);
+            artist = new Artist(artistName);
             insertArtist(artist);
             Observable.just(artist).subscribe(handleInsertedArtist).dispose();
         }
         return artist;
+    }
+
+    public Album findOrCreateAlbum(String albumName, int artistId, Integer albumYear, Consumer<Album> handleInsertedAlbum) {
+        Album album = findAlbum(albumName, artistId);
+        if (album == null) {
+            album = new Album(albumName, artistId);
+            album.yearReleased = albumYear;
+            insertAlbum(album);
+            Observable.just(album).subscribe(handleInsertedAlbum).dispose();
+        }
+        return album;
+    }
+
+    public Song findOrCreateSong(@NonNull String songName, int songArtistId, int albumId, int track, @NonNull String file,
+                                 int songLength, Consumer<Song> handleInsertedSong) {
+        Song song = findSong(file);
+        if (song == null) {
+            song = new Song(songName, songArtistId, albumId, track, file);
+            song.length = songLength;
+            insertSong(song);
+            Observable.just(song).subscribe(handleInsertedSong).dispose();
+        }
+        return song;
     }
 
     /**
