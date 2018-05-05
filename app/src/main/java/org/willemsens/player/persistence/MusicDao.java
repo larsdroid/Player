@@ -9,6 +9,8 @@ import android.arch.persistence.room.Update;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.ApplicationState;
 import org.willemsens.player.model.Artist;
@@ -135,11 +137,12 @@ public abstract class MusicDao {
     @Query("DELETE FROM applicationstate WHERE property = :property")
     public abstract void deleteApplicationState(String property);
 
-    public Artist findOrCreateArtist(String name) {
+    public Artist findOrCreateArtist(String name, Consumer<Artist> handleInsertedArtist) {
         Artist artist = findArtist(name);
         if (artist == null) {
             artist = new Artist(name);
             insertArtist(artist);
+            Observable.just(artist).subscribe(handleInsertedArtist).dispose();
         }
         return artist;
     }
