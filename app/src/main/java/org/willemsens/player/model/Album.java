@@ -2,6 +2,7 @@ package org.willemsens.player.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -14,6 +15,9 @@ import java.util.Objects;
         @ForeignKey(entity = Image.class,
                 parentColumns = "id",
                 childColumns = "imageId")
+}, indices = {
+        @Index(value = {"artistId"}),
+        @Index(value = {"imageId"})
 })
 public class Album {
     @PrimaryKey(autoGenerate = true)

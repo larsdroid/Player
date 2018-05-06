@@ -128,11 +128,12 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             final MenuItem menuItemAll = albumsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Album, Boolean>> it = filter.getAlbumIterator(); it.hasNext();) {
-                final Map.Entry<Album, Boolean> entry = it.next();
-                final Album album = entry.getKey();
+            for (Iterator<Map.Entry<Integer, Boolean>> it = filter.getAlbumIterator(); it.hasNext();) {
+                final Map.Entry<Integer, Boolean> entry = it.next();
+                final Integer albumId = entry.getKey();
                 // TODO: performance: fetch all artists at once!
                 // TODO: make it sorted: fetch all artists at once!
+                final Album album = musicDao.findAlbum(albumId);
                 albumsMenu.add(NONE, album.id, NONE, album.name);
                 final MenuItem menuItem = albumsMenu.getItem(i++);
                 menuItem.setCheckable(true);
@@ -148,11 +149,12 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             final MenuItem menuItemAll = artistsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Artist, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
-                final Map.Entry<Artist, Boolean> entry = it.next();
-                final Artist artist = entry.getKey();
+            for (Iterator<Map.Entry<Integer, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Integer, Boolean> entry = it.next();
+                final Integer artistId = entry.getKey();
                 // TODO: performance: fetch all artists at once!
                 // TODO: make it sorted: fetch all artists at once!
+                final Artist artist = musicDao.findArtist(artistId);
                 // Negative ID means it's an artist
                 artistsMenu.add(NONE, -artist.id, NONE, artist.name);
                 final MenuItem menuItem = artistsMenu.getItem(i++);

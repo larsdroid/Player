@@ -17,7 +17,9 @@ import java.util.Objects;
                 childColumns = "albumId")},
         indices = {
                 @Index(value = {"file"},
-                        unique = true)
+                        unique = true),
+                @Index(value = {"artistId"}),
+                @Index(value = {"albumId"})
         })
 public class Song {
     @PrimaryKey(autoGenerate = true)

@@ -87,7 +87,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         return this.musicDao.getCurrentSong();
     }
 
-    void setSong(final long songId, final PlayerCommand playerCommand) {
+    void setSong(final int songId, final PlayerCommand playerCommand) {
         final Song song = this.musicDao.findSong(songId);
         if (playerCommand == PLAY) {
             this.musicDao.setCurrentPlayStatus(PLAYING);

@@ -54,7 +54,7 @@ public class MusicLibraryBroadcastBuilder {
         return setRecordId(MLBPT_ARTIST_ID, artist.id);
     }
 
-    public MusicLibraryBroadcastBuilder setRecordId(@NonNull MusicLibraryBroadcastPayloadType payloadType, long recordId) {
+    public MusicLibraryBroadcastBuilder setRecordId(@NonNull MusicLibraryBroadcastPayloadType payloadType, int recordId) {
         if (this.payloadType == null) {
             this.intent.putExtra(payloadType.name(), recordId);
             this.payloadType = payloadType;

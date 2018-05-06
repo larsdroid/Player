@@ -14,7 +14,8 @@ import java.util.Objects;
                 childColumns = "imageId")},
         indices = {
                 @Index(value = {"name"},
-                        unique = true)
+                        unique = true),
+                @Index(value = {"imageId"})
         })
 public class Artist implements Comparable<Artist> {
     @PrimaryKey(autoGenerate = true)
