@@ -46,7 +46,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     public void onCreate() {
         super.onCreate();
 
-        this.player = new Player(getApplication(), this, this);
+        this.player = new Player(this, this);
 
         initNotificationBars();
         initNotificationManager();

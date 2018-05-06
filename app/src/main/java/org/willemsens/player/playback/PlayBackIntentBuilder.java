@@ -33,7 +33,7 @@ public class PlayBackIntentBuilder {
 
     public PlayBackIntentBuilder setSong(Song song) {
         this.intent.setAction(PBIT_SET_SONG_ID.name());
-        this.intent.putExtra(PBIPT_SONG_ID.name(), song.getId());
+        this.intent.putExtra(PBIPT_SONG_ID.name(), song.id);
         return this;
     }
 

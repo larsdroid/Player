@@ -20,14 +20,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import org.willemsens.player.R;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.view.DataAccessProvider;
 
 import java.io.File;
 
 public class SettingsFragment extends Fragment {
     private OnSettingsFragmentListener listener;
-    private DataAccessProvider dataAccessProvider;
     private MusicDao musicDao;
     private MusicDirectoryAdapter adapter;
 
@@ -57,7 +56,7 @@ public class SettingsFragment extends Fragment {
         Context context = view.getContext();
         this.directoryList.setLayoutManager(new LinearLayoutManager(context));
         if (this.adapter == null) {
-            this.adapter = new MusicDirectoryAdapter(this.dataAccessProvider);
+            this.adapter = new MusicDirectoryAdapter(this.getContext());
         }
         this.directoryList.setAdapter(this.adapter);
 
@@ -121,11 +120,9 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnSettingsFragmentListener
-                && context instanceof DataAccessProvider) {
+        if (context instanceof OnSettingsFragmentListener) {
             listener = (OnSettingsFragmentListener) context;
-            dataAccessProvider = (DataAccessProvider) context;
-            musicDao = this.dataAccessProvider.getMusicDao();
+            musicDao = AppDatabase.getAppDatabase(context).musicDao();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnSettingsFragmentListener and DataAccessProvider");

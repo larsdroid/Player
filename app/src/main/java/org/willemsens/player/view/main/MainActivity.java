@@ -26,9 +26,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
-import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
@@ -37,10 +34,10 @@ import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
-import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.main.album.AlbumFragment;
 import org.willemsens.player.view.main.music.MusicFragment;
 import org.willemsens.player.view.main.music.SubFragmentType;
@@ -60,8 +57,7 @@ import static org.willemsens.player.playback.PlayerCommand.PAUSE;
 import static org.willemsens.player.playback.PlayerCommand.PLAY;
 
 public class MainActivity extends AppCompatActivity
-        implements DataAccessProvider,
-        OnSongClickedListener,
+        implements OnSongClickedListener,
         OnArtistClickedListener,
         OnAlbumClickedListener,
         OnSettingsFragmentListener,
@@ -89,8 +85,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
-        this.musicDao = new MusicDao(dataStore, this);
+        this.musicDao = AppDatabase.getAppDatabase(this).musicDao();
 
         handlePermission(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -271,11 +266,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public MusicDao getMusicDao() {
-        return this.musicDao;
-    }
-
-    @Override
     public void songClicked(Song song) {
         new PlayBackIntentBuilder(this)
                 .setSong(song)
@@ -285,7 +275,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void albumClicked(Album album) {
-        Fragment albumFragment = AlbumFragment.newInstance(this, album.getId());
+        Fragment albumFragment = AlbumFragment.newInstance(this, album.id);
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragment_container, albumFragment);
@@ -352,8 +342,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: runOnUiThread(new Runnable() {    ?
-            final Song song = getMusicDao().getCurrentSong();
-            final PlayStatus playStatus = getMusicDao().getCurrentPlayStatus();
+            final Song song = musicDao.getCurrentSong();
+            final PlayStatus playStatus = musicDao.getCurrentPlayStatus();
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();
             } else {

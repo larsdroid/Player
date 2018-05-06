@@ -52,16 +52,14 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     }
 
     private boolean fetchAlbumArt(Album album, ImageDownloader imageDownloader, @NonNull AlbumInfo albumInfo) {
-        if (album.getImage() == null) {
+        if (album.imageId == null) {
             try {
                 final String coverImageUrl = albumInfo.getCoverImageUrl();
                 final byte[] imageData = imageDownloader.downloadImage(coverImageUrl);
 
-                final Image image = new Image();
-                image.setUrl(coverImageUrl);
-                image.setImageData(imageData);
-                getMusicDao().insertImage(image);
-                album.setImage(image);
+                final Image image = new Image(imageData);
+                image.url = coverImageUrl;
+                album.imageId = getMusicDao().insertImage(image);
             } catch (NetworkClientException e) {
                 generateAlbumArt(album);
             } catch (NetworkServerException e) {
@@ -74,43 +72,43 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     }
 
     private void generateAlbumArt(Album album) {
-        final Image image = new Image();
-        image.setImageData(ImageGenerator.generateAlbumCover(album));
-        getMusicDao().insertImage(image);
-        album.setImage(image);
+        final Image image = new Image(ImageGenerator.generateAlbumCover(album));
+        album.imageId = getMusicDao().insertImage(image);
     }
 
     private void fetchAlbum(Album album, ImageDownloader imageDownloader) {
-        boolean isAlbumUpdated = false;
-
         try {
-            final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(album.getArtist().getName(), album.getName());
+            final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(getMusicDao().findArtist(album.artistId).name, album.name);
 
-            isAlbumUpdated = fetchAlbumArt(album, imageDownloader, albumInfo);
+            boolean isAlbumUpdated = fetchAlbumArt(album, imageDownloader, albumInfo);
 
-            if (album.getYearReleased() == null && albumInfo.getYear() != null) {
-                album.setYearReleased(albumInfo.getYear());
+            if (album.yearReleased == null && albumInfo.getYear() != null) {
+                album.yearReleased = albumInfo.getYear();
                 isAlbumUpdated = true;
             }
+
+            if (isAlbumUpdated) {
+                updateAlbum(album);
+            }
         } catch (NetworkClientException e) {
-            if (album.getImage() == null) {
+            if (album.imageId == null) {
                 generateAlbumArt(album);
-                isAlbumUpdated = true;
+                updateAlbum(album);
             }
         } catch (NetworkServerException e) {
             // Ignore
         }
 
-        if (isAlbumUpdated) {
-            getMusicDao().updateAlbum(album);
-
-            MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
-            builder
-                    .setType(MLBT_ALBUM_UPDATED)
-                    .setAlbum(album)
-                    .buildAndSubmitBroadcast();
-        }
-
         waitRateLimit();
+    }
+
+    private void updateAlbum(Album album) {
+        getMusicDao().updateAlbum(album);
+
+        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+        builder
+                .setType(MLBT_ALBUM_UPDATED)
+                .setAlbum(album)
+                .buildAndSubmitBroadcast();
     }
 }

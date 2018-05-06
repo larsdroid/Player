@@ -16,9 +16,9 @@ import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.util.StringFormat;
-import org.willemsens.player.view.DataAccessProvider;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
 import java.util.List;
@@ -32,14 +32,12 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
     private final PlayBackUpdateReceiver playBackUpdateReceiver;
     private final MusicDao musicDao;
 
-    AlbumSongAdapter(Context context, DataAccessProvider dataAccessProvider, Album album) {
+    AlbumSongAdapter(Context context, Album album) {
         this.context = context;
         this.listener = (OnSongClickedListener) context;
         this.playBackUpdateReceiver = new PlayBackUpdateReceiver();
-        this.musicDao = dataAccessProvider.getMusicDao();
-
-        // TODO: can requery handle 'album.getSongs()'?
-        this.songs = this.musicDao.getAllSongs(album);
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
+        this.songs = this.musicDao.getAllSongs(album.id);
     }
 
     @NonNull
@@ -90,13 +88,13 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
         private void setSong(Song song) {
             this.song = song;
 
-            this.trackNumber.setText(String.valueOf(song.getTrack()));
-            this.songName.setText(song.getName());
-            this.artistName.setText(song.getArtist().getName());
-            this.songLength.setText(StringFormat.formatToSongLength(song.getLength()));
+            this.trackNumber.setText(String.valueOf(song.track));
+            this.songName.setText(song.name);
+            this.artistName.setText(musicDao.findArtist(song.artistId).name);
+            this.songLength.setText(StringFormat.formatToSongLength(song.length));
 
             final Song currentSong = musicDao.getCurrentSong();
-            if (currentSong != null && currentSong.getId().equals(song.getId())) {
+            if (currentSong != null && currentSong.id == song.id) {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorBackground));

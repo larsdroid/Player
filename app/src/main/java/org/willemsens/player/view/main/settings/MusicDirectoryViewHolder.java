@@ -31,7 +31,7 @@ public class MusicDirectoryViewHolder extends RecyclerView.ViewHolder {
     void setDirectory(Directory directory) {
         this.directory = directory;
 
-        this.directoryPath.setText(directory.getPath());
+        this.directoryPath.setText(directory.path);
     }
 
     interface DirectoryDeleteListener {

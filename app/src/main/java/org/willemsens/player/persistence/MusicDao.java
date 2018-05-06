@@ -51,10 +51,10 @@ public abstract class MusicDao {
     public abstract List<Artist> getAllArtistsMissingImage();
 
     @Query("SELECT * FROM album WHERE id = :id")
-    public abstract Album findAlbum(long id);
+    public abstract Album findAlbum(int id);
 
     @Query("SELECT * FROM artist WHERE id = :id")
-    public abstract Artist findArtist(long id);
+    public abstract Artist findArtist(int id);
 
     @Query("SELECT * FROM artist WHERE name = :name")
     abstract Artist findArtist(@NonNull String name);
@@ -66,7 +66,10 @@ public abstract class MusicDao {
     abstract Song findSong(@NonNull String file);
 
     @Query("SELECT * FROM song WHERE id = :id")
-    public abstract Song findSong(long id);
+    public abstract Song findSong(int id);
+
+    @Query("SELECT * FROM image WHERE id = :id")
+    public abstract Image findImage(int id);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId AND track > :previousTrack ORDER BY track ASC LIMIT 1")
     public abstract Song findNextSong(int albumId, int previousTrack);
@@ -114,13 +117,13 @@ public abstract class MusicDao {
     public abstract int insertImage(Image image);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Long> insertArtistsIfNotExist(Set<Artist> artists);
+    public abstract List<Integer> insertArtistsIfNotExist(Set<Artist> artists);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Long> insertAlbumsIfNotExist(Set<Album> albums);
+    public abstract List<Integer> insertAlbumsIfNotExist(Set<Album> albums);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Long> insertSongsIfNotExist(Set<Song> songs);
+    public abstract List<Integer> insertSongsIfNotExist(Set<Song> songs);
 
     @Delete
     public abstract void deleteDirectory(Directory directory);
@@ -252,17 +255,17 @@ public abstract class MusicDao {
         insertDirectory(directory);
     }
 
-    private Long getCurrentSongId() {
+    private Integer getCurrentSongId() {
         ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
         if (stateSongId != null) {
-            return Long.parseLong(stateSongId.value);
+            return Integer.parseInt(stateSongId.value);
         } else {
             return null;
         }
     }
 
     public Song getCurrentSong() {
-        final Long songId = getCurrentSongId();
+        final Integer songId = getCurrentSongId();
         return songId == null ? null : findSong(songId);
     }
 
