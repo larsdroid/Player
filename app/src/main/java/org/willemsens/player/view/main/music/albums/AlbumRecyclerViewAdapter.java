@@ -22,15 +22,16 @@ import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
-import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.model.Image;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
@@ -51,13 +52,13 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     private final List<Album> albums;
     private final List<Album> allAlbums;
     private final OnAlbumClickedListener listener;
-    private final DataAccessProvider dataAccessProvider;
+    private final MusicDao musicDao;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final AlbumFilter filter;
 
-    AlbumRecyclerViewAdapter(Context context, DataAccessProvider dataAccessProvider, Bundle savedInstanceState) {
+    AlbumRecyclerViewAdapter(Context context, Bundle savedInstanceState) {
         this.context = context;
-        this.dataAccessProvider = dataAccessProvider;
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
         this.listener = (OnAlbumClickedListener) context;
         this.dbUpdateReceiver = new DBUpdateReceiver();
         this.allAlbums = new ArrayList<>();
@@ -69,8 +70,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
     private void loadAlbumsFromDb() {
         allAlbums.clear();
-        allAlbums.addAll(dataAccessProvider.getMusicDao().getAllAlbums());
-        Collections.sort(allAlbums);
+        allAlbums.addAll(musicDao.getAllAlbums());
 
         getFilter().filter(null);
     }
@@ -146,13 +146,14 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         private void setAlbum(Album album) {
             this.album = album;
 
-            this.albumName.setText(album.getName());
-            this.albumYear.setText(album.getYearReleased() == null ? "" : String.valueOf(album.getYearReleased()));
-            this.albumArtist.setText(album.getArtist().getName());
+            this.albumName.setText(album.name);
+            this.albumYear.setText(album.yearReleased == null ? "" : String.valueOf(album.yearReleased));
+            this.albumArtist.setText(musicDao.findArtist(album.artistId).name);
 
-            if (album.getImage() != null) {
+            if (album.imageId != null) {
+                final Image albumCover = musicDao.findImage(album.imageId);
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        album.getImage().getImageData(), 0, album.getImage().getImageData().length);
+                        albumCover.imageData, 0, albumCover.imageData.length);
                 this.albumCover.setImageBitmap(bitmap);
 
                 this.albumCover.setVisibility(View.VISIBLE);
@@ -172,10 +173,10 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     }
 
     public class AlbumFilter extends Filter {
-        private final Map<Artist, Boolean> artists;
+        private final Map<Integer, Boolean> artists; // Artist ID --> Include in filter
 
         AlbumFilter() {
-            this.artists = new TreeMap<>();
+            this.artists = new HashMap<>();
             fetchAllArtists();
         }
 
@@ -185,20 +186,20 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
         private void fetchAllArtists() {
             this.artists.clear();
-            for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
-                this.artists.put(artist, true);
+            for (Artist artist : musicDao.getAllArtists()) {
+                this.artists.put(artist.id, true);
             }
         }
 
         private void setAllArtists(boolean b) {
-            for (Artist key : this.artists.keySet()) {
+            for (Integer key : this.artists.keySet()) {
                 this.artists.put(key, b);
             }
         }
 
         boolean hasAllArtists() {
-            for (Artist key : this.artists.keySet()) {
-                if (!this.artists.get(key)) {
+            for (Boolean include : this.artists.values()) {
+                if (!include) {
                     return false;
                 }
             }
@@ -214,48 +215,38 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         }
 
         public void add(Artist artist) {
-            this.artists.put(artist, true);
+            this.artists.put(artist.id, true);
         }
 
         void flipArtist(int artistId) {
-            for (Artist artist : this.artists.keySet()) {
-                if (artist.getId() == artistId) {
-                    this.artists.put(artist, !this.artists.get(artist));
-                }
-            }
+            this.artists.put(artistId, !this.artists.get(artistId));
         }
 
-        Iterator<Map.Entry<Artist, Boolean>> getArtistIterator() {
+        Iterator<Map.Entry<Integer, Boolean>> getArtistIterator() {
             return this.artists.entrySet().iterator();
         }
 
         private void onSaveInstanceState(Bundle outState) {
-            List<Artist> filterArtists = new ArrayList<>();
-            for (Artist artist : this.artists.keySet()) {
-                if (this.artists.get(artist)) {
-                    filterArtists.add(artist);
+            List<Integer> filterArtists = new ArrayList<>();
+            for (Integer artistId : this.artists.keySet()) {
+                if (this.artists.get(artistId)) {
+                    filterArtists.add(artistId);
                 }
             }
-            long[] filterArtistIds = new long[filterArtists.size()];
+            int[] filterArtistIds = new int[filterArtists.size()];
             int i = 0;
-            for (Artist artist : filterArtists) {
-                filterArtistIds[i++] = artist.getId();
+            for (Integer artistId : filterArtists) {
+                filterArtistIds[i++] = artistId;
             }
-            outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
+            outState.putIntArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
+                int[] filterArtistIds = savedInstanceState.getIntArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
-                    for (Artist artist : this.artists.keySet()) {
-                        this.artists.put(artist, false);
-                        for (long filterArtistId : filterArtistIds) {
-                            if (artist.getId() == filterArtistId) {
-                                this.artists.put(artist, true);
-                                break;
-                            }
-                        }
+                    for (int filterArtistId : filterArtistIds) {
+                        this.artists.put(filterArtistId, true);
                     }
                 }
             }
@@ -267,7 +258,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             final List<Album> newList = new LinkedList<>(allAlbums);
             for (Iterator<Album> i = newList.iterator(); i.hasNext();) {
                 final Album album = i.next();
-                if (!this.artists.get(album.getArtist())) {
+                if (!this.artists.get(album.artistId)) {
                     i.remove();
                 }
             }
@@ -293,14 +284,16 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             if (intentAction.equals(MLBT_ALBUMS_INSERTED.name())) {
                 loadAlbumsFromDb();
             } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
-                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                loadAlbumsFromDb();
+
+                /*final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                final Album album = musicDao.findAlbum(albumId);
                 allAlbums.add(album);
-                Collections.sort(allAlbums);
-                getFilter().filter(null);
+                // SORT: this can't easily be done...
+                getFilter().filter(null);*/
             } else if (intentAction.equals(MLBT_ALBUM_UPDATED.name())) {
-                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                final Album album = musicDao.findAlbum(albumId);
                 allAlbums.set(allAlbums.indexOf(album), album);
                 final int index = albums.indexOf(album);
                 if (index != -1) {
@@ -313,8 +306,8 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
-                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final Artist artist = musicDao.findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);
             } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
                 ((AlbumFilter)getFilter()).clearAllArtists();

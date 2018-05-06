@@ -35,13 +35,13 @@ public abstract class MusicDao {
     @Query("SELECT * FROM directory")
     public abstract List<Directory> getAllDirectories();
 
-    @Query("SELECT * FROM album")
+    @Query("SELECT al.* FROM album al, artist ar WHERE al.artistId = ar.id ORDER BY ar.name, al.yearReleased")
     public abstract List<Album> getAllAlbums();
 
-    @Query("SELECT * FROM artist")
+    @Query("SELECT * FROM artist ORDER BY name")
     public abstract List<Artist> getAllArtists();
 
-    @Query("SELECT * FROM song")
+    @Query("SELECT * FROM song so, album al, artist ar WHERE so.albumId = al.id AND al.artistId = ar.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
     public abstract List<Song> getAllSongs();
 
     @Query("SELECT * FROM album WHERE imageId IS NULL OR yearReleased IS NULL")

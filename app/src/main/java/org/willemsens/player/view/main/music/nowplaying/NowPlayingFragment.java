@@ -1,5 +1,6 @@
 package org.willemsens.player.view.main.music.nowplaying;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -9,15 +10,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.willemsens.player.R;
-import org.willemsens.player.model.Song;
-import org.willemsens.player.playback.PlayBackIntentBuilder;
-import org.willemsens.player.playback.PlayStatus;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Image;
+import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.playback.PlayBackIntentBuilder;
+import org.willemsens.player.playback.PlayStatus;
 
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
@@ -44,6 +47,8 @@ public class NowPlayingFragment extends Fragment {
 
     @BindView(R.id.button_next)
     ImageView nextButton;
+
+    private MusicDao musicDao;
 
     public static NowPlayingFragment newInstance() {
         return new NowPlayingFragment();
@@ -78,6 +83,12 @@ public class NowPlayingFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        musicDao = AppDatabase.getAppDatabase(context).musicDao();
+    }
+
     public void update(Song song, PlayStatus playStatus) {
         switch (playStatus) {
             case PLAYING:
@@ -90,16 +101,18 @@ public class NowPlayingFragment extends Fragment {
                 playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
         }
 
-        if (song.getAlbum().getImage() != null) {
+        final Album album = this.musicDao.findAlbum(song.albumId);
+        final Image albumImage = this.musicDao.findImage(album.imageId);
+        if (albumImage.imageData != null) {
             final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                    song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
+                    albumImage.imageData, 0, albumImage.imageData.length);
             albumCover.setImageBitmap(bitmap);
         } else {
             albumCover.setImageDrawable(null);
         }
 
-        trackNumber.setText(String.valueOf(song.getTrack()));
-        songName.setText(song.getName());
-        albumName.setText(song.getAlbum().getName());
+        trackNumber.setText(String.valueOf(song.track));
+        songName.setText(song.name);
+        albumName.setText(album.name);
     }
 }

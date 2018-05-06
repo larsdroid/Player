@@ -41,6 +41,6 @@ public class Artist implements Comparable<Artist> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 }

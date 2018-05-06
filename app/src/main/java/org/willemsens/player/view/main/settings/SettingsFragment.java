@@ -120,9 +120,10 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        musicDao = AppDatabase.getAppDatabase(context).musicDao();
+
         if (context instanceof OnSettingsFragmentListener) {
             listener = (OnSettingsFragmentListener) context;
-            musicDao = AppDatabase.getAppDatabase(context).musicDao();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnSettingsFragmentListener and DataAccessProvider");

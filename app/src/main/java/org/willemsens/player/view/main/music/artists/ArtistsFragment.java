@@ -9,16 +9,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
 import org.willemsens.player.model.Artist;
-import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +33,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_
  * A fragment representing a list of Artists.
  */
 public class ArtistsFragment extends Fragment {
-    private DataAccessProvider dataAccessProvider;
+    private MusicDao musicDao;
     private ArtistRecyclerViewAdapter adapter;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final List<Artist> artists;
@@ -61,7 +60,7 @@ public class ArtistsFragment extends Fragment {
             if (this.artists.isEmpty()) {
                 loadAllArtists();
             }
-            this.adapter = new ArtistRecyclerViewAdapter(this.artists, (OnArtistClickedListener) context);
+            this.adapter = new ArtistRecyclerViewAdapter(context, this.artists, (OnArtistClickedListener) context);
             recyclerView.setAdapter(this.adapter);
         }
         return view;
@@ -71,11 +70,7 @@ public class ArtistsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof DataAccessProvider) {
-            this.dataAccessProvider = (DataAccessProvider) context;
-        } else {
-            Log.e(getClass().getName(), "Context should be a DataAccessProvider.");
-        }
+        musicDao = AppDatabase.getAppDatabase(context).musicDao();
     }
 
     @Override
@@ -111,15 +106,15 @@ public class ArtistsFragment extends Fragment {
                 loadAllArtists();
                 adapter.notifyDataSetChanged();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
-                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final Artist artist = musicDao.findArtist(artistId);
                 artists.add(artist);
                 Collections.sort(artists);
                 final int index = artists.indexOf(artist);
                 adapter.notifyItemInserted(index);
             } else if (intentAction.equals(MLBT_ARTIST_UPDATED.name())) {
-                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final Artist artist = musicDao.findArtist(artistId);
                 final int index = artists.indexOf(artist);
                 if (index != -1) {
                     artists.set(index, artist);
@@ -133,7 +128,6 @@ public class ArtistsFragment extends Fragment {
 
     private void loadAllArtists() {
         artists.clear();
-        artists.addAll(dataAccessProvider.getMusicDao().getAllArtists());
-        Collections.sort(artists);
+        artists.addAll(musicDao.getAllArtists());
     }
 }
