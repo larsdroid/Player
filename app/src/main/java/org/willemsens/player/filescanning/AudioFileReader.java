@@ -34,7 +34,7 @@ class AudioFileReader {
         Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
     }
 
-    public AudioFileReader(MusicDao musicDao, Context context) {
+    AudioFileReader(MusicDao musicDao, Context context) {
         this.musicDao = musicDao;
         this.context = context;
     }
@@ -48,12 +48,9 @@ class AudioFileReader {
             final Song song = getSong(audioFile, musicDao, album, songArtist);
 
             Log.v(AudioFileReader.class.getName(), "SONG: " + song);
-
-            return song;
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(AudioFileReader.class.getName(), e.getMessage());
-            return null;
         }
     }
 

@@ -111,7 +111,7 @@ public abstract class MusicDao {
     abstract void insertApplicationState(ApplicationState applicationState);
 
     @Insert
-    public abstract void insertImage(Image image);
+    public abstract int insertImage(Image image);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract List<Long> insertArtistsIfNotExist(Set<Artist> artists);

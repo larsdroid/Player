@@ -6,44 +6,20 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import org.willemsens.player.PlayerApplication;
-import org.willemsens.player.fetchers.AlbumInfoFetcherService;
-import org.willemsens.player.fetchers.ArtistInfoFetcherService;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Directory;
-import org.willemsens.player.model.Song;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastType;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONG_INSERTED;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
  * updates the file's information in the music DB.
  */
 public class FileScannerService extends IntentService {
-    private static final int THRESHOLD_FULL_REFRESH = 10;
-
     private static final String[] SUPPORTED_FORMATS = {"flac", "mkv", "mp3", "ogg", "wav"};
 
     private MusicDao musicDao;
@@ -56,8 +32,7 @@ public class FileScannerService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         if (this.musicDao == null) {
-            final EntityDataStore<Persistable> dataStore = ((PlayerApplication) getApplication()).getData();
-            this.musicDao = new MusicDao(dataStore, this);
+            this.musicDao = AppDatabase.getAppDatabase(this).musicDao();
         }
 
         if (this.audioFileReader == null) {
@@ -80,23 +55,17 @@ public class FileScannerService extends IntentService {
             if (musicCursor.moveToFirst()) {
                 final int fileColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
-                Set<Song> songs = new HashSet<>();
-                Set<Album> albums = new HashSet<>();
-                Set<Artist> artists = new HashSet<>();
-
                 do {
                     Log.d("FileScannerService", musicCursor.getString(fileColumn));
 
                     final File file = new File(musicCursor.getString(fileColumn));
                     try {
                         final File canonicalFile = file.getCanonicalFile();
-                        processSingleFile(canonicalFile, songs, albums, artists);
+                        processSingleFile(canonicalFile);
                     } catch (IOException e) {
                         Log.e("FileScannerService", e.getMessage());
                     }
                 } while (musicCursor.moveToNext());
-
-                insertRecords(songs, albums, artists);
             }
             musicCursor.close();
         }
@@ -110,7 +79,7 @@ public class FileScannerService extends IntentService {
     private void scanCustomDirectories() {
         for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
-                File root = new File(dir.getPath()).getCanonicalFile();
+                File root = new File(dir.path).getCanonicalFile();
                 if (root.isDirectory()) {
                     processDirectory(root);
                 } else {

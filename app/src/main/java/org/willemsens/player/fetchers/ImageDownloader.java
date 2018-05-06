@@ -15,7 +15,7 @@ import java.io.InputStream;
 public class ImageDownloader {
     private final OkHttpClient client;
 
-    public ImageDownloader() {
+    ImageDownloader() {
         this.client = new OkHttpClient();
     }
 
