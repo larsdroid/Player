@@ -56,7 +56,7 @@ public class AlbumFragment extends Fragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            final int albumId = arguments.getInt(MLBPT_ALBUM_ID.name());
+            final long albumId = arguments.getLong(MLBPT_ALBUM_ID.name());
             this.album = musicDao.findAlbum(albumId);
 
             final Image albumCover = musicDao.findImage(album.imageId);

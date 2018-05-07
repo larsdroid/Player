@@ -19,12 +19,12 @@ import java.util.Objects;
         })
 public class Artist implements Comparable<Artist> {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @NonNull
     public String name;
 
-    public Integer imageId;
+    public Long imageId;
 
     public Artist(@NonNull String name) {
         this.name = name;

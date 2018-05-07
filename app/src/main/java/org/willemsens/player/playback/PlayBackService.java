@@ -107,7 +107,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             if (intentAction.equals(PlayBackIntentType.PBIT_DISMISS.name())) {
                 stopSelf();
             } else if (intentAction.equals(PBIT_SET_SONG_ID.name())) {
-                final int songId = intent.getIntExtra(PBIPT_SONG_ID.name(), -1);
+                final long songId = intent.getLongExtra(PBIPT_SONG_ID.name(), -1);
                 PlayerCommand playerCommand = null;
                 if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));

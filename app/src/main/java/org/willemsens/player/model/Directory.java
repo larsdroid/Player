@@ -13,7 +13,7 @@ import java.util.Date;
 })
 public class Directory {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @NonNull
     public String path;

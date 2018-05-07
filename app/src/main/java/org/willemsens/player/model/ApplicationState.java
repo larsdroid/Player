@@ -12,7 +12,7 @@ import android.support.annotation.NonNull;
 })
 public class ApplicationState {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @NonNull
     public String property;

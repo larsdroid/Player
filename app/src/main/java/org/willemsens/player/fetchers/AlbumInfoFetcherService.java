@@ -43,7 +43,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
             }
         } else if (intent.getAction().equals(MLBT_ALBUM_INSERTED.name())) {
             // Fetch info for a single album.
-            final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+            final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
             if (albumId != -1) {
                 final Album album = getMusicDao().findAlbum(albumId);
                 fetchAlbum(album, imageDownloader);

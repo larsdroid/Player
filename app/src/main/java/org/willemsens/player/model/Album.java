@@ -21,17 +21,17 @@ import java.util.Objects;
 })
 public class Album {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @NonNull
     public String name;
 
-    public int artistId;
+    public long artistId;
     public Integer yearReleased;
     public Integer length;
-    public Integer imageId;
+    public Long imageId;
 
-    public Album(@NonNull String name, int artistId) {
+    public Album(@NonNull String name, long artistId) {
         this.name = name;
         this.artistId = artistId;
     }

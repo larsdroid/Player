@@ -126,13 +126,13 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
             final MenuItem menuItemAll = artistsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Integer, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
-                final Map.Entry<Integer, Boolean> entry = it.next();
-                final Integer artistId = entry.getKey();
+            for (Iterator<Map.Entry<Long, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Long, Boolean> entry = it.next();
+                final Long artistId = entry.getKey();
                 // TODO: performance: fetch all artists at once!
                 // TODO: make it sorted: fetch all artists at once!
                 final Artist artist = musicDao.findArtist(artistId);
-                artistsMenu.add(NONE, artist.id, NONE, artist.name);
+                artistsMenu.add(NONE, (int)artist.id, NONE, artist.name);
                 final MenuItem menuItem = artistsMenu.getItem(i++);
                 menuItem.setCheckable(true);
                 if (entry.getValue()) {

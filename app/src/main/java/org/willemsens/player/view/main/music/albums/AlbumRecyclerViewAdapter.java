@@ -173,7 +173,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
     }
 
     public class AlbumFilter extends Filter {
-        private final Map<Integer, Boolean> artists; // Artist ID --> Include in filter
+        private final Map<Long, Boolean> artists; // Artist ID --> Include in filter
 
         AlbumFilter() {
             this.artists = new HashMap<>();
@@ -192,7 +192,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         }
 
         private void setAllArtists(boolean b) {
-            for (Integer key : this.artists.keySet()) {
+            for (Long key : this.artists.keySet()) {
                 this.artists.put(key, b);
             }
         }
@@ -218,34 +218,34 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             this.artists.put(artist.id, true);
         }
 
-        void flipArtist(int artistId) {
+        void flipArtist(long artistId) {
             this.artists.put(artistId, !this.artists.get(artistId));
         }
 
-        Iterator<Map.Entry<Integer, Boolean>> getArtistIterator() {
+        Iterator<Map.Entry<Long, Boolean>> getArtistIterator() {
             return this.artists.entrySet().iterator();
         }
 
         private void onSaveInstanceState(Bundle outState) {
-            List<Integer> filterArtists = new ArrayList<>();
-            for (Integer artistId : this.artists.keySet()) {
+            List<Long> filterArtists = new ArrayList<>();
+            for (Long artistId : this.artists.keySet()) {
                 if (this.artists.get(artistId)) {
                     filterArtists.add(artistId);
                 }
             }
-            int[] filterArtistIds = new int[filterArtists.size()];
+            long[] filterArtistIds = new long[filterArtists.size()];
             int i = 0;
-            for (Integer artistId : filterArtists) {
+            for (Long artistId : filterArtists) {
                 filterArtistIds[i++] = artistId;
             }
-            outState.putIntArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
+            outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                int[] filterArtistIds = savedInstanceState.getIntArray(MLBPT_ARTIST_IDS.name());
+                long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
-                    for (int filterArtistId : filterArtistIds) {
+                    for (long filterArtistId : filterArtistIds) {
                         this.artists.put(filterArtistId, true);
                     }
                 }
@@ -286,13 +286,13 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
                 loadAlbumsFromDb();
 
-                /*final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                /*final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 final Album album = musicDao.findAlbum(albumId);
                 allAlbums.add(album);
                 // SORT: this can't easily be done...
                 getFilter().filter(null);*/
             } else if (intentAction.equals(MLBT_ALBUM_UPDATED.name())) {
-                final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 final Album album = musicDao.findAlbum(albumId);
                 allAlbums.set(allAlbums.indexOf(album), album);
                 final int index = albums.indexOf(album);
@@ -306,7 +306,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((AlbumFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
-                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = musicDao.findArtist(artistId);
                 ((AlbumFilter)getFilter()).add(artist);
             } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {

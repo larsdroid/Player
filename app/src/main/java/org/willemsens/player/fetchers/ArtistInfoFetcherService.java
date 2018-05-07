@@ -38,7 +38,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
             }
         } else if (intent.getAction().equals(MLBT_ARTIST_INSERTED.name())) {
             // Fetch info for a single artist.
-            int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+            final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
             if (artistId != -1) {
                 final Artist artist = getMusicDao().findArtist(artistId);
                 fetchArtist(artist, imageDownloader);

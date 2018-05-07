@@ -23,20 +23,20 @@ import java.util.Objects;
         })
 public class Song {
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @NonNull
     public String name;
 
-    public int artistId;
-    public int albumId;
+    public long artistId;
+    public long albumId;
     public int track;
     public Integer length; // In seconds
 
     @NonNull
     public String file;
 
-    public Song(@NonNull String name, int artistId, int albumId, int track, @NonNull String file) {
+    public Song(@NonNull String name, long artistId, long albumId, int track, @NonNull String file) {
         this.name = name;
         this.artistId = artistId;
         this.albumId = albumId;

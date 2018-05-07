@@ -3,7 +3,6 @@ package org.willemsens.player.persistence;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 import android.os.Environment;
@@ -23,7 +22,6 @@ import org.willemsens.player.playback.PlayStatus;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_MILLIS;
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_MODE;
@@ -51,40 +49,40 @@ public abstract class MusicDao {
     public abstract List<Artist> getAllArtistsMissingImage();
 
     @Query("SELECT * FROM album WHERE id = :id")
-    public abstract Album findAlbum(int id);
+    public abstract Album findAlbum(long id);
 
     @Query("SELECT * FROM artist WHERE id = :id")
-    public abstract Artist findArtist(int id);
+    public abstract Artist findArtist(long id);
 
     @Query("SELECT * FROM artist WHERE name = :name")
     abstract Artist findArtist(@NonNull String name);
 
     @Query("SELECT * FROM album WHERE name = :name AND artistId = :artistId")
-    abstract Album findAlbum(@NonNull String name, int artistId);
+    abstract Album findAlbum(@NonNull String name, long artistId);
 
     @Query("SELECT * FROM song WHERE file = :file")
     abstract Song findSong(@NonNull String file);
 
     @Query("SELECT * FROM song WHERE id = :id")
-    public abstract Song findSong(int id);
+    public abstract Song findSong(long id);
 
     @Query("SELECT * FROM image WHERE id = :id")
-    public abstract Image findImage(int id);
+    public abstract Image findImage(long id);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId AND track > :previousTrack ORDER BY track ASC LIMIT 1")
-    public abstract Song findNextSong(int albumId, int previousTrack);
+    public abstract Song findNextSong(long albumId, int previousTrack);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId AND track < :followingTrack ORDER BY track DESC LIMIT 1")
-    public abstract Song findPreviousSong(int albumId, int followingTrack);
+    public abstract Song findPreviousSong(long albumId, int followingTrack);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
-    public abstract List<Song> getAllSongs(int albumId);
+    public abstract List<Song> getAllSongs(long albumId);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
-    public abstract Song findFirstSong(int albumId);
+    public abstract Song findFirstSong(long albumId);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track DESC LIMIT 1")
-    public abstract Song findLastSong(int albumId);
+    public abstract Song findLastSong(long albumId);
 
     @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
     abstract ApplicationState getApplicationState(String property);
@@ -114,16 +112,7 @@ public abstract class MusicDao {
     abstract void insertApplicationState(ApplicationState applicationState);
 
     @Insert
-    public abstract int insertImage(Image image);
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Integer> insertArtistsIfNotExist(Set<Artist> artists);
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Integer> insertAlbumsIfNotExist(Set<Album> albums);
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    public abstract List<Integer> insertSongsIfNotExist(Set<Song> songs);
+    public abstract long insertImage(Image image);
 
     @Delete
     public abstract void deleteDirectory(Directory directory);
@@ -156,7 +145,7 @@ public abstract class MusicDao {
         return artist;
     }
 
-    public Album findOrCreateAlbum(String albumName, int artistId, Integer albumYear, Consumer<Album> handleInsertedAlbum) {
+    public Album findOrCreateAlbum(String albumName, long artistId, Integer albumYear, Consumer<Album> handleInsertedAlbum) {
         Album album = findAlbum(albumName, artistId);
         if (album == null) {
             album = new Album(albumName, artistId);
@@ -167,7 +156,7 @@ public abstract class MusicDao {
         return album;
     }
 
-    public Song findOrCreateSong(@NonNull String songName, int songArtistId, int albumId, int track, @NonNull String file,
+    public Song findOrCreateSong(@NonNull String songName, long songArtistId, long albumId, int track, @NonNull String file,
                                  int songLength, Consumer<Song> handleInsertedSong) {
         Song song = findSong(file);
         if (song == null) {
@@ -269,7 +258,7 @@ public abstract class MusicDao {
         return songId == null ? null : findSong(songId);
     }
 
-    private void setCurrentSongId(Integer songId) {
+    private void setCurrentSongId(Long songId) {
         if (songId == null) {
             deleteApplicationState(APPSTATE_CURRENT_SONG_ID.name());
         } else {

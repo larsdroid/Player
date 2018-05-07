@@ -106,14 +106,14 @@ public class ArtistsFragment extends Fragment {
                 loadAllArtists();
                 adapter.notifyDataSetChanged();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
-                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = musicDao.findArtist(artistId);
                 artists.add(artist);
                 Collections.sort(artists);
                 final int index = artists.indexOf(artist);
                 adapter.notifyItemInserted(index);
             } else if (intentAction.equals(MLBT_ARTIST_UPDATED.name())) {
-                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = musicDao.findArtist(artistId);
                 final int index = artists.indexOf(artist);
                 if (index != -1) {

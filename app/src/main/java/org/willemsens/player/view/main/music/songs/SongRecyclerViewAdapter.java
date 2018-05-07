@@ -214,8 +214,8 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
     }
 
     class SongFilter extends Filter {
-        private final Map<Integer, Boolean> albums;
-        private final Map<Integer, Boolean> artists;
+        private final Map<Long, Boolean> albums;
+        private final Map<Long, Boolean> artists;
 
         SongFilter() {
             this.albums = new HashMap<>();
@@ -247,13 +247,13 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         }
 
         private void setAllAlbums(boolean b) {
-            for (Integer albumId : this.albums.keySet()) {
+            for (Long albumId : this.albums.keySet()) {
                 this.albums.put(albumId, b);
             }
         }
 
         private void setAllArtists(boolean b) {
-            for (Integer artistId : this.artists.keySet()) {
+            for (Long artistId : this.artists.keySet()) {
                 this.artists.put(artistId, b);
             }
         }
@@ -301,62 +301,62 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             this.artists.put(artist.id, true);
         }
 
-        void flipAlbum(int albumId) {
+        void flipAlbum(long albumId) {
             this.albums.put(albumId, !this.albums.get(albumId));
         }
 
-        void flipArtist(int artistId) {
+        void flipArtist(long artistId) {
             this.artists.put(artistId, !this.artists.get(artistId));
         }
 
-        Iterator<Map.Entry<Integer, Boolean>> getAlbumIterator() {
+        Iterator<Map.Entry<Long, Boolean>> getAlbumIterator() {
             return this.albums.entrySet().iterator();
         }
 
-        Iterator<Map.Entry<Integer, Boolean>> getArtistIterator() {
+        Iterator<Map.Entry<Long, Boolean>> getArtistIterator() {
             return this.artists.entrySet().iterator();
         }
 
         private void onSaveInstanceState(Bundle outState) {
-            List<Integer> filterAlbums = new ArrayList<>();
-            for (Integer albumId : this.albums.keySet()) {
+            List<Long> filterAlbums = new ArrayList<>();
+            for (Long albumId : this.albums.keySet()) {
                 if (this.albums.get(albumId)) {
                     filterAlbums.add(albumId);
                 }
             }
-            int[] filterAlbumIds = new int[filterAlbums.size()];
+            long[] filterAlbumIds = new long[filterAlbums.size()];
             int i = 0;
-            for (Integer albumId : filterAlbums) {
+            for (Long albumId : filterAlbums) {
                 filterAlbumIds[i++] = albumId;
             }
-            outState.putIntArray(MLBPT_ALBUM_IDS.name(), filterAlbumIds);
+            outState.putLongArray(MLBPT_ALBUM_IDS.name(), filterAlbumIds);
 
-            List<Integer> filterArtists = new ArrayList<>();
-            for (Integer artistId : this.artists.keySet()) {
+            List<Long> filterArtists = new ArrayList<>();
+            for (Long artistId : this.artists.keySet()) {
                 if (this.artists.get(artistId)) {
                     filterArtists.add(artistId);
                 }
             }
-            int[] filterArtistIds = new int[filterArtists.size()];
+            long[] filterArtistIds = new long[filterArtists.size()];
             i = 0;
-            for (Integer artistId : filterArtists) {
+            for (Long artistId : filterArtists) {
                 filterArtistIds[i++] = artistId;
             }
-            outState.putIntArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
+            outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
 
         private void initialiseFilter(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                int[] filterAlbumIds = savedInstanceState.getIntArray(MLBPT_ALBUM_IDS.name());
+                long[] filterAlbumIds = savedInstanceState.getLongArray(MLBPT_ALBUM_IDS.name());
                 if (filterAlbumIds != null) {
-                    for (int filterAlbumId : filterAlbumIds) {
+                    for (long filterAlbumId : filterAlbumIds) {
                         this.albums.put(filterAlbumId, true);
                     }
                 }
 
-                int[] filterArtistIds = savedInstanceState.getIntArray(MLBPT_ARTIST_IDS.name());
+                long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
-                    for (int filterArtistId : filterArtistIds) {
+                    for (long filterArtistId : filterArtistIds) {
                         this.artists.put(filterArtistId, true);
                     }
                 }
@@ -401,7 +401,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             } else if (intentAction.equals(MLBT_SONG_INSERTED.name())) {
                 loadSongsFromDb();
 
-                /*final int songId = intent.getIntExtra(MLBPT_SONG_ID.name(), -1);
+                /*final long songId = intent.getLongExtra(MLBPT_SONG_ID.name(), -1);
                 final Song song = musicDao.findSong(songId);
                 allSongs.add(song);
                 // SORT: this can't easily be done...
@@ -412,7 +412,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             } else if (intentAction.equals(MLBT_ARTISTS_INSERTED.name())) {
                 ((SongFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
-                final int artistId = intent.getIntExtra(MLBPT_ARTIST_ID.name(), -1);
+                final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
                 final Artist artist = musicDao.findArtist(artistId);
                 ((SongFilter) getFilter()).add(artist);
             } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
@@ -420,11 +420,11 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             } else if (intentAction.equals(MLBT_ALBUMS_INSERTED.name())) {
                 ((SongFilter)getFilter()).fetchAllAlbums();
             } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
-                final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 final Album album = musicDao.findAlbum(albumId);
                 ((SongFilter)getFilter()).add(album);
             } else if (intentAction.equals(MLBT_ALBUM_UPDATED.name())) {
-                final int albumId = intent.getIntExtra(MLBPT_ALBUM_ID.name(), -1);
+                final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
                 for (int i = 0; i < songs.size(); i++) {
                     if (songs.get(i).albumId == albumId) {
                         notifyItemChanged(i);
