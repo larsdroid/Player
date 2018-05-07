@@ -97,13 +97,13 @@ public abstract class MusicDao {
     abstract void updateApplicationState(ApplicationState applicationState);
 
     @Insert
-    abstract void insertAlbum(Album album);
+    abstract long insertAlbum(Album album);
 
     @Insert
-    abstract void insertArtist(Artist artist);
+    abstract long insertArtist(Artist artist);
 
     @Insert
-    abstract void insertSong(Song song);
+    abstract long insertSong(Song song);
 
     @Insert
     abstract void insertDirectory(Directory directory);
@@ -139,7 +139,7 @@ public abstract class MusicDao {
         Artist artist = findArtist(artistName);
         if (artist == null) {
             artist = new Artist(artistName);
-            insertArtist(artist);
+            artist.id = insertArtist(artist);
             Observable.just(artist).subscribe(handleInsertedArtist).dispose();
         }
         return artist;
@@ -150,7 +150,7 @@ public abstract class MusicDao {
         if (album == null) {
             album = new Album(albumName, artistId);
             album.yearReleased = albumYear;
-            insertAlbum(album);
+            album.id = insertAlbum(album);
             Observable.just(album).subscribe(handleInsertedAlbum).dispose();
         }
         return album;
@@ -162,7 +162,7 @@ public abstract class MusicDao {
         if (song == null) {
             song = new Song(songName, songArtistId, albumId, track, file);
             song.length = songLength;
-            insertSong(song);
+            song.id = insertSong(song);
             Observable.just(song).subscribe(handleInsertedSong).dispose();
         }
         return song;
