@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,11 +13,11 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
-import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +28,7 @@ import static android.view.Menu.NONE;
  * A fragment representing a list of Songs.
  */
 public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
-    private DataAccessProvider dataAccessProvider;
+    private MusicDao musicDao;
     private SongRecyclerViewAdapter adapter;
 
     public SongsFragment() {
@@ -42,11 +41,7 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof DataAccessProvider) {
-            this.dataAccessProvider = (DataAccessProvider) context;
-        } else {
-            Log.e(getClass().getName(), "Context should be a DataAccessProvider.");
-        }
+        musicDao = AppDatabase.getAppDatabase(context).musicDao();
     }
 
     @Override
@@ -60,7 +55,7 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             if (this.adapter == null) {
-                this.adapter = new SongRecyclerViewAdapter(context, this.dataAccessProvider, savedInstanceState);
+                this.adapter = new SongRecyclerViewAdapter(context, savedInstanceState);
             }
             recyclerView.setAdapter(this.adapter);
         }
@@ -133,10 +128,13 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             final MenuItem menuItemAll = albumsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Album, Boolean>> it = filter.getAlbumIterator(); it.hasNext();) {
-                final Map.Entry<Album, Boolean> entry = it.next();
-                final Album album = entry.getKey();
-                albumsMenu.add(NONE, (int)album.getId().longValue(), NONE, album.getName());
+            for (Iterator<Map.Entry<Long, Boolean>> it = filter.getAlbumIterator(); it.hasNext();) {
+                final Map.Entry<Long, Boolean> entry = it.next();
+                final Long albumId = entry.getKey();
+                // TODO: performance: fetch all artists at once!
+                // TODO: make it sorted: fetch all artists at once!
+                final Album album = musicDao.findAlbum(albumId);
+                albumsMenu.add(NONE, (int)album.id, NONE, album.name);
                 final MenuItem menuItem = albumsMenu.getItem(i++);
                 menuItem.setCheckable(true);
                 if (entry.getValue()) {
@@ -151,11 +149,14 @@ public class SongsFragment extends Fragment implements PopupMenu.OnMenuItemClick
             final MenuItem menuItemAll = artistsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Artist, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
-                final Map.Entry<Artist, Boolean> entry = it.next();
-                final Artist artist = entry.getKey();
+            for (Iterator<Map.Entry<Long, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Long, Boolean> entry = it.next();
+                final Long artistId = entry.getKey();
+                // TODO: performance: fetch all artists at once!
+                // TODO: make it sorted: fetch all artists at once!
+                final Artist artist = musicDao.findArtist(artistId);
                 // Negative ID means it's an artist
-                artistsMenu.add(NONE, (int)-artist.getId(), NONE, artist.getName());
+                artistsMenu.add(NONE, (int)-artist.id, NONE, artist.name);
                 final MenuItem menuItem = artistsMenu.getItem(i++);
                 menuItem.setCheckable(true);
                 if (entry.getValue()) {

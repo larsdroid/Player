@@ -1,6 +1,5 @@
 package org.willemsens.player.playback;
 
-import android.app.Application;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
@@ -17,11 +16,9 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
-import org.willemsens.player.PlayerApplication;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
@@ -40,11 +37,10 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     private final DataSource.Factory dataSourceFactory;
     private long millis;
 
-    Player(Application application, Context context, OnUpdateListener onUpdateListener) {
+    Player(Context context, OnUpdateListener onUpdateListener) {
         this.onUpdateListener = onUpdateListener;
 
-        final EntityDataStore<Persistable> dataStore = ((PlayerApplication) application).getData();
-        this.musicDao = new MusicDao(dataStore, context);
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
@@ -68,7 +64,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         this.musicDao.setCurrentSong(song);
 
         MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(Uri.fromFile(new File(song.getFile())));
+                .createMediaSource(Uri.fromFile(new File(song.file)));
         this.exoPlayer.prepare(musicSource);
 
         /*
@@ -105,16 +101,17 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         switch (playerCommand) {
             case PREVIOUS:
             case NEXT:
+                final Song currentSong = this.musicDao.getCurrentSong();
                 Song newSong;
                 if (playerCommand == PREVIOUS) {
-                    newSong = this.musicDao.findPreviousSong(this.musicDao.getCurrentSong());
+                    newSong = this.musicDao.findPreviousSong(currentSong.albumId, currentSong.track);
                     if (newSong == null) {
-                        newSong = this.musicDao.findLastSong(this.musicDao.getCurrentSong().getAlbum());
+                        newSong = this.musicDao.findLastSong(currentSong.albumId);
                     }
                 } else {
-                    newSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong());
+                    newSong = this.musicDao.findNextSong(currentSong.albumId, currentSong.track);
                     if (newSong == null) {
-                        newSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong().getAlbum());
+                        newSong = this.musicDao.findFirstSong(currentSong.albumId);
                     }
                 }
 
@@ -154,10 +151,11 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 //       ... but it probably shouldn't since we want to track the number of plays.
                 this.exoPlayer.setPlayWhenReady(true);
             } else {
-                Song nextSong = this.musicDao.findNextSong(this.musicDao.getCurrentSong());
+                final Song currentSong = this.musicDao.getCurrentSong();
+                Song nextSong = this.musicDao.findNextSong(currentSong.albumId, currentSong.track);
                 if (nextSong == null) {
                     if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ALL) {
-                        nextSong = this.musicDao.findFirstSong(this.musicDao.getCurrentSong().getAlbum());
+                        nextSong = this.musicDao.findFirstSong(currentSong.albumId);
                         setCurrentSong(nextSong);
                     } else {
                         this.musicDao.setCurrentPlayStatus(STOPPED);

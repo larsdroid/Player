@@ -1,5 +1,6 @@
 package org.willemsens.player.view.main.settings;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +20,9 @@ public class MusicDirectoryAdapter
     private final List<Directory> directories;
     private final MusicDao musicDao;
 
-    public MusicDirectoryAdapter(DataAccessProvider dataAccessProvider) {
+    MusicDirectoryAdapter(final Context context) {
         this.directories = new ArrayList<>();
-        this.musicDao = dataAccessProvider.getMusicDao();
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
         readAllDirectories();
     }
 

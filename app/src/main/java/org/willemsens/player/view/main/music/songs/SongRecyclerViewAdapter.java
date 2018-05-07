@@ -22,24 +22,23 @@ import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
+import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.util.StringFormat;
-import org.willemsens.player.view.DataAccessProvider;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_IDS;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
@@ -59,13 +58,13 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
     private final List<Song> songs;
     private final List<Song> allSongs;
     private final OnSongClickedListener listener;
-    private final DataAccessProvider dataAccessProvider;
+    private final MusicDao musicDao;
     private final DBUpdateReceiver dbUpdateReceiver;
     private final SongFilter filter;
 
-    SongRecyclerViewAdapter(Context context, DataAccessProvider dataAccessProvider, Bundle savedInstanceState) {
+    SongRecyclerViewAdapter(Context context, Bundle savedInstanceState) {
         this.context = context;
-        this.dataAccessProvider = dataAccessProvider;
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
         this.listener = (OnSongClickedListener) context;
         this.dbUpdateReceiver = new DBUpdateReceiver();
         this.allSongs = new ArrayList<>();
@@ -77,8 +76,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
     private void loadSongsFromDb() {
         allSongs.clear();
-        allSongs.addAll(dataAccessProvider.getMusicDao().getAllSongs());
-        Collections.sort(allSongs);
+        allSongs.addAll(musicDao.getAllSongs());
 
         getFilter().filter(null);
     }
@@ -96,10 +94,10 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         final boolean showAlbumCover =
                 position == 0
-                        || (position > 0 && !songs.get(position - 1).getAlbum().equals(song.getAlbum()));
+                        || (position > 0 && songs.get(position - 1).albumId != song.albumId);
 
         final boolean showLongLine =
-                (songs.size() > position + 1) && !songs.get(position + 1).getAlbum().equals(song.getAlbum());
+                (songs.size() > position + 1) && songs.get(position + 1).albumId != song.albumId;
 
         holder.setSong(song, showAlbumCover, showLongLine);
     }
@@ -172,18 +170,24 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         private void setSong(Song song, boolean showAlbumCover, boolean showLongLine) {
             this.song = song;
 
-            if (showAlbumCover && song.getAlbum().getImage() != null) {
-                final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length);
-                this.albumCover.setImageBitmap(bitmap);
+            final Album album = musicDao.findAlbum(song.albumId);
+            final Artist artist = musicDao.findArtist(song.artistId);
 
-                this.albumCover.setVisibility(View.VISIBLE);
-                this.progressBar.setVisibility(View.GONE);
-            } else if (showAlbumCover) {
-                this.albumCover.setImageDrawable(null);
+            if (showAlbumCover) {
+                if (album.imageId != null) {
+                    final Image albumCover = musicDao.findImage(album.imageId);
+                    final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                            albumCover.imageData, 0, albumCover.imageData.length);
+                    this.albumCover.setImageBitmap(bitmap);
 
-                this.albumCover.setVisibility(View.GONE);
-                this.progressBar.setVisibility(View.VISIBLE);
+                    this.albumCover.setVisibility(View.VISIBLE);
+                    this.progressBar.setVisibility(View.GONE);
+                } else {
+                    this.albumCover.setImageDrawable(null);
+
+                    this.albumCover.setVisibility(View.GONE);
+                    this.progressBar.setVisibility(View.VISIBLE);
+                }
             } else {
                 this.albumCover.setImageDrawable(null);
 
@@ -191,10 +195,10 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 this.progressBar.setVisibility(View.GONE);
             }
 
-            this.songName.setText(song.getName());
-            this.songTrack.setText(String.valueOf(song.getTrack()));
-            this.songAlbumName.setText(song.getArtist().getName() + " - " + song.getAlbum().getName());
-            this.songLength.setText(StringFormat.formatToSongLength(song.getLength()));
+            this.songName.setText(song.name);
+            this.songTrack.setText(String.valueOf(song.track));
+            this.songAlbumName.setText(artist.name + " - " + album.name);
+            this.songLength.setText(StringFormat.formatToSongLength(song.length));
 
             if (!showLongLine) {
                 this.leftSectionOfDivider.setVisibility(View.INVISIBLE);
@@ -210,17 +214,12 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
     }
 
     class SongFilter extends Filter {
-        private final Map<Album, Boolean> albums;
-        private final Map<Artist, Boolean> artists;
+        private final Map<Long, Boolean> albums;
+        private final Map<Long, Boolean> artists;
 
         SongFilter() {
-            this.albums = new TreeMap<>(new Comparator<Album>() {
-                @Override
-                public int compare(Album a, Album b) {
-                    return a.getName().compareTo(b.getName());
-                }
-            });
-            this.artists = new TreeMap<>();
+            this.albums = new HashMap<>();
+            this.artists = new HashMap<>();
             fetchAllAlbums();
             fetchAllArtists();
         }
@@ -231,8 +230,8 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         private void fetchAllAlbums() {
             this.albums.clear();
-            for (Album album : dataAccessProvider.getMusicDao().getAllAlbums()) {
-                this.albums.put(album, true);
+            for (Album album : musicDao.getAllAlbums()) {
+                this.albums.put(album.id, true);
             }
         }
 
@@ -242,26 +241,26 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         private void fetchAllArtists() {
             this.artists.clear();
-            for (Artist artist : dataAccessProvider.getMusicDao().getAllArtists()) {
-                this.artists.put(artist, true);
+            for (Artist artist : musicDao.getAllArtists()) {
+                this.artists.put(artist.id, true);
             }
         }
 
         private void setAllAlbums(boolean b) {
-            for (Album key : this.albums.keySet()) {
-                this.albums.put(key, b);
+            for (Long albumId : this.albums.keySet()) {
+                this.albums.put(albumId, b);
             }
         }
 
         private void setAllArtists(boolean b) {
-            for (Artist key : this.artists.keySet()) {
-                this.artists.put(key, b);
+            for (Long artistId : this.artists.keySet()) {
+                this.artists.put(artistId, b);
             }
         }
 
         boolean hasAllAlbums() {
-            for (Album key : this.albums.keySet()) {
-                if (!this.albums.get(key)) {
+            for (Boolean b : this.albums.values()) {
+                if (!b) {
                     return false;
                 }
             }
@@ -269,8 +268,8 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         }
 
         boolean hasAllArtists() {
-            for (Artist key : this.artists.keySet()) {
-                if (!this.artists.get(key)) {
+            for (Boolean b : this.artists.values()) {
+                if (!b) {
                     return false;
                 }
             }
@@ -295,61 +294,53 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         // TODO: private (once MainActivity no longer calls this)
         public void add(Album album) {
-            this.albums.put(album, true);
+            this.albums.put(album.id, true);
         }
 
         private void add(Artist artist) {
-            this.artists.put(artist, true);
+            this.artists.put(artist.id, true);
         }
 
-        void flipAlbum(int albumId) {
-            for (Album album : this.albums.keySet()) {
-                if (album.getId() == albumId) {
-                    this.albums.put(album, !this.albums.get(album));
-                }
-            }
+        void flipAlbum(long albumId) {
+            this.albums.put(albumId, !this.albums.get(albumId));
         }
 
-        void flipArtist(int artistId) {
-            for (Artist artist : this.artists.keySet()) {
-                if (artist.getId() == artistId) {
-                    this.artists.put(artist, !this.artists.get(artist));
-                }
-            }
+        void flipArtist(long artistId) {
+            this.artists.put(artistId, !this.artists.get(artistId));
         }
 
-        Iterator<Map.Entry<Album, Boolean>> getAlbumIterator() {
+        Iterator<Map.Entry<Long, Boolean>> getAlbumIterator() {
             return this.albums.entrySet().iterator();
         }
 
-        Iterator<Map.Entry<Artist, Boolean>> getArtistIterator() {
+        Iterator<Map.Entry<Long, Boolean>> getArtistIterator() {
             return this.artists.entrySet().iterator();
         }
 
         private void onSaveInstanceState(Bundle outState) {
-            List<Album> filterAlbums = new ArrayList<>();
-            for (Album album : this.albums.keySet()) {
-                if (this.albums.get(album)) {
-                    filterAlbums.add(album);
+            List<Long> filterAlbums = new ArrayList<>();
+            for (Long albumId : this.albums.keySet()) {
+                if (this.albums.get(albumId)) {
+                    filterAlbums.add(albumId);
                 }
             }
             long[] filterAlbumIds = new long[filterAlbums.size()];
             int i = 0;
-            for (Album album : filterAlbums) {
-                filterAlbumIds[i++] = album.getId();
+            for (Long albumId : filterAlbums) {
+                filterAlbumIds[i++] = albumId;
             }
             outState.putLongArray(MLBPT_ALBUM_IDS.name(), filterAlbumIds);
 
-            List<Artist> filterArtists = new ArrayList<>();
-            for (Artist artist : this.artists.keySet()) {
-                if (this.artists.get(artist)) {
-                    filterArtists.add(artist);
+            List<Long> filterArtists = new ArrayList<>();
+            for (Long artistId : this.artists.keySet()) {
+                if (this.artists.get(artistId)) {
+                    filterArtists.add(artistId);
                 }
             }
             long[] filterArtistIds = new long[filterArtists.size()];
             i = 0;
-            for (Artist artist : filterArtists) {
-                filterArtistIds[i++] = artist.getId();
+            for (Long artistId : filterArtists) {
+                filterArtistIds[i++] = artistId;
             }
             outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
@@ -358,27 +349,15 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             if (savedInstanceState != null) {
                 long[] filterAlbumIds = savedInstanceState.getLongArray(MLBPT_ALBUM_IDS.name());
                 if (filterAlbumIds != null) {
-                    for (Album album : this.albums.keySet()) {
-                        this.albums.put(album, false);
-                        for (long filterAlbumId : filterAlbumIds) {
-                            if (album.getId() == filterAlbumId) {
-                                this.albums.put(album, true);
-                                break;
-                            }
-                        }
+                    for (long filterAlbumId : filterAlbumIds) {
+                        this.albums.put(filterAlbumId, true);
                     }
                 }
 
                 long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
-                    for (Artist artist : this.artists.keySet()) {
-                        this.artists.put(artist, false);
-                        for (long filterArtistId : filterArtistIds) {
-                            if (artist.getId() == filterArtistId) {
-                                this.artists.put(artist, true);
-                                break;
-                            }
-                        }
+                    for (long filterArtistId : filterArtistIds) {
+                        this.artists.put(filterArtistId, true);
                     }
                 }
             }
@@ -390,13 +369,13 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             final List<Song> newList = new LinkedList<>(allSongs);
             for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
                 final Song song = i.next();
-                if (!this.albums.get(song.getAlbum())) {
+                if (!this.albums.get(song.albumId)) {
                     i.remove();
                 }
             }
             for (Iterator<Song> i = newList.iterator(); i.hasNext();) {
                 final Song song = i.next();
-                if (!this.artists.get(song.getArtist())) {
+                if (!this.artists.get(song.artistId)) {
                     i.remove();
                 }
             }
@@ -420,11 +399,13 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
             if (intentAction.equals(MLBT_SONGS_INSERTED.name())) {
                 loadSongsFromDb();
             } else if (intentAction.equals(MLBT_SONG_INSERTED.name())) {
-                final long songId = intent.getLongExtra(MLBPT_SONG_ID.name(), -1);
-                final Song song = dataAccessProvider.getMusicDao().findSong(songId);
+                loadSongsFromDb();
+
+                /*final long songId = intent.getLongExtra(MLBPT_SONG_ID.name(), -1);
+                final Song song = musicDao.findSong(songId);
                 allSongs.add(song);
-                Collections.sort(allSongs);
-                getFilter().filter(null);
+                // SORT: this can't easily be done...
+                getFilter().filter(null);*/
             } else if (intentAction.equals(MLBT_SONGS_DELETED.name())) {
                 allSongs.clear();
                 getFilter().filter(null);
@@ -432,7 +413,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 ((SongFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
                 final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
-                final Artist artist = dataAccessProvider.getMusicDao().findArtist(artistId);
+                final Artist artist = musicDao.findArtist(artistId);
                 ((SongFilter) getFilter()).add(artist);
             } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
                 ((SongFilter)getFilter()).clearAllArtists();
@@ -440,13 +421,12 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 ((SongFilter)getFilter()).fetchAllAlbums();
             } else if (intentAction.equals(MLBT_ALBUM_INSERTED.name())) {
                 final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
+                final Album album = musicDao.findAlbum(albumId);
                 ((SongFilter)getFilter()).add(album);
             } else if (intentAction.equals(MLBT_ALBUM_UPDATED.name())) {
                 final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
-                final Album album = dataAccessProvider.getMusicDao().findAlbum(albumId);
                 for (int i = 0; i < songs.size(); i++) {
-                    if (songs.get(i).getAlbum().equals(album)) {
+                    if (songs.get(i).albumId == albumId) {
                         notifyItemChanged(i);
                     }
                 }

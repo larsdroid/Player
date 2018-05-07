@@ -2,12 +2,8 @@ package org.willemsens.player.fetchers;
 
 import android.app.IntentService;
 import android.util.Log;
-
-import org.willemsens.player.PlayerApplication;
+import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
-
-import io.requery.Persistable;
-import io.requery.sql.EntityDataStore;
 
 public abstract class InfoFetcherService extends IntentService {
     private static final int WAIT_MILLIS = 1100;
@@ -20,8 +16,7 @@ public abstract class InfoFetcherService extends IntentService {
 
     protected MusicDao getMusicDao() {
         if (this.musicDao == null) {
-            final EntityDataStore<Persistable> dataStore = ((PlayerApplication)getApplication()).getData();
-            this.musicDao = new MusicDao(dataStore, this);
+            this.musicDao = AppDatabase.getAppDatabase(this).musicDao();
         }
         return this.musicDao;
     }

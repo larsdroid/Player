@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,10 +13,10 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
-
 import org.willemsens.player.R;
 import org.willemsens.player.model.Artist;
-import org.willemsens.player.view.DataAccessProvider;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -28,7 +27,7 @@ import static android.view.Menu.NONE;
  * A fragment representing a list of Albums.
  */
 public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
-    private DataAccessProvider dataAccessProvider;
+    private MusicDao musicDao;
     private AlbumRecyclerViewAdapter adapter;
 
     public AlbumsFragment() {
@@ -49,7 +48,7 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
             RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
             if (this.adapter == null) {
-                this.adapter = new AlbumRecyclerViewAdapter(context, this.dataAccessProvider, savedInstanceState);
+                this.adapter = new AlbumRecyclerViewAdapter(context, savedInstanceState);
             }
             recyclerView.setAdapter(this.adapter);
         }
@@ -59,11 +58,7 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof DataAccessProvider) {
-            this.dataAccessProvider = (DataAccessProvider) context;
-        } else {
-            Log.e(getClass().getName(), "Context should be a DataAccessProvider.");
-        }
+        musicDao = AppDatabase.getAppDatabase(context).musicDao();
     }
 
     @Override
@@ -131,10 +126,13 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
             final MenuItem menuItemAll = artistsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Artist, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
-                final Map.Entry<Artist, Boolean> entry = it.next();
-                final Artist artist = entry.getKey();
-                artistsMenu.add(NONE, (int)artist.getId().longValue(), NONE, artist.getName());
+            for (Iterator<Map.Entry<Long, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
+                final Map.Entry<Long, Boolean> entry = it.next();
+                final Long artistId = entry.getKey();
+                // TODO: performance: fetch all artists at once!
+                // TODO: make it sorted: fetch all artists at once!
+                final Artist artist = musicDao.findArtist(artistId);
+                artistsMenu.add(NONE, (int)artist.id, NONE, artist.name);
                 final MenuItem menuItem = artistsMenu.getItem(i++);
                 menuItem.setCheckable(true);
                 if (entry.getValue()) {

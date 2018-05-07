@@ -38,7 +38,7 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
             }
         } else if (intent.getAction().equals(MLBT_ARTIST_INSERTED.name())) {
             // Fetch info for a single artist.
-            long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
+            final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
             if (artistId != -1) {
                 final Artist artist = getMusicDao().findArtist(artistId);
                 fetchArtist(artist, imageDownloader);
@@ -47,48 +47,41 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
     }
 
     private void generateArtistImage(Artist artist) {
-        final Image image = new Image();
-        image.setImageData(ImageGenerator.generateArtistImage(artist));
-        getMusicDao().insertImage(image);
-        artist.setImage(image);
+        final Image image = new Image(ImageGenerator.generateArtistImage(artist));
+        artist.imageId = getMusicDao().insertImage(image);
     }
 
     private void fetchArtist(Artist artist, ImageDownloader imageDownloader) {
-        boolean isArtistUpdated = false;
-
         try {
-            final String artistId = infoFetcher.fetchArtistId(artist.getName());
+            final String artistId = infoFetcher.fetchArtistId(artist.name);
 
             waitRateLimit();
 
             final ArtistInfo artistInfo = infoFetcher.fetchArtistInfo(artistId);
 
-            final Image image = new Image();
-            image.setUrl(artistInfo.getImageUrl());
-            image.setImageData(imageDownloader.downloadImage(image.getUrl()));
+            final Image image = new Image(imageDownloader.downloadImage(artistInfo.getImageUrl()));
+            image.url = artistInfo.getImageUrl();
 
-            getMusicDao().insertImage(image);
+            artist.imageId = getMusicDao().insertImage(image);
 
-            artist.setImage(image);
-
-            isArtistUpdated = true;
+            updateArtist(artist);
         } catch (NetworkClientException e) {
             generateArtistImage(artist);
-            isArtistUpdated = true;
+            updateArtist(artist);
         } catch (NetworkServerException e) {
             // Ignore
         }
 
-        if (isArtistUpdated) {
-            getMusicDao().updateArtist(artist);
-
-            MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
-            builder
-                    .setType(MLBT_ARTIST_UPDATED)
-                    .setArtist(artist)
-                    .buildAndSubmitBroadcast();
-        }
-
         waitRateLimit();
+    }
+
+    private void updateArtist(Artist artist) {
+        getMusicDao().updateArtist(artist);
+
+        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+        builder
+                .setType(MLBT_ARTIST_UPDATED)
+                .setArtist(artist)
+                .buildAndSubmitBroadcast();
     }
 }

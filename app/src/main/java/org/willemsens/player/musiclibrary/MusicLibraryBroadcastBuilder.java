@@ -43,15 +43,15 @@ public class MusicLibraryBroadcastBuilder {
     }
 
     public MusicLibraryBroadcastBuilder setSong(@NonNull Song song) {
-        return setRecordId(MLBPT_SONG_ID, song.getId());
+        return setRecordId(MLBPT_SONG_ID, song.id);
     }
 
     public MusicLibraryBroadcastBuilder setAlbum(@NonNull Album album) {
-        return setRecordId(MLBPT_ALBUM_ID, album.getId());
+        return setRecordId(MLBPT_ALBUM_ID, album.id);
     }
 
     public MusicLibraryBroadcastBuilder setArtist(@NonNull Artist artist) {
-        return setRecordId(MLBPT_ARTIST_ID, artist.getId());
+        return setRecordId(MLBPT_ARTIST_ID, artist.id);
     }
 
     public MusicLibraryBroadcastBuilder setRecordId(@NonNull MusicLibraryBroadcastPayloadType payloadType, long recordId) {

@@ -1,5 +1,6 @@
 package org.willemsens.player.view.main.music.artists;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.model.Artist;
+import org.willemsens.player.model.Image;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 
 import java.util.List;
 
@@ -22,10 +26,12 @@ import java.util.List;
 class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistViewHolder> {
     private final List<Artist> artists;
     private final OnArtistClickedListener listener;
+    private final MusicDao musicDao;
 
-    ArtistRecyclerViewAdapter(List<Artist> artists, OnArtistClickedListener listener) {
+    ArtistRecyclerViewAdapter(Context context, List<Artist> artists, OnArtistClickedListener listener) {
         this.artists = artists;
         this.listener = listener;
+        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
     }
 
     @Override
@@ -71,11 +77,12 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         private void setArtist(Artist artist) {
             this.artist = artist;
 
-            this.artistName.setText(artist.getName());
+            this.artistName.setText(artist.name);
 
-            if (artist.getImage() != null) {
+            if (artist.imageId != null) {
+                final Image artistImage = musicDao.findImage(artist.imageId);
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        artist.getImage().getImageData(), 0, artist.getImage().getImageData().length);
+                        artistImage.imageData, 0, artistImage.imageData.length);
                 this.artistImage.setImageBitmap(bitmap);
 
                 this.artistImage.setVisibility(View.VISIBLE);
