@@ -11,6 +11,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Image;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.notification.NotificationBarBig;
 import org.willemsens.player.playback.notification.NotificationBarSmall;
 import org.willemsens.player.playback.notification.NotificationType;
@@ -35,6 +39,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     private NotificationBarBig notificationBarBig;
     private NotificationManager notificationManager;
     private Player player;
+    private MusicDao musicDao;
 
     @Nullable
     @Override
@@ -47,6 +52,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
         super.onCreate();
 
         this.player = new Player(this, this);
+        this.musicDao = AppDatabase.getAppDatabase(this).musicDao();
 
         initNotificationBars();
         initNotificationManager();
@@ -160,8 +166,10 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             this.notificationManager.cancel(NotificationType.MUSIC_PLAYING.getCode());
             stopSelf();
         } else {
-            this.notificationBarSmall.update(this.player.getSong(), this.player.getPlayStatus());
-            this.notificationBarBig.update(this.player.getSong(), this.player.getPlayStatus());
+            final Album album = this.musicDao.findAlbum(this.player.getSong().albumId);
+            final Image albumCover = this.musicDao.findImage(album.imageId);
+            this.notificationBarSmall.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
+            this.notificationBarBig.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
             if (this.player.getPlayStatus() == PLAYING) {
                 startForeground(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
             } else {

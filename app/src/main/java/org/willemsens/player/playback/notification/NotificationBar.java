@@ -3,6 +3,8 @@ package org.willemsens.player.playback.notification;
 import android.graphics.BitmapFactory;
 import android.widget.RemoteViews;
 import org.willemsens.player.R;
+import org.willemsens.player.model.Album;
+import org.willemsens.player.model.Image;
 import org.willemsens.player.model.Song;
 import org.willemsens.player.playback.PlayStatus;
 
@@ -11,12 +13,12 @@ abstract class NotificationBar extends RemoteViews {
         super(packageName, layoutId);
     }
 
-    public void update(Song song, PlayStatus playStatus) {
+    public void update(Song song, Album album, Image albumCover, PlayStatus playStatus) {
         this.setImageViewBitmap(R.id.notification_bar_image, BitmapFactory.decodeByteArray(
-                song.getAlbum().getImage().getImageData(), 0, song.getAlbum().getImage().getImageData().length));
-        this.setTextViewText(R.id.notification_bar_track, String.valueOf(song.getTrack()));
-        this.setTextViewText(R.id.notification_bar_song, song.getName());
-        this.setTextViewText(R.id.notification_bar_album, song.getAlbum().getName());
+                albumCover.imageData, 0, albumCover.imageData.length));
+        this.setTextViewText(R.id.notification_bar_track, String.valueOf(song.track));
+        this.setTextViewText(R.id.notification_bar_song, song.name);
+        this.setTextViewText(R.id.notification_bar_album, album.name);
 
         switch (playStatus) {
             case PAUSED:
