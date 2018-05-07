@@ -3,6 +3,7 @@ package org.willemsens.player.persistence;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.ApplicationState;
@@ -21,6 +22,7 @@ import org.willemsens.player.model.Song;
 },
         version = 1,
         exportSchema = false)
+@TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
