@@ -1,4 +1,4 @@
-![logotype_horizontal](https://user-images.githubusercontent.com/34600369/39715013-b80fe4a8-5223-11e8-9175-e5c6fc51852f.png)
+![logotype_horizontal](/images/logo/Logotype_horizontal.png)
 
 Album Player
 ============
@@ -19,10 +19,10 @@ Google's official music player such as:
 Also, every music lover knows that albums are pieces of art that should be played
 as a whole, so this app tries to take care of that ;)
 
-![/images/albums.png](/images/albums.png)
+![/images/albums.png](/images/screenshot/albums.png)
 
-![/images/artists.png](/images/artists.png)
+![/images/artists.png](/images/screenshot/artists.png)
 
-![/images/songs.png](/images/songs.png)
+![/images/songs.png](/images/screenshot/songs.png)
 
-![/images/album.png](/images/album.png)
+![/images/album.png](/images/screenshot/album.png)
