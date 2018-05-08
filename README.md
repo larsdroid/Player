@@ -1,3 +1,5 @@
+![logotype_horizontal](https://user-images.githubusercontent.com/34600369/39715013-b80fe4a8-5223-11e8-9175-e5c6fc51852f.png)
+
 Album Player
 ============
 
