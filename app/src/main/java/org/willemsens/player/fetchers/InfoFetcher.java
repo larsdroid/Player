@@ -1,26 +1,69 @@
 package org.willemsens.player.fetchers;
 
+import android.net.TrafficStats;
 import android.support.annotation.NonNull;
 import android.util.Log;
-
 import com.google.gson.Gson;
-
-import org.willemsens.player.exceptions.NetworkClientException;
-import org.willemsens.player.exceptions.NetworkServerException;
-
-import java.io.IOException;
-
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.willemsens.player.exceptions.NetworkClientException;
+import org.willemsens.player.exceptions.NetworkServerException;
+
+import javax.net.SocketFactory;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
 
 public abstract class InfoFetcher {
     private final OkHttpClient httpClient;
     private final Gson gson;
 
+    // Crazy workaround for https://github.com/square/okhttp/issues/3537
+    private final class DelegatingSocketFactory extends SocketFactory {
+        private final SocketFactory theRealSocketFactory;
+
+        DelegatingSocketFactory() {
+            this.theRealSocketFactory = SocketFactory.getDefault();
+        }
+
+        private Socket configureSocket(Socket socket) {
+            try {
+                TrafficStats.tagSocket(socket);
+            } catch (SocketException e) {
+                Log.e(getClass().getName(), e.getMessage());
+            }
+            return socket;
+        }
+
+        @Override
+        public Socket createSocket(String host, int port) throws IOException {
+            return configureSocket(this.theRealSocketFactory.createSocket(host, port));
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+            return configureSocket(this.theRealSocketFactory.createSocket(host, port, localHost, localPort));
+        }
+
+        @Override
+        public Socket createSocket(InetAddress host, int port) throws IOException {
+            return configureSocket(this.theRealSocketFactory.createSocket(host, port));
+        }
+
+        @Override
+        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+            return configureSocket(this.theRealSocketFactory.createSocket(address, port, localAddress, localPort));
+        }
+    }
+
     public InfoFetcher() {
-        this.httpClient = new OkHttpClient();
+        // Crazy workaround for https://github.com/square/okhttp/issues/3537
+        this.httpClient = new OkHttpClient.Builder().socketFactory(new DelegatingSocketFactory()).build();
+
+        //this.httpClient = new OkHttpClient();
         this.gson = new Gson();
     }
 

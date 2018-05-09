@@ -95,6 +95,9 @@ public class MusicLibraryBroadcastBuilder {
                 case MLBT_SONG_INSERTED:
                     isValid = this.payloadType == MLBPT_SONG_ID;
                     break;
+                case MLBT_SONG_UPDATED:
+                    isValid = this.payloadType == MLBPT_SONG_ID;
+                    break;
                 case MLBT_ALBUMS_INSERTED:
                 case MLBT_SONGS_INSERTED:
                 case MLBT_ARTISTS_INSERTED:

@@ -48,6 +48,9 @@ public abstract class MusicDao {
     @Query("SELECT * FROM artist WHERE imageId IS NULL")
     public abstract List<Artist> getAllArtistsMissingImage();
 
+    @Query("SELECT * FROM song WHERE length IS NULL")
+    public abstract List<Song> getAllSongsMissingLength();
+
     @Query("SELECT * FROM album WHERE id = :id")
     public abstract Album findAlbum(long id);
 
@@ -92,6 +95,9 @@ public abstract class MusicDao {
 
     @Update
     public abstract void updateArtist(Artist artist);
+
+    @Update
+    public abstract void updateSong(Song song);
 
     @Update
     abstract void updateApplicationState(ApplicationState applicationState);
@@ -157,7 +163,7 @@ public abstract class MusicDao {
     }
 
     public Song findOrCreateSong(@NonNull String songName, long songArtistId, long albumId, int track, @NonNull String file,
-                                 int songLength, Consumer<Song> handleInsertedSong) {
+                                 Integer songLength, Consumer<Song> handleInsertedSong) {
         Song song = findSong(file);
         if (song == null) {
             song = new Song(songName, songArtistId, albumId, track, file);

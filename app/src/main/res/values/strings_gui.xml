@@ -14,6 +14,7 @@
     <string name="scanner_service_description">Scans a select number of directories (listed in settings) for music
         files.
     </string>
+    <string name="mp3_scanning_service_description">Scans MP3 file to determine the song lengths.</string>
     <string name="purging_service_description">Updates the list of songs, albums and artists in case music files are
         removed from storage.
     </string>

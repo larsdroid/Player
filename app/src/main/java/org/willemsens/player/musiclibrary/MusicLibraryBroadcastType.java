@@ -11,5 +11,6 @@ public enum MusicLibraryBroadcastType {
     MLBT_ALBUMS_DELETED,
     MLBT_SONG_INSERTED,
     MLBT_SONGS_INSERTED,
+    MLBT_SONG_UPDATED,
     MLBT_SONGS_DELETED
 }

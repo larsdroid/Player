@@ -29,6 +29,10 @@
                 android:description="@string/scanner_service_description"
                 android:exported="false"/>
         <service
+                android:name=".filescanning.Mp3ScanningService"
+                android:description="@string/mp3_scanning_service_description"
+                android:exported="false"/>
+        <service
                 android:name=".fetchers.AlbumInfoFetcherService"
                 android:description="@string/album_image_fetcher_service_description"
                 android:exported="false"/>

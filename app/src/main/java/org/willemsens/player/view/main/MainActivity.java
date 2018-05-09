@@ -30,6 +30,7 @@ import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
+import org.willemsens.player.filescanning.Mp3ScanningService;
 import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Artist;
 import org.willemsens.player.model.Song;
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         startService(new Intent(this, FileScannerService.class));
+        startService(new Intent(this, Mp3ScanningService.class));
     }
 
     private void setupAfterPermissionInternet() {

@@ -1,11 +1,11 @@
 package org.willemsens.player.filescanning;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
-import org.willemsens.mp3_vbr_length.Mp3Info;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.model.Album;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.willemsens.player.filescanning.Mp3ScanningPayloadType.MP3PT_SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
@@ -91,11 +92,9 @@ class AudioFileReader {
 
     private Song getSong(AudioFile audioFile, MusicDao musicDao, Album album, Artist songArtist) throws IOException {
         final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
-        final int songLength;
+        final Integer songLength;
         if (audioFile.getFile().toString().endsWith(".mp3")) {
-            // This takes a while!!
-            final Mp3Info mp3Info = Mp3Info.of(audioFile.getFile());
-            songLength = mp3Info.getSeconds();
+            songLength = null;
         } else {
             songLength = audioFile.getAudioHeader().getTrackLength();
         }
@@ -137,5 +136,11 @@ class AudioFileReader {
                 .setType(MLBT_SONG_INSERTED)
                 .setRecordId(MLBPT_SONG_ID, song.id)
                 .buildAndSubmitBroadcast();
+
+        if (song.file.endsWith(".mp3")) {
+            Intent intent = new Intent(context, Mp3ScanningService.class);
+            intent.putExtra(MP3PT_SONG_ID.name(), song.id);
+            context.startService(intent);
+        }
     }
 }

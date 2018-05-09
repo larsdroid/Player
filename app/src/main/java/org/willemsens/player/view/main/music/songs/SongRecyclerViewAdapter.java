@@ -39,6 +39,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadTyp
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_IDS;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_IDS;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUM_INSERTED;
@@ -49,6 +50,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONGS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONG_INSERTED;
+import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_SONG_UPDATED;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Song}.
@@ -116,6 +118,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         IntentFilter filter = new IntentFilter();
         filter.addAction(MLBT_SONGS_INSERTED.name());
         filter.addAction(MLBT_SONG_INSERTED.name());
+        filter.addAction(MLBT_SONG_UPDATED.name());
         filter.addAction(MLBT_SONGS_DELETED.name());
         filter.addAction(MLBT_ARTISTS_INSERTED.name());
         filter.addAction(MLBT_ARTIST_INSERTED.name());
@@ -406,6 +409,10 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
                 allSongs.add(song);
                 // SORT: this can't easily be done...
                 getFilter().filter(null);*/
+            } else if (intentAction.equals(MLBT_SONG_UPDATED.name())) {
+                final long songId = intent.getLongExtra(MLBPT_SONG_ID.name(), -1);
+                final Song song = musicDao.findSong(songId);
+                notifyItemChanged(songs.indexOf(song));
             } else if (intentAction.equals(MLBT_SONGS_DELETED.name())) {
                 allSongs.clear();
                 getFilter().filter(null);
