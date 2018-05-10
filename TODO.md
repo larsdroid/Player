@@ -1,12 +1,10 @@
-* AudioFileReader: 33, 47,48, 55
-  Complete overhaul: insert album, artist and song in the file reader
-  --> broadcast!
-
+* AlbumFragment: show progressbar instead of album cover in case
+  the art wasn't fetched yet
+  * Also: SongsFragment... idem ditto for the tiny cover art display
+  * Also: NowPlaying and notification display... idem ditto for the tiny cover art display
 * AlbumsFragment/AlbumRecyclerViewAdapter pair is implemented differently from
   ArtistsFragment/ArtistRecyclerViewAdapter. Also check SongsFragment/SongRecyclerViewAdapter
 * Calculate album length and show it in the GUI
-  * Full scan of an MP3 file should be done in a separate thread
-    followed by a new type of broadcast: 'SONG_UPDATED'
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
   * Save album **play count** per album
