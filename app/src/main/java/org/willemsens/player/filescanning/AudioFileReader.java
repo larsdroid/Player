@@ -56,7 +56,10 @@ class AudioFileReader {
     }
 
     private Artist getAlbumArtist(AudioFile audioFile, MusicDao musicDao) {
-        final String albumArtistName = audioFile.getTag().getFirst(FieldKey.ALBUM_ARTIST);
+        String albumArtistName = audioFile.getTag().getFirst(FieldKey.ALBUM_ARTIST);
+        if (albumArtistName == null || albumArtistName.trim().isEmpty()) {
+            albumArtistName = audioFile.getTag().getFirst(FieldKey.ARTIST);
+        }
         if (albumArtistName == null || albumArtistName.trim().isEmpty()) {
             throw new RuntimeException("Albums's artist is mandatory! File: '" + audioFile.getFile() + "'");
         }

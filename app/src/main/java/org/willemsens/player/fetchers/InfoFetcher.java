@@ -15,7 +15,6 @@ import javax.net.SocketFactory;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
 
 public abstract class InfoFetcher {
     private final OkHttpClient httpClient;
@@ -30,12 +29,20 @@ public abstract class InfoFetcher {
         }
 
         private Socket configureSocket(Socket socket) {
-            try {
+            TrafficStats.setThreadStatsTag(1);
+
+            /*try {
                 TrafficStats.tagSocket(socket);
             } catch (SocketException e) {
                 Log.e(getClass().getName(), e.getMessage());
-            }
+            }*/
+
             return socket;
+        }
+
+        @Override
+        public Socket createSocket() throws IOException {
+            return configureSocket(this.theRealSocketFactory.createSocket());
         }
 
         @Override
@@ -71,7 +78,8 @@ public abstract class InfoFetcher {
         return this.gson;
     }
 
-    protected @NonNull String fetch(HttpUrl url) throws NetworkClientException, NetworkServerException {
+    protected @NonNull
+    String fetch(HttpUrl url) throws NetworkClientException, NetworkServerException {
         try (Response response = httpClient.newCall(getRequest(url)).execute()) {
             if (response.isSuccessful()) {
                 return response.body().string();
@@ -98,7 +106,13 @@ public abstract class InfoFetcher {
     }
 
     public abstract Request getRequest(HttpUrl url);
-    @NonNull public abstract String fetchArtistId(String artistName) throws NetworkClientException, NetworkServerException;
-    @NonNull public abstract ArtistInfo fetchArtistInfo(String artistId) throws NetworkClientException, NetworkServerException;
-    @NonNull public abstract AlbumInfo fetchAlbumInfo(String artistName, String albumName) throws NetworkClientException, NetworkServerException;
+
+    @NonNull
+    public abstract String fetchArtistId(String artistName) throws NetworkClientException, NetworkServerException;
+
+    @NonNull
+    public abstract ArtistInfo fetchArtistInfo(String artistId) throws NetworkClientException, NetworkServerException;
+
+    @NonNull
+    public abstract AlbumInfo fetchAlbumInfo(String artistName, String albumName) throws NetworkClientException, NetworkServerException;
 }

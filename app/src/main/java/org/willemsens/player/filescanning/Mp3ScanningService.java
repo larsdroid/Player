@@ -36,7 +36,12 @@ public class Mp3ScanningService extends IntentService {
         }
 
         if (intent != null && intent.hasExtra(MP3PT_SONG_ID.name())) {
-            scanMp3File(this.musicDao.findSong(intent.getLongExtra(MP3PT_SONG_ID.name(), -1)));
+            final Song song = this.musicDao.findSong(intent.getLongExtra(MP3PT_SONG_ID.name(), -1));
+            if (song != null) {
+                scanMp3File(song);
+            } else {
+                Log.e(getClass().getName(), "Can't find MP3 file to scan. Song ID: \"" + intent.getLongExtra(MP3PT_SONG_ID.name(), -1) + "\"");
+            }
         } else {
             scanMp3Files();
         }

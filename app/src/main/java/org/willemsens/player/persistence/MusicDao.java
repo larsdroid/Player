@@ -207,10 +207,10 @@ public abstract class MusicDao {
     }
 
     public void deleteAllMusic() {
-        deleteAllArtists();
-        deleteAllAlbums();
-        deleteAllImages();
         deleteAllSongs();
+        deleteAllAlbums();
+        deleteAllArtists();
+        deleteAllImages();
     }
 
     /**

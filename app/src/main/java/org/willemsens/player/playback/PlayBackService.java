@@ -24,7 +24,9 @@ import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_S
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_SONG_ID;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_DISMISS;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_PLAYER_COMMAND;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SETUP;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_SONG_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
@@ -110,7 +112,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     public int onStartCommand(Intent intent, int flags, int startId) {
         String intentAction = intent.getAction();
         if (intentAction != null) {
-            if (intentAction.equals(PlayBackIntentType.PBIT_DISMISS.name())) {
+            if (intentAction.equals(PBIT_DISMISS.name())) {
                 stopSelf();
             } else if (intentAction.equals(PBIT_SET_SONG_ID.name())) {
                 final long songId = intent.getLongExtra(PBIPT_SONG_ID.name(), -1);
@@ -125,8 +127,10 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             } else if (intentAction.equals(PBIT_SET_PLAY_MODE.name())) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PBIPT_PLAY_MODE.name()));
                 // TODO
+            } else if (intentAction.equals(PBIT_SETUP.name())) {
+                // No setup necessary yet.
             } else {
-                Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand");
+                Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand. Action: '" + intentAction + "'.");
             }
         }
         return START_NOT_STICKY;

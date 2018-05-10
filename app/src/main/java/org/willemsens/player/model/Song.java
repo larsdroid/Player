@@ -54,4 +54,9 @@ public class Song {
     public int hashCode() {
         return Objects.hash(file);
     }
+
+    @Override
+    public String toString() {
+        return file;
+    }
 }
