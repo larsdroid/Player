@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,30 +13,31 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
 import org.willemsens.player.model.Song;
-import org.willemsens.player.persistence.AppDatabase;
-import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_STATUS_UPDATE;
 
 public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.SongViewHolder> {
     private final Context context;
-    private final List<Song> songs;
     private final OnSongClickedListener listener;
     private final PlayBackUpdateReceiver playBackUpdateReceiver;
-    private final MusicDao musicDao;
+    private List<Song> songs;
 
-    AlbumSongAdapter(Context context, Album album) {
+    AlbumSongAdapter(Context context) {
         this.context = context;
         this.listener = (OnSongClickedListener) context;
         this.playBackUpdateReceiver = new PlayBackUpdateReceiver();
-        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
-        this.songs = this.musicDao.getAllSongs(album.id);
+        this.songs = new ArrayList<>();
+    }
+
+    public void setSongs(List<Song> songs) {
+        this.songs = songs;
+        this.notifyDataSetChanged();
     }
 
     @NonNull
@@ -50,13 +50,13 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
     @Override
     public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
-        final Song song = songs.get(position);
+        final Song song = this.songs.get(position);
         holder.setSong(song);
     }
 
     @Override
     public int getItemCount() {
-        return songs.size();
+        return this.songs.size();
     }
 
     class SongViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -90,15 +90,18 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
             this.trackNumber.setText(String.valueOf(song.track));
             this.songName.setText(song.name);
-            this.artistName.setText(musicDao.findArtist(song.artistId).name);
+            // TODO this.artistName.setText(musicDao.findArtist(song.artistId).name);
             this.songLength.setText(StringFormat.formatToSongLength(song.length));
 
+            /*
+            TODO
             final Song currentSong = musicDao.getCurrentSong();
             if (currentSong != null && currentSong.id == song.id) {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorBackground));
             }
+            */
         }
     }
 

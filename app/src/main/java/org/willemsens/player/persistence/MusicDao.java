@@ -1,5 +1,6 @@
 package org.willemsens.player.persistence;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -78,8 +79,11 @@ public abstract class MusicDao {
     @Query("SELECT * FROM song WHERE albumId = :albumId AND track < :followingTrack ORDER BY track DESC LIMIT 1")
     public abstract Song findPreviousSong(long albumId, int followingTrack);
 
+    @Query("SELECT * FROM album WHERE id = :id")
+    public abstract LiveData<Album> getAlbum(long id);
+
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
-    public abstract List<Song> getAllSongs(long albumId);
+    public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);
