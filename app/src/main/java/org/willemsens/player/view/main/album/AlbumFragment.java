@@ -2,6 +2,8 @@ package org.willemsens.player.view.main.album;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +36,7 @@ public class AlbumFragment extends Fragment {
     @BindView(R.id.song_list)
     RecyclerView songList;
 
-    public static AlbumFragment newInstance(final Context context, final long albumId) {
+    public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
 
         Bundle args = new Bundle();
@@ -62,8 +64,6 @@ public class AlbumFragment extends Fragment {
             this.viewModel = ViewModelProviders.of(this, new AlbumAndSongsViewModelFactory(getContext(), albumId)).get(AlbumAndSongsViewModel.class);
         }
 
-        fetchAndShowAlbumArt();
-
         Context context = view.getContext();
         this.songList.setLayoutManager(new LinearLayoutManager(context));
         if (this.adapter == null) {
@@ -71,26 +71,31 @@ public class AlbumFragment extends Fragment {
         }
         this.songList.setAdapter(this.adapter);
 
+        this.albumImage.setVisibility(View.INVISIBLE);
+        this.progressBar.setVisibility(View.GONE);
+
         observeAlbum();
+        observeArtist();
         observeSongs();
+        observeCoverArt();
 
         return view;
     }
 
-    private void fetchAndShowAlbumArt() {
-        /* TODO
-        if (album.imageId != null) {
-            final Image albumCover = musicDao.findImage(album.imageId);
-            final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                    albumCover.imageData, 0, albumCover.imageData.length);
-            this.albumImage.setImageBitmap(bitmap);
+    private void observeCoverArt() {
+        this.viewModel.coverArtLiveData.observe(this, coverArt -> {
+            if (coverArt != null) {
+                final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                        coverArt.imageData, 0, coverArt.imageData.length);
+                this.albumImage.setImageBitmap(bitmap);
 
-            this.albumImage.setVisibility(View.VISIBLE);
-            this.progressBar.setVisibility(View.GONE);
-        } else {
-            this.albumImage.setVisibility(View.GONE);
-            this.progressBar.setVisibility(View.VISIBLE);
-        }*/
+                this.albumImage.setVisibility(View.VISIBLE);
+                this.progressBar.setVisibility(View.GONE);
+            } else {
+                this.albumImage.setVisibility(View.GONE);
+                this.progressBar.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -112,18 +117,26 @@ public class AlbumFragment extends Fragment {
     }
 
     private void observeAlbum() {
-        this.viewModel.albumLiveData.observe(this, album -> {
-            // TODO: next line used to be in onCreateOptionsMenu... WHY??
-            getActivity().setTitle(/* TODO musicDao.findArtist(album.artistId).name + " - " +*/ viewModel.albumLiveData.getValue().name);
-        });
+        this.viewModel.albumLiveData.observe(this,
+                album -> setActivityTitle());
+    }
+
+    private void observeArtist() {
+        this.viewModel.artistLiveData.observe(this,
+                artist -> setActivityTitle());
+    }
+
+    private void setActivityTitle() {
+        if (getActivity() != null
+                && viewModel.artistLiveData.getValue() != null
+                && viewModel.albumLiveData.getValue() != null) {
+            getActivity().setTitle(viewModel.artistLiveData.getValue().name
+                    + " - " + viewModel.albumLiveData.getValue().name);
+        }
     }
 
     private void observeSongs() {
-        this.viewModel.songsLiveData.observe(this, songs -> {
-            adapter.setSongs(songs);
-        });
+        this.viewModel.songsLiveData.observe(this,
+                songs -> adapter.setSongs(songs));
     }
-
-    // TODO: Intent action MLBT_ALBUM_UPDATED no longer accepted here
-    // TODO: Intent extra MLBPT_ALBUM_ID no longer accepted here
 }

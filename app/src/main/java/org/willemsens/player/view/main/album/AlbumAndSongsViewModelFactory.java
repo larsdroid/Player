@@ -9,7 +9,7 @@ public class AlbumAndSongsViewModelFactory extends ViewModelProvider.NewInstance
     private final Context context;
     private final long albumId;
 
-    public AlbumAndSongsViewModelFactory(Context context, long albumId) {
+    AlbumAndSongsViewModelFactory(Context context, long albumId) {
         this.context = context;
         this.albumId = albumId;
     }

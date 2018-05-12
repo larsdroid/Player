@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void albumClicked(Album album) {
-        Fragment albumFragment = AlbumFragment.newInstance(this, album.id);
+        Fragment albumFragment = AlbumFragment.newInstance(album.id);
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragment_container, albumFragment);

@@ -82,6 +82,12 @@ public abstract class MusicDao {
     @Query("SELECT * FROM album WHERE id = :id")
     public abstract LiveData<Album> getAlbum(long id);
 
+    @Query("SELECT ar.* FROM artist ar, album al WHERE ar.id = al.artistId AND al.id = :albumId")
+    public abstract LiveData<Artist> getArtistForAlbum(long albumId);
+
+    @Query("SELECT im.* FROM image im, album al WHERE im.id = al.imageId AND al.id = :albumId")
+    public abstract LiveData<Image> getImageForAlbum(long albumId);
+
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
     public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
