@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: runOnUiThread(new Runnable() {    ?
-            final Song song = musicDao.getCurrentSong();
+            final Song song = musicDao.getCurrentSong_NonLive();
             final PlayStatus playStatus = musicDao.getCurrentPlayStatus();
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();

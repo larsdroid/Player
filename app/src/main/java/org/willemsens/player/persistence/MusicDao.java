@@ -91,6 +91,9 @@ public abstract class MusicDao {
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
     public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
+    @Query("SELECT so.* FROM song so, applicationstate ap WHERE so.id = ap.value AND ap.property = 'APPSTATE_CURRENT_SONG_ID'")
+    public abstract LiveData<Song> getCurrentSong();
+
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);
 
@@ -269,7 +272,7 @@ public abstract class MusicDao {
         }
     }
 
-    public Song getCurrentSong() {
+    public Song getCurrentSong_NonLive() {
         final Integer songId = getCurrentSongId();
         return songId == null ? null : findSong(songId);
     }

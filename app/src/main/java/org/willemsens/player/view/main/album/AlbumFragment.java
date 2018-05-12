@@ -78,6 +78,7 @@ public class AlbumFragment extends Fragment {
         observeArtist();
         observeSongs();
         observeCoverArt();
+        observeCurrentSong();
 
         return view;
     }
@@ -104,18 +105,6 @@ public class AlbumFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        adapter.registerPlayBackUpdateReceiver();
-    }
-
-    @Override
-    public void onPause() {
-        adapter.unregisterPlayBackUpdateReceiver();
-        super.onPause();
-    }
-
     private void observeAlbum() {
         this.viewModel.albumLiveData.observe(this,
                 album -> setActivityTitle());
@@ -123,7 +112,10 @@ public class AlbumFragment extends Fragment {
 
     private void observeArtist() {
         this.viewModel.artistLiveData.observe(this,
-                artist -> setActivityTitle());
+                artist -> {
+            setActivityTitle();
+            adapter.setArtist(artist);
+        });
     }
 
     private void setActivityTitle() {
@@ -138,5 +130,10 @@ public class AlbumFragment extends Fragment {
     private void observeSongs() {
         this.viewModel.songsLiveData.observe(this,
                 songs -> adapter.setSongs(songs));
+    }
+
+    private void observeCurrentSong() {
+        this.viewModel.currentSongLiveData.observe(this,
+                currentSong -> adapter.setHighlightedSong(currentSong));
     }
 }

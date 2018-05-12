@@ -17,6 +17,7 @@ public class AlbumAndSongsViewModel extends ViewModel {
     public final LiveData<Artist> artistLiveData;
     public final LiveData<List<Song>> songsLiveData;
     public final LiveData<Image> coverArtLiveData;
+    public final LiveData<Song> currentSongLiveData;
 
     public AlbumAndSongsViewModel(Context context, long albumId) {
         final AppDatabase appDatabase = AppDatabase.getAppDatabase(context);
@@ -26,5 +27,6 @@ public class AlbumAndSongsViewModel extends ViewModel {
         this.artistLiveData = musicDao.getArtistForAlbum(albumId);
         this.songsLiveData = musicDao.getAllSongs(albumId);
         this.coverArtLiveData = musicDao.getImageForAlbum(albumId);
+        this.currentSongLiveData = musicDao.getCurrentSong();
     }
 }

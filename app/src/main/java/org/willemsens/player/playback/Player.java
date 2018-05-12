@@ -49,7 +49,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         this.dataSourceFactory = new DefaultDataSourceFactory(context,
                 Util.getUserAgent(context, context.getString(R.string.app_name)), null);
 
-        final Song currentSong = this.musicDao.getCurrentSong();
+        final Song currentSong = this.musicDao.getCurrentSong_NonLive();
         if (currentSong != null) {
             this.setCurrentSong(currentSong, false);
             this.millis = this.musicDao.getCurrentMillis();
@@ -84,7 +84,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     }
 
     Song getSong() {
-        return this.musicDao.getCurrentSong();
+        return this.musicDao.getCurrentSong_NonLive();
     }
 
     void setSong(final long songId, final PlayerCommand playerCommand) {
@@ -101,7 +101,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         switch (playerCommand) {
             case PREVIOUS:
             case NEXT:
-                final Song currentSong = this.musicDao.getCurrentSong();
+                final Song currentSong = this.musicDao.getCurrentSong_NonLive();
                 Song newSong;
                 if (playerCommand == PREVIOUS) {
                     newSong = this.musicDao.findPreviousSong(currentSong.albumId, currentSong.track);
@@ -118,9 +118,9 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 setCurrentSong(newSong);
                 break;
             case STOP_PLAY_PAUSE:
-                if (this.musicDao.getCurrentPlayStatus() == STOPPED && this.musicDao.getCurrentSong() != null) {
+                if (this.musicDao.getCurrentPlayStatus() == STOPPED && this.musicDao.getCurrentSong_NonLive() != null) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
-                    setCurrentSong(this.musicDao.getCurrentSong()); // TODO: not optimal to reload this song, I guess...
+                    setCurrentSong(this.musicDao.getCurrentSong_NonLive()); // TODO: not optimal to reload this song, I guess...
                 } else if (this.musicDao.getCurrentPlayStatus() == PAUSED) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
                     this.exoPlayer.setPlayWhenReady(true);
@@ -151,7 +151,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 //       ... but it probably shouldn't since we want to track the number of plays.
                 this.exoPlayer.setPlayWhenReady(true);
             } else {
-                final Song currentSong = this.musicDao.getCurrentSong();
+                final Song currentSong = this.musicDao.getCurrentSong_NonLive();
                 Song nextSong = this.musicDao.findNextSong(currentSong.albumId, currentSong.track);
                 if (nextSong == null) {
                     if (this.musicDao.getCurrentPlayMode() == PlayMode.REPEAT_ALL) {
