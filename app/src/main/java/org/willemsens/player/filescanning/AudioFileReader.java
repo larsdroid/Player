@@ -8,9 +8,9 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.MusicDao;
 

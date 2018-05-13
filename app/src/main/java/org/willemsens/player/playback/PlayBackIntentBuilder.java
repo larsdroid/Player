@@ -2,7 +2,7 @@ package org.willemsens.player.playback;
 
 import android.content.Context;
 import android.content.Intent;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Song;
 
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;

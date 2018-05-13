@@ -1,4 +1,4 @@
-package org.willemsens.player.model;
+package org.willemsens.player.persistence.entities;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
@@ -9,40 +9,39 @@ import android.support.annotation.NonNull;
 import java.util.Objects;
 
 @Entity(foreignKeys = {
-        @ForeignKey(entity = Artist.class,
-                parentColumns = "id",
-                childColumns = "artistId"),
         @ForeignKey(entity = Image.class,
                 parentColumns = "id",
-                childColumns = "imageId")
-}, indices = {
-        @Index(value = {"artistId"}),
-        @Index(value = {"imageId"})
-})
-public class Album {
+                childColumns = "imageId")},
+        indices = {
+                @Index(value = {"name"},
+                        unique = true),
+                @Index(value = {"imageId"})
+        })
+public class Artist implements Comparable<Artist> {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
     @NonNull
     public String name;
 
-    public long artistId;
-    public Integer yearReleased;
-    public Integer length;
     public Long imageId;
 
-    public Album(@NonNull String name, long artistId) {
+    public Artist(@NonNull String name) {
         this.name = name;
-        this.artistId = artistId;
+    }
+
+    @Override
+    public int compareTo(@NonNull Artist that) {
+        return this.name.compareTo(that.name);
     }
 
     @Override
     public boolean equals(Object o) {
-        return this == o || o instanceof Album && this.id == ((Album) o).id;
+        return this == o || o instanceof Artist && this.id == ((Artist) o).id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, artistId);
+        return Objects.hash(id);
     }
 }

@@ -20,10 +20,10 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Image;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.util.StringFormat;
@@ -244,7 +244,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         private void fetchAllArtists() {
             this.artists.clear();
-            for (Artist artist : musicDao.getAllArtists()) {
+            for (Artist artist : musicDao.getAllArtists_NonLive()) {
                 this.artists.put(artist.id, true);
             }
         }

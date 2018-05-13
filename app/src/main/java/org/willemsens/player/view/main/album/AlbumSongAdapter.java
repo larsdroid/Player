@@ -11,8 +11,8 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 

@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import org.willemsens.mp3_vbr_length.Mp3Info;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;

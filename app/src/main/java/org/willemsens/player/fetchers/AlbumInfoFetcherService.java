@@ -7,8 +7,8 @@ import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
 import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Image;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;

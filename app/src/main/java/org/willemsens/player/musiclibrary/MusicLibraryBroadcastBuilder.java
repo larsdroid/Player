@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Song;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
@@ -81,9 +81,6 @@ public class MusicLibraryBroadcastBuilder {
             boolean isValid = false;
             switch (this.type) {
                 case MLBT_ARTIST_INSERTED:
-                    isValid = this.payloadType == MLBPT_ARTIST_ID;
-                    break;
-                case MLBT_ARTIST_UPDATED:
                     isValid = this.payloadType == MLBPT_ARTIST_ID;
                     break;
                 case MLBT_ALBUM_INSERTED:

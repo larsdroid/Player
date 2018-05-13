@@ -11,12 +11,13 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.ApplicationState;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Directory;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.ApplicationState;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Directory;
+import org.willemsens.player.persistence.entities.Image;
+import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.persistence.entities.helpers.ArtistWithImage;
 import org.willemsens.player.playback.PlayMode;
 import org.willemsens.player.playback.PlayStatus;
 
@@ -38,7 +39,7 @@ public abstract class MusicDao {
     public abstract List<Album> getAllAlbums();
 
     @Query("SELECT * FROM artist ORDER BY name")
-    public abstract List<Artist> getAllArtists();
+    public abstract List<Artist> getAllArtists_NonLive();
 
     @Query("SELECT so.* FROM song so, album al, artist ar WHERE so.albumId = al.id AND al.artistId = ar.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
     public abstract List<Song> getAllSongs();
@@ -93,6 +94,9 @@ public abstract class MusicDao {
 
     @Query("SELECT so.* FROM song so, applicationstate ap WHERE so.id = ap.value AND ap.property = 'APPSTATE_CURRENT_SONG_ID'")
     public abstract LiveData<Song> getCurrentSong();
+
+    @Query("SELECT ar.id, ar.name, im.imageData FROM artist ar LEFT OUTER JOIN image im ON ar.imageId = im.id ORDER BY ar.name")
+    public abstract LiveData<List<ArtistWithImage>> getAllArtistsWithImages();
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);

@@ -7,7 +7,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.entities.Directory;
 
 public class MusicDirectoryViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.directory_path)

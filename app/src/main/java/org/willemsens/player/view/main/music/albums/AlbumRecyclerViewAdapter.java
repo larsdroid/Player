@@ -20,9 +20,9 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Image;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 
@@ -186,7 +186,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
         private void fetchAllArtists() {
             this.artists.clear();
-            for (Artist artist : musicDao.getAllArtists()) {
+            for (Artist artist : musicDao.getAllArtists_NonLive()) {
                 this.artists.put(artist.id, true);
             }
         }
@@ -214,8 +214,8 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             setAllArtists(false);
         }
 
-        public void add(Artist artist) {
-            this.artists.put(artist.id, true);
+        public void add(long artistId) {
+            this.artists.put(artistId, true);
         }
 
         void flipArtist(long artistId) {
@@ -307,8 +307,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
                 ((AlbumFilter)getFilter()).fetchAllArtists();
             } else if (intentAction.equals(MLBT_ARTIST_INSERTED.name())) {
                 final long artistId = intent.getLongExtra(MLBPT_ARTIST_ID.name(), -1);
-                final Artist artist = musicDao.findArtist(artistId);
-                ((AlbumFilter)getFilter()).add(artist);
+                ((AlbumFilter)getFilter()).add(artistId);
             } else if (intentAction.equals(MLBT_ARTISTS_DELETED.name())) {
                 ((AlbumFilter)getFilter()).clearAllArtists();
             }

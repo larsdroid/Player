@@ -5,12 +5,12 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.ApplicationState;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Directory;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.ApplicationState;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Directory;
+import org.willemsens.player.persistence.entities.Image;
+import org.willemsens.player.persistence.entities.Song;
 
 @Database(entities = {
         Album.class,

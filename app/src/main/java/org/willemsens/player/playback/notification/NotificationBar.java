@@ -3,9 +3,9 @@ package org.willemsens.player.playback.notification;
 import android.graphics.BitmapFactory;
 import android.widget.RemoteViews;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Image;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayStatus;
 
 abstract class NotificationBar extends RemoteViews {

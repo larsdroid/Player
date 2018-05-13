@@ -3,7 +3,6 @@ package org.willemsens.player.musiclibrary;
 public enum MusicLibraryBroadcastType {
     MLBT_ARTIST_INSERTED,
     MLBT_ARTISTS_INSERTED,
-    MLBT_ARTIST_UPDATED,
     MLBT_ARTISTS_DELETED,
     MLBT_ALBUM_INSERTED,
     MLBT_ALBUMS_INSERTED,

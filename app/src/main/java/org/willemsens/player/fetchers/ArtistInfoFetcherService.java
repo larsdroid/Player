@@ -6,16 +6,14 @@ import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.discogs.DiscogsInfoFetcher;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.Image;
 
 import java.util.List;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ARTIST_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_INSERTED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_INSERTED;
-import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTIST_UPDATED;
 
 public class ArtistInfoFetcherService extends InfoFetcherService {
     private final InfoFetcher infoFetcher;
@@ -77,11 +75,5 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
 
     private void updateArtist(Artist artist) {
         getMusicDao().updateArtist(artist);
-
-        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
-        builder
-                .setType(MLBT_ARTIST_UPDATED)
-                .setArtist(artist)
-                .buildAndSubmitBroadcast();
     }
 }

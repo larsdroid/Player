@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.entities.Directory;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 

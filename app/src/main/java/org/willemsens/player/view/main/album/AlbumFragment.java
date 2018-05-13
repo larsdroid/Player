@@ -61,7 +61,7 @@ public class AlbumFragment extends Fragment {
         Bundle arguments = getArguments();
         if (arguments != null) {
             final long albumId = arguments.getLong(MLBPT_ALBUM_ID.name());
-            this.viewModel = ViewModelProviders.of(this, new AlbumAndSongsViewModelFactory(getContext(), albumId)).get(AlbumAndSongsViewModel.class);
+            this.viewModel = ViewModelProviders.of(this, new AlbumAndSongsViewModelFactory(getActivity().getApplication(), albumId)).get(AlbumAndSongsViewModel.class);
         }
 
         Context context = view.getContext();

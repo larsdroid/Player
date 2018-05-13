@@ -1,8 +1,8 @@
 package org.willemsens.player.view.main.music.artists;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,42 +13,45 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Image;
-import org.willemsens.player.persistence.AppDatabase;
-import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Artist;
+import org.willemsens.player.persistence.entities.helpers.ArtistWithImage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display an {@link Artist}.
  */
 class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistViewHolder> {
-    private final List<Artist> artists;
+    private List<ArtistWithImage> artistsWithImages;
     private final OnArtistClickedListener listener;
-    private final MusicDao musicDao;
 
-    ArtistRecyclerViewAdapter(Context context, List<Artist> artists, OnArtistClickedListener listener) {
-        this.artists = artists;
+    ArtistRecyclerViewAdapter(OnArtistClickedListener listener) {
+        this.artistsWithImages = new ArrayList<>();
         this.listener = listener;
-        this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
+    }
+
+    public void setArtistsWithImages(List<ArtistWithImage> artistsWithImages) {
+        this.artistsWithImages = artistsWithImages;
+        this.notifyDataSetChanged();
     }
 
     @Override
-    public ArtistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    @NonNull
+    public ArtistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_artist_list_item, parent, false);
         return new ArtistViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ArtistViewHolder holder, int position) {
-        holder.setArtist(artists.get(position));
+    public void onBindViewHolder(@NonNull final ArtistViewHolder holder, int position) {
+        holder.setArtistWithImage(artistsWithImages.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return artists.size();
+        return artistsWithImages.size();
     }
 
     class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -61,7 +64,7 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         @BindView(R.id.artist_list_progress_bar)
         ProgressBar progressBar;
 
-        private Artist artist;
+        private ArtistWithImage artistWithImage;
 
         ArtistViewHolder(View view) {
             super(view);
@@ -71,18 +74,17 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
 
         @Override
         public void onClick(View v) {
-            listener.artistClicked(this.artist);
+            listener.artistClicked(this.artistWithImage.id);
         }
 
-        private void setArtist(Artist artist) {
-            this.artist = artist;
+        private void setArtistWithImage(ArtistWithImage artistWithImage) {
+            this.artistWithImage = artistWithImage;
 
-            this.artistName.setText(artist.name);
+            this.artistName.setText(artistWithImage.name);
 
-            if (artist.imageId != null) {
-                final Image artistImage = musicDao.findImage(artist.imageId);
+            if (artistWithImage.imageData != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        artistImage.imageData, 0, artistImage.imageData.length);
+                        artistWithImage.imageData, 0, artistWithImage.imageData.length);
                 this.artistImage.setImageBitmap(bitmap);
 
                 this.artistImage.setVisibility(View.VISIBLE);

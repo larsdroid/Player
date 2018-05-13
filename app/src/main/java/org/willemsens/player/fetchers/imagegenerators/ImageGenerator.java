@@ -2,8 +2,8 @@ package org.willemsens.player.fetchers.imagegenerators;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Random;

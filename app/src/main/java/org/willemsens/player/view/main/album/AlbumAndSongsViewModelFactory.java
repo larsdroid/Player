@@ -1,22 +1,22 @@
 package org.willemsens.player.view.main.album;
 
+import android.app.Application;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 public class AlbumAndSongsViewModelFactory extends ViewModelProvider.NewInstanceFactory {
-    private final Context context;
+    private final Application application;
     private final long albumId;
 
-    AlbumAndSongsViewModelFactory(Context context, long albumId) {
-        this.context = context;
+    AlbumAndSongsViewModelFactory(Application application, long albumId) {
+        this.application = application;
         this.albumId = albumId;
     }
 
     @Override
     @NonNull
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new AlbumAndSongsViewModel(context, albumId);
+        return (T) new AlbumAndSongsViewModel(application, albumId);
     }
 }

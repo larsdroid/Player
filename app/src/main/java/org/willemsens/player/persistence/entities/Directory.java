@@ -1,4 +1,4 @@
-package org.willemsens.player.model;
+package org.willemsens.player.persistence.entities;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Index;

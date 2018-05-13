@@ -1,6 +1,5 @@
-* AlbumFragment: show progressbar instead of album cover in case
+* SongsFragment: show progressbar instead of album cover in case
   the art wasn't fetched yet
-  * Also: SongsFragment... idem ditto for the tiny cover art display
   * Also: NowPlaying and notification display... idem ditto for the tiny cover art display
 * AlbumsFragment/AlbumRecyclerViewAdapter pair is implemented differently from
   ArtistsFragment/ArtistRecyclerViewAdapter. Also check SongsFragment/SongRecyclerViewAdapter

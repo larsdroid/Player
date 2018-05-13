@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Directory;
+import org.willemsens.player.persistence.entities.Directory;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 

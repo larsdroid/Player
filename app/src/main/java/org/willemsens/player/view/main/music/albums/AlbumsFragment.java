@@ -14,7 +14,7 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import org.willemsens.player.R;
-import org.willemsens.player.model.Artist;
+import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 

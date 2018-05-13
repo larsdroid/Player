@@ -11,14 +11,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.willemsens.player.R;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.view.main.music.albums.AlbumRecyclerViewAdapter;
-import org.willemsens.player.view.main.music.albums.AlbumsFragment;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import org.willemsens.player.R;
+import org.willemsens.player.view.main.music.albums.AlbumRecyclerViewAdapter;
+import org.willemsens.player.view.main.music.albums.AlbumsFragment;
 
 import static org.willemsens.player.view.main.music.SubFragmentType.ALBUMS;
 
@@ -82,10 +79,10 @@ public class MusicFragment extends Fragment
         return (AlbumsFragment) ((MusicViewPagerAdapter) viewPager.getAdapter()).getFragment(ALBUMS);
     }
 
-    public void filterAlbums(Artist artist) {
+    public void filterAlbums(long artistId) {
         AlbumRecyclerViewAdapter.AlbumFilter filter = getAlbumssFragment().getFilter();
         filter.removeAllArtists();
-        filter.add(artist);
+        filter.add(artistId);
         filter.filter(null);
     }
 

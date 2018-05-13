@@ -31,9 +31,8 @@ import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
 import org.willemsens.player.filescanning.Mp3ScanningService;
-import org.willemsens.player.model.Album;
-import org.willemsens.player.model.Artist;
-import org.willemsens.player.model.Song;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
@@ -286,13 +285,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void artistClicked(Artist artist) {
+    public void artistClicked(long artistId) {
         FragmentManager manager = getSupportFragmentManager();
         Fragment fragment = manager.findFragmentById(R.id.fragment_container);
         if (fragment instanceof MusicFragment) {
             MusicFragment musicFragment = (MusicFragment) fragment;
             musicFragment.setCurrentFragment(SubFragmentType.ALBUMS);
-            musicFragment.filterAlbums(artist);
+            musicFragment.filterAlbums(artistId);
         }
     }
 
