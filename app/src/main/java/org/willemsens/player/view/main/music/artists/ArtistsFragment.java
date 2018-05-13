@@ -46,8 +46,8 @@ public class ArtistsFragment extends Fragment {
     }
 
     private void observeArtists() {
-        this.viewModel.artistWithImagesLiveData.observe(this,
-                artists -> this.adapter.setArtistsWithImages(artists));
+        this.viewModel.artistsLiveData.observe(this,
+                artists -> this.adapter.setArtists(artists));
     }
 
     @Override

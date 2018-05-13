@@ -23,16 +23,16 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display an {@link Artist}.
  */
 class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistViewHolder> {
-    private List<ArtistWithImage> artistsWithImages;
+    private List<ArtistWithImage> artists;
     private final OnArtistClickedListener listener;
 
     ArtistRecyclerViewAdapter(OnArtistClickedListener listener) {
-        this.artistsWithImages = new ArrayList<>();
+        this.artists = new ArrayList<>();
         this.listener = listener;
     }
 
-    public void setArtistsWithImages(List<ArtistWithImage> artistsWithImages) {
-        this.artistsWithImages = artistsWithImages;
+    public void setArtists(List<ArtistWithImage> artists) {
+        this.artists = artists;
         this.notifyDataSetChanged();
     }
 
@@ -46,12 +46,12 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
 
     @Override
     public void onBindViewHolder(@NonNull final ArtistViewHolder holder, int position) {
-        holder.setArtistWithImage(artistsWithImages.get(position));
+        holder.setArtist(artists.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return artistsWithImages.size();
+        return artists.size();
     }
 
     class ArtistViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -64,7 +64,7 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
         @BindView(R.id.artist_list_progress_bar)
         ProgressBar progressBar;
 
-        private ArtistWithImage artistWithImage;
+        private ArtistWithImage artist;
 
         ArtistViewHolder(View view) {
             super(view);
@@ -74,17 +74,17 @@ class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewA
 
         @Override
         public void onClick(View v) {
-            listener.artistClicked(this.artistWithImage.id);
+            listener.artistClicked(this.artist.id);
         }
 
-        private void setArtistWithImage(ArtistWithImage artistWithImage) {
-            this.artistWithImage = artistWithImage;
+        private void setArtist(ArtistWithImage artist) {
+            this.artist = artist;
 
-            this.artistName.setText(artistWithImage.name);
+            this.artistName.setText(artist.name);
 
-            if (artistWithImage.imageData != null) {
+            if (artist.imageData != null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        artistWithImage.imageData, 0, artistWithImage.imageData.length);
+                        artist.imageData, 0, artist.imageData.length);
                 this.artistImage.setImageBitmap(bitmap);
 
                 this.artistImage.setVisibility(View.VISIBLE);

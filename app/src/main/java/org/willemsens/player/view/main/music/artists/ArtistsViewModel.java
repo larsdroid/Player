@@ -10,7 +10,7 @@ import org.willemsens.player.persistence.entities.helpers.ArtistWithImage;
 import java.util.List;
 
 public class ArtistsViewModel extends AndroidViewModel {
-    public final LiveData<List<ArtistWithImage>> artistWithImagesLiveData;
+    public final LiveData<List<ArtistWithImage>> artistsLiveData;
 
     public ArtistsViewModel(Application application) {
         super(application);
@@ -18,6 +18,6 @@ public class ArtistsViewModel extends AndroidViewModel {
         final AppDatabase appDatabase = AppDatabase.getAppDatabase(this.getApplication());
         final MusicDao musicDao = appDatabase.musicDao();
 
-        this.artistWithImagesLiveData = musicDao.getAllArtistsWithImages();
+        this.artistsLiveData = musicDao.getAllArtistsWithImages();
     }
 }
