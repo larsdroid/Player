@@ -31,11 +31,10 @@ import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
 import org.willemsens.player.filescanning.FileScannerService;
 import org.willemsens.player.filescanning.Mp3ScanningService;
-import org.willemsens.player.persistence.entities.Album;
-import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.main.album.AlbumFragment;
@@ -275,8 +274,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void albumClicked(Album album) {
-        Fragment albumFragment = AlbumFragment.newInstance(album.id);
+    public void albumClicked(long albumId) {
+        Fragment albumFragment = AlbumFragment.newInstance(albumId);
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragment_container, albumFragment);

@@ -99,7 +99,7 @@ public abstract class MusicDao {
     @Query("SELECT ar.id, ar.name, im.imageData FROM artist ar LEFT OUTER JOIN image im ON ar.imageId = im.id ORDER BY ar.name")
     public abstract LiveData<List<ArtistWithImage>> getAllArtistsWithImages();
 
-    @Query("SELECT al.id, al.name, al.yearReleased, al.length, im.imageData, ar.name AS artistName FROM album al LEFT JOIN artist ar ON al.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id ORDER BY ar.name, al.yearReleased")
+    @Query("SELECT al.id, al.name, al.yearReleased, al.length, im.imageData, ar.id AS artistId, ar.name AS artistName FROM album al LEFT JOIN artist ar ON al.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id ORDER BY ar.name, al.yearReleased")
     public abstract LiveData<List<AlbumWithImageAndArtist>> getAllAlbumsWithImages();
 
     @Query("SELECT * FROM artist ORDER BY name")

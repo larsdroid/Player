@@ -1,7 +1,9 @@
 package org.willemsens.player.view.main.music.albums;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -15,11 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import org.willemsens.player.R;
 import org.willemsens.player.persistence.entities.Artist;
-import org.willemsens.player.persistence.AppDatabase;
-import org.willemsens.player.persistence.MusicDao;
-
-import java.util.Iterator;
-import java.util.Map;
 
 import static android.view.Menu.NONE;
 
@@ -27,8 +24,8 @@ import static android.view.Menu.NONE;
  * A fragment representing a list of Albums.
  */
 public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClickListener {
-    private MusicDao musicDao;
     private AlbumRecyclerViewAdapter adapter;
+    private AlbumsViewModel viewModel;
 
     public AlbumsFragment() {
     }
@@ -38,43 +35,38 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
         View view = inflater.inflate(R.layout.fragment_albums_list, container, false);
 
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-            if (this.adapter == null) {
-                this.adapter = new AlbumRecyclerViewAdapter(context, savedInstanceState);
-            }
-            recyclerView.setAdapter(this.adapter);
-        }
+        Context context = view.getContext();
+        RecyclerView recyclerView = (RecyclerView) view;
+        recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
+
+        this.viewModel = ViewModelProviders.of(this).get(AlbumsViewModel.class);
+
+        this.adapter = new AlbumRecyclerViewAdapter(context, savedInstanceState);
+        recyclerView.setAdapter(this.adapter);
+
+        observeAlbums();
+        observeArtists();
+
         return view;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        musicDao = AppDatabase.getAppDatabase(context).musicDao();
+    private void observeAlbums() {
+        this.viewModel.albumsLiveData.observe(this,
+                albums -> this.adapter.setAllAlbums(albums));
+    }
+
+    private void observeArtists() {
+        this.viewModel.artistsLiveData.observe(this,
+                artists -> this.adapter.setArtists(artists));
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        adapter.registerDbUpdateReceiver();
-    }
-
-    @Override
-    public void onPause() {
-        adapter.unregisterDbUpdateReceiver();
-        super.onPause();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         // It's possible that Android tries to save this instance even though it has never been shown
         // (no call happened to onCreateView). As a result, the adapter can be null here.
         if (adapter != null) {
@@ -126,19 +118,17 @@ public class AlbumsFragment extends Fragment implements PopupMenu.OnMenuItemClic
             final MenuItem menuItemAll = artistsMenu.getItem(i++);
             menuItemAll.setCheckable(true);
             menuItemAll.setChecked(true);
-            for (Iterator<Map.Entry<Long, Boolean>> it = filter.getArtistIterator(); it.hasNext();) {
-                final Map.Entry<Long, Boolean> entry = it.next();
-                final Long artistId = entry.getKey();
-                // TODO: performance: fetch all artists at once!
-                // TODO: make it sorted: fetch all artists at once!
-                final Artist artist = musicDao.findArtist(artistId);
-                artistsMenu.add(NONE, (int)artist.id, NONE, artist.name);
-                final MenuItem menuItem = artistsMenu.getItem(i++);
-                menuItem.setCheckable(true);
-                if (entry.getValue()) {
-                    menuItem.setChecked(true);
-                } else {
-                    menuItemAll.setChecked(false);
+
+            if (this.viewModel.artistsLiveData.getValue() != null) {
+                for (Artist artist : this.viewModel.artistsLiveData.getValue()) {
+                    artistsMenu.add(NONE, (int) artist.id, NONE, artist.name);
+                    final MenuItem menuItem = artistsMenu.getItem(i++);
+                    menuItem.setCheckable(true);
+                    if (filter.getArtistValue(artist.id)) {
+                        menuItem.setChecked(true);
+                    } else {
+                        menuItemAll.setChecked(false);
+                    }
                 }
             }
         } else if (id == R.id.menu_item_filter_all_artists) {
