@@ -1,5 +1,3 @@
-* AlbumsFragment: filter is reset after screen rotation
-
 * SongsFragment: show progressbar instead of album cover in case
   the art wasn't fetched yet
   * Also: NowPlaying and notification display... idem ditto for the tiny cover art display

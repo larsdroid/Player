@@ -233,7 +233,7 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
 
         private void fetchAllAlbums() {
             this.albums.clear();
-            for (Album album : musicDao.getAllAlbums()) {
+            for (Album album : musicDao.getAllAlbums_NonLive()) {
                 this.albums.put(album.id, true);
             }
         }

@@ -19,6 +19,7 @@ import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.persistence.entities.helpers.AlbumWithImageAndArtist;
 import org.willemsens.player.persistence.entities.helpers.ArtistWithImage;
+import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.PlayMode;
 import org.willemsens.player.playback.PlayStatus;
 
@@ -37,7 +38,7 @@ public abstract class MusicDao {
     public abstract List<Directory> getAllDirectories();
 
     @Query("SELECT al.* FROM album al, artist ar WHERE al.artistId = ar.id ORDER BY ar.name, al.yearReleased")
-    public abstract List<Album> getAllAlbums();
+    public abstract List<Album> getAllAlbums_NonLive();
 
     @Query("SELECT * FROM artist ORDER BY name")
     public abstract List<Artist> getAllArtists_NonLive();
@@ -104,6 +105,12 @@ public abstract class MusicDao {
 
     @Query("SELECT * FROM artist ORDER BY name")
     public abstract LiveData<List<Artist>> getAllArtists();
+
+    @Query("SELECT al.* FROM album al LEFT JOIN artist ar ON al.artistId = ar.id ORDER BY ar.name, al.yearReleased")
+    public abstract LiveData<List<Album>> getAllAlbums();
+
+    @Query("SELECT so.id, so.name, so.track, so.length, al.name AS albumName, im.imageData AS albumImageData, ar.name AS artistName FROM song so LEFT JOIN album al ON so.albumId = al.id LEFT JOIN artist ar ON so.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
+    public abstract LiveData<List<SongWithAlbumInfo>> getAllSongsWithAlbumInfo();
 
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);
