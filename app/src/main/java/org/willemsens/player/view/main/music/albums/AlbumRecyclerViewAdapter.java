@@ -43,8 +43,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         this.listener = (OnAlbumClickedListener) context;
         this.allAlbums = new ArrayList<>();
         this.albums = new ArrayList<>();
-        this.filter = new AlbumFilter();
-        this.filter.initialiseFilter(savedInstanceState);
+        this.filter = new AlbumFilter(savedInstanceState);
     }
 
     public void setAllAlbums(List<AlbumWithImageAndArtist> allAlbums) {
@@ -142,9 +141,11 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
 
     public class AlbumFilter extends Filter {
         private final Map<Long, Boolean> artists; // Artist ID --> Include in filter
+        private Bundle savedInstanceState;
 
-        AlbumFilter() {
+        AlbumFilter(Bundle savedInstanceState) {
             this.artists = new HashMap<>();
+            this.savedInstanceState = savedInstanceState;
         }
 
         private void initAllArtists(List<Artist> artists) {
@@ -152,6 +153,8 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             for (Artist artist : artists) {
                 this.artists.put(artist.id, true);
             }
+
+            handleSavedInstanceState();
         }
 
         private void setAllArtists(boolean b) {
@@ -204,14 +207,16 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             outState.putLongArray(MLBPT_ARTIST_IDS.name(), filterArtistIds);
         }
 
-        private void initialiseFilter(Bundle savedInstanceState) {
-            if (savedInstanceState != null) {
-                long[] filterArtistIds = savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
+        private void handleSavedInstanceState() {
+            if (this.savedInstanceState != null) {
+                long[] filterArtistIds = this.savedInstanceState.getLongArray(MLBPT_ARTIST_IDS.name());
                 if (filterArtistIds != null) {
+                    removeAllArtists();
                     for (long filterArtistId : filterArtistIds) {
                         this.artists.put(filterArtistId, true);
                     }
                 }
+                this.savedInstanceState = null;
             }
         }
 
