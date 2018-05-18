@@ -1,6 +1,5 @@
-* SongsFragment: show progressbar instead of album cover in case
+* NowPlaying and notification display: show progressbar instead of album cover in case
   the art wasn't fetched yet
-  * Also: NowPlaying and notification display... idem ditto for the tiny cover art display
 * SongWithAlbumInfo: album image data should be a nested Object (currently copying the
   data in each song)
 * Calculate album length and show it in the GUI

@@ -3,6 +3,7 @@ package org.willemsens.player.view.main.music.albums;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Artist;
@@ -14,7 +15,7 @@ public class AlbumsViewModel extends AndroidViewModel {
     public final LiveData<List<AlbumWithImageAndArtist>> albumsLiveData;
     public final LiveData<List<Artist>> artistsLiveData; // For the "filter by artist" list
 
-    public AlbumsViewModel(Application application) {
+    public AlbumsViewModel(@NonNull Application application) {
         super(application);
 
         final AppDatabase appDatabase = AppDatabase.getAppDatabase(this.getApplication());

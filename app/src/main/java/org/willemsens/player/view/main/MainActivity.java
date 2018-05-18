@@ -218,8 +218,6 @@ public class MainActivity extends AppCompatActivity
             // We have to execute the pending transactions since we're about to update the new fragment's view...
             manager.executePendingTransactions();
         }
-
-        nowPlayingFragment.update(song, playStatus);
     }
 
     private void removeNowPlayingFragment() {
@@ -343,7 +341,7 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             // TODO: runOnUiThread(new Runnable() {    ?
             final Song song = musicDao.getCurrentSong_NonLive();
-            final PlayStatus playStatus = musicDao.getCurrentPlayStatus();
+            final PlayStatus playStatus = musicDao.getCurrentPlayStatus_NON_Live();
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();
             } else {

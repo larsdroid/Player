@@ -3,6 +3,7 @@ package org.willemsens.player.view.main.album;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
@@ -19,7 +20,7 @@ public class AlbumAndSongsViewModel extends AndroidViewModel {
     public final LiveData<Image> coverArtLiveData;
     public final LiveData<Song> currentSongLiveData;
 
-    AlbumAndSongsViewModel(Application application, long albumId) {
+    AlbumAndSongsViewModel(@NonNull Application application, long albumId) {
         super(application);
 
         final AppDatabase appDatabase = AppDatabase.getAppDatabase(this.getApplication());

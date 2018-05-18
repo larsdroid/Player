@@ -80,7 +80,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     }
 
     PlayStatus getPlayStatus() {
-        return this.musicDao.getCurrentPlayStatus();
+        return this.musicDao.getCurrentPlayStatus_NON_Live();
     }
 
     Song getSong() {
@@ -118,21 +118,21 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 setCurrentSong(newSong);
                 break;
             case STOP_PLAY_PAUSE:
-                if (this.musicDao.getCurrentPlayStatus() == STOPPED && this.musicDao.getCurrentSong_NonLive() != null) {
+                if (this.musicDao.getCurrentPlayStatus_NON_Live() == STOPPED && this.musicDao.getCurrentSong_NonLive() != null) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
                     setCurrentSong(this.musicDao.getCurrentSong_NonLive()); // TODO: not optimal to reload this song, I guess...
-                } else if (this.musicDao.getCurrentPlayStatus() == PAUSED) {
+                } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PAUSED) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
                     this.exoPlayer.setPlayWhenReady(true);
                     this.onUpdateListener.onUpdate();
-                } else if (this.musicDao.getCurrentPlayStatus() == PLAYING) {
+                } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
                 break;
             case PAUSE:
-                if (this.musicDao.getCurrentPlayStatus() == PLAYING) {
+                if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();

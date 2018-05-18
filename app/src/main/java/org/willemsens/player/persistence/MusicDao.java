@@ -1,6 +1,7 @@
 package org.willemsens.player.persistence;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Transformations;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -97,6 +98,9 @@ public abstract class MusicDao {
     @Query("SELECT so.* FROM song so, applicationstate ap WHERE so.id = ap.value AND ap.property = 'APPSTATE_CURRENT_SONG_ID'")
     public abstract LiveData<Song> getCurrentSong();
 
+    @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName FROM applicationstate ap LEFT JOIN song so ON ap.value = so.id LEFT JOIN album al ON so.albumId = al.id LEFT JOIN artist ar ON so.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id WHERE ap.property = 'APPSTATE_CURRENT_SONG_ID'")
+    public abstract LiveData<SongWithAlbumInfo> getCurrentSongWithAlbumInfo();
+
     @Query("SELECT ar.id, ar.name, im.imageData FROM artist ar LEFT OUTER JOIN image im ON ar.imageId = im.id ORDER BY ar.name")
     public abstract LiveData<List<ArtistWithImage>> getAllArtistsWithImages();
 
@@ -112,6 +116,9 @@ public abstract class MusicDao {
     @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName FROM song so LEFT JOIN album al ON so.albumId = al.id LEFT JOIN artist ar ON so.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
     public abstract LiveData<List<SongWithAlbumInfo>> getAllSongsWithAlbumInfo();
 
+    @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
+    abstract LiveData<ApplicationState> getApplicationState(String property);
+
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);
 
@@ -119,7 +126,7 @@ public abstract class MusicDao {
     public abstract Song findLastSong(long albumId);
 
     @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
-    abstract ApplicationState getApplicationState(String property);
+    abstract ApplicationState getApplicationState_NON_Live(String property);
 
     @Update
     public abstract void updateAlbum(Album album);
@@ -282,7 +289,7 @@ public abstract class MusicDao {
     }
 
     private Integer getCurrentSongId() {
-        ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
+        ApplicationState stateSongId = getApplicationState_NON_Live(APPSTATE_CURRENT_SONG_ID.name());
         if (stateSongId != null) {
             return Integer.parseInt(stateSongId.value);
         } else {
@@ -299,7 +306,7 @@ public abstract class MusicDao {
         if (songId == null) {
             deleteApplicationState(APPSTATE_CURRENT_SONG_ID.name());
         } else {
-            ApplicationState stateSongId = getApplicationState(APPSTATE_CURRENT_SONG_ID.name());
+            ApplicationState stateSongId = getApplicationState_NON_Live(APPSTATE_CURRENT_SONG_ID.name());
             if (stateSongId == null) {
                 stateSongId = new ApplicationState(APPSTATE_CURRENT_SONG_ID.name(), String.valueOf(songId));
                 insertApplicationState(stateSongId);
@@ -314,8 +321,8 @@ public abstract class MusicDao {
         setCurrentSongId(song == null ? null : song.id);
     }
 
-    public PlayStatus getCurrentPlayStatus() {
-        ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
+    public PlayStatus getCurrentPlayStatus_NON_Live() {
+        ApplicationState statePlayStatus = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_STATUS.name());
         if (statePlayStatus != null) {
             return PlayStatus.valueOf(statePlayStatus.value);
         } else {
@@ -323,11 +330,22 @@ public abstract class MusicDao {
         }
     }
 
+    public LiveData<PlayStatus> getCurrentPlayStatus() {
+        LiveData<ApplicationState> statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
+        return Transformations.map(statePlayStatus, playStatus -> {
+            if (playStatus != null) {
+                return PlayStatus.valueOf(playStatus.value);
+            } else {
+                return PlayStatus.STOPPED;
+            }
+        });
+    }
+
     public void setCurrentPlayStatus(PlayStatus playStatus) {
         if (playStatus == null) {
             deleteApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
         } else {
-            ApplicationState statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
+            ApplicationState statePlayStatus = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_STATUS.name());
             if (statePlayStatus == null) {
                 statePlayStatus = new ApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name(), playStatus.name());
                 insertApplicationState(statePlayStatus);
@@ -339,7 +357,7 @@ public abstract class MusicDao {
     }
 
     public PlayMode getCurrentPlayMode() {
-        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
+        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_MODE.name());
         if (statePlayMode != null) {
             return PlayMode.valueOf(statePlayMode.value);
         } else {
@@ -351,7 +369,7 @@ public abstract class MusicDao {
         if (playMode == null) {
             deleteApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
         } else {
-            ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
+            ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_MODE.name());
             if (statePlayMode == null) {
                 statePlayMode = new ApplicationState(APPSTATE_CURRENT_PLAY_MODE.name(), playMode.name());
                 insertApplicationState(statePlayMode);
@@ -363,7 +381,7 @@ public abstract class MusicDao {
     }
 
     public long getCurrentMillis() {
-        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
+        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_MILLIS.name());
         if (statePlayMode != null) {
             return Long.parseLong(statePlayMode.value);
         } else {
@@ -372,7 +390,7 @@ public abstract class MusicDao {
     }
 
     public void setCurrentMillis(long millis) {
-        ApplicationState statePlayMode = getApplicationState(APPSTATE_CURRENT_MILLIS.name());
+        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_MILLIS.name());
         if (statePlayMode == null) {
             statePlayMode = new ApplicationState(APPSTATE_CURRENT_MILLIS.name(), String.valueOf(millis));
             insertApplicationState(statePlayMode);
