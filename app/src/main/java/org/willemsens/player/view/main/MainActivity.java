@@ -266,9 +266,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void songClicked(Song song) {
+    public void songClicked(long songId) {
         new PlayBackIntentBuilder(this)
-                .setSong(song)
+                .setSong(songId)
                 .setPlayerCommand(PLAY)
                 .buildAndSubmit();
     }

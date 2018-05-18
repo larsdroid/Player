@@ -226,7 +226,7 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             final List<AlbumWithImageAndArtist> newList = new LinkedList<>(allAlbums);
             for (Iterator<AlbumWithImageAndArtist> i = newList.iterator(); i.hasNext();) {
                 final AlbumWithImageAndArtist album = i.next();
-                if (!this.artists.get(album.artistId)) {
+                if (this.artists.get(album.artistId) != null && !this.artists.get(album.artistId)) {
                     i.remove();
                 }
             }

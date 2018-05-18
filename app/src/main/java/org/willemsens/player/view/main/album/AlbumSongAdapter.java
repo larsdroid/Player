@@ -93,7 +93,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
 
         @Override
         public void onClick(View view) {
-            listener.songClicked(this.song);
+            listener.songClicked(this.song.id);
         }
 
         private void setSong(Song song) {

@@ -2,7 +2,6 @@ package org.willemsens.player.playback;
 
 import android.content.Context;
 import android.content.Intent;
-import org.willemsens.player.persistence.entities.Song;
 
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
@@ -31,9 +30,9 @@ public class PlayBackIntentBuilder {
         this.intent = new Intent(context, PlayBackService.class);
     }
 
-    public PlayBackIntentBuilder setSong(Song song) {
+    public PlayBackIntentBuilder setSong(long songId) {
         this.intent.setAction(PBIT_SET_SONG_ID.name());
-        this.intent.putExtra(PBIPT_SONG_ID.name(), song.id);
+        this.intent.putExtra(PBIPT_SONG_ID.name(), songId);
         return this;
     }
 
