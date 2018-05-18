@@ -1,8 +1,8 @@
 * SongsFragment: show progressbar instead of album cover in case
   the art wasn't fetched yet
   * Also: NowPlaying and notification display... idem ditto for the tiny cover art display
-* AlbumsFragment/AlbumRecyclerViewAdapter pair is implemented differently from
-  ArtistsFragment/ArtistRecyclerViewAdapter. Also check SongsFragment/SongRecyclerViewAdapter
+* SongWithAlbumInfo: album image data should be a nested Object (currently copying the
+  data in each song)
 * Calculate album length and show it in the GUI
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
@@ -12,7 +12,7 @@
 * When the Activity is terminated, pressing the notification should open the acticity
  **in album view with the correct album selected and scrolled to the correct song**
 * Add a placeholder image to use for albums and artists for which the art
-  couldn't be/wasn't fecthed
+  couldn't be/wasn't fetched
 * Album Fragment: toolbar should have some back button of a quick way to
   get back to the music fragment
 * Pick album art Activity
