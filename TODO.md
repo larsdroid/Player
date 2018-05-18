@@ -1,15 +1,9 @@
-* NowPlaying and notification display: show progressbar instead of album cover in case
-  the art wasn't fetched yet
-* SongWithAlbumInfo: album image data should be a nested Object (currently copying the
-  data in each song)
 * Calculate album length and show it in the GUI
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
   * Save album **play count** per album
   * *Current Song* and *current millis* should no longer be stored **globally**,
     only *current album*
-* When the Activity is terminated, pressing the notification should open the acticity
- **in album view with the correct album selected and scrolled to the correct song**
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fetched
 * Album Fragment: toolbar should have some back button of a quick way to
@@ -23,6 +17,16 @@
     * Custom file (JPG/PNG/...) selection
 * "The Zombies" should be sorted at "Z" (not "T")
 * Clean up/remove all unused icons
+* SongWithAlbumInfo -- LiveData: album image data should be a nested Object (currently copying the
+  data in each song)
+
+Notification
+--
+* When the Activity is terminated, pressing the notification should open the acticity
+ **in album view with the correct album selected and scrolled to the correct song**
+* Notification display: show progressbar instead of album cover in case
+  the art wasn't fetched yet
+  * Is it possible to use LiveData for the notification?
 
 Possible features
 --
