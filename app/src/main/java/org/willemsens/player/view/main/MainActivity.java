@@ -294,6 +294,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClearMusicCache() {
+        final Intent mp3ScanningIntent = new Intent(this, Mp3ScanningService.class);
+        stopService(mp3ScanningIntent);
         final Intent fileScannerIntent = new Intent(this, FileScannerService.class);
         stopService(fileScannerIntent);
         final Intent artistFetcherIntent = new Intent(this, ArtistInfoFetcherService.class);
@@ -314,6 +316,7 @@ public class MainActivity extends AppCompatActivity
         startService(albumFetcherIntent);
         startService(artistFetcherIntent);
         startService(fileScannerIntent);
+        startService(mp3ScanningIntent);
     }
 
     @Override
