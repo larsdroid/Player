@@ -229,6 +229,15 @@ public abstract class MusicDao {
         }
     }
 
+    @Query("UPDATE album SET imageId = :imageId WHERE id = :albumId")
+    public abstract void updateAlbum(long albumId, long imageId);
+
+    @Query("UPDATE album SET yearReleased = :year WHERE id = :albumId")
+    public abstract void updateAlbum(long albumId, int year);
+
+    @Query("UPDATE album SET imageId = :imageId, yearReleased = :year WHERE id = :albumId")
+    public abstract void updateAlbum(long albumId, long imageId, int year);
+
     /**
      * Inserts a new music path into the DB. It is checked if this path exists.
      *

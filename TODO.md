@@ -1,10 +1,3 @@
-* Rewrite `AlbumInfoFetcherService` to use LiveData and/or MutableLivedata:
-  Currently albums are fetched at the start and quite a while later (after
-  network fetch) the "old" previously fetched data is persisten with just
-  a few fields alteres (image ID and year). So the album length, which may
-  have been updated in the meantime is overwritten to its old `null` value.
-
-* Calculate album length and show it in the GUI
 * Application state: save previous track position millis
   * Save current track and current millis **per album**
   * Save album **play count** per album

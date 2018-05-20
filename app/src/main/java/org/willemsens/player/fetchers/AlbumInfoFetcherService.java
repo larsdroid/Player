@@ -51,7 +51,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
         }
     }
 
-    private boolean fetchAlbumArt(Album album, ImageDownloader imageDownloader, @NonNull AlbumInfo albumInfo) {
+    private Long fetchAlbumArt(Album album, ImageDownloader imageDownloader, @NonNull AlbumInfo albumInfo) {
         if (album.imageId == null) {
             try {
                 final String coverImageUrl = albumInfo.getCoverImageUrl();
@@ -59,41 +59,53 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
 
                 final Image image = new Image(imageData);
                 image.url = coverImageUrl;
-                album.imageId = getMusicDao().insertImage(image);
+                return getMusicDao().insertImage(image);
             } catch (NetworkClientException e) {
-                generateAlbumArt(album);
+                return generateAlbumArt(album);
             } catch (NetworkServerException e) {
-                return false;
+                return null;
             }
-            return true;
         } else {
-            return false;
+            return null;
         }
     }
 
-    private void generateAlbumArt(Album album) {
+    private long generateAlbumArt(Album album) {
         final Image image = new Image(ImageGenerator.generateAlbumCover(album));
-        album.imageId = getMusicDao().insertImage(image);
+        return getMusicDao().insertImage(image);
     }
 
     private void fetchAlbum(Album album, ImageDownloader imageDownloader) {
         try {
             final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(getMusicDao().findArtist(album.artistId).name, album.name);
 
-            boolean isAlbumUpdated = fetchAlbumArt(album, imageDownloader, albumInfo);
+            Long newImageId = fetchAlbumArt(album, imageDownloader, albumInfo);
 
+            Integer newAlbumYear = null;
             if (album.yearReleased == null && albumInfo.getYear() != null) {
-                album.yearReleased = albumInfo.getYear();
-                isAlbumUpdated = true;
+                newAlbumYear = albumInfo.getYear();
             }
 
-            if (isAlbumUpdated) {
-                updateAlbum(album);
+            if (newImageId != null && newAlbumYear != null) {
+                this.getMusicDao().updateAlbum(album.id, newImageId, newAlbumYear);
+                album.imageId = newImageId;
+                album.yearReleased = newAlbumYear;
+                broadcastAlbumChange(album);
+            } else if (newImageId != null) {
+                this.getMusicDao().updateAlbum(album.id, newImageId);
+                album.imageId = newImageId;
+                broadcastAlbumChange(album);
+            } else if (newAlbumYear != null) {
+                this.getMusicDao().updateAlbum(album.id, newAlbumYear);
+                album.yearReleased = newAlbumYear;
+                broadcastAlbumChange(album);
             }
         } catch (NetworkClientException e) {
             if (album.imageId == null) {
-                generateAlbumArt(album);
-                updateAlbum(album);
+                long newImageId = generateAlbumArt(album);
+                this.getMusicDao().updateAlbum(album.id, newImageId);
+                album.imageId = newImageId;
+                broadcastAlbumChange(album);
             }
         } catch (NetworkServerException e) {
             // Ignore
@@ -102,9 +114,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
         waitRateLimit();
     }
 
-    private void updateAlbum(Album album) {
-        getMusicDao().updateAlbum(album);
-
+    private void broadcastAlbumChange(Album album) {
         MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
         builder
                 .setType(MLBT_ALBUM_UPDATED)
