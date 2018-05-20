@@ -52,8 +52,7 @@ public class Mp3ScanningService extends IntentService {
             // This takes a while!!
             final Mp3Info mp3Info = Mp3Info.of(new File(song.file));
 
-            song.length = mp3Info.getSeconds();
-            this.musicDao.updateSong(song);
+            this.musicDao.updateSongLength(song, mp3Info.getSeconds());
 
             MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
             builder

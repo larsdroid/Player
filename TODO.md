@@ -35,11 +35,6 @@ Possible features
 
 File scanning features
 --
-* SongsFragment should listen to album updates so that missing album art
-  can be updated in the list after it is fetched
-* FileScannerService should start broadcasting sooner, not after ALL
-  records have been inserted
-  * Replace 'FileScannerService::insertRecords' with 'FileScannerService::insertRecord'
 * PurgingService
 
 Fetching issues for album art

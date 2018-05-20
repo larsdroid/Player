@@ -6,6 +6,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Transaction;
 import android.arch.persistence.room.Update;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -38,15 +39,6 @@ public abstract class MusicDao {
     @Query("SELECT * FROM directory")
     public abstract List<Directory> getAllDirectories();
 
-    @Query("SELECT al.* FROM album al, artist ar WHERE al.artistId = ar.id ORDER BY ar.name, al.yearReleased")
-    public abstract List<Album> getAllAlbums_NonLive();
-
-    @Query("SELECT * FROM artist ORDER BY name")
-    public abstract List<Artist> getAllArtists_NonLive();
-
-    @Query("SELECT so.* FROM song so, album al, artist ar WHERE so.albumId = al.id AND al.artistId = ar.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
-    public abstract List<Song> getAllSongs();
-
     @Query("SELECT * FROM album WHERE imageId IS NULL OR yearReleased IS NULL")
     public abstract List<Album> getAllAlbumsMissingInfo();
 
@@ -55,6 +47,12 @@ public abstract class MusicDao {
 
     @Query("SELECT * FROM song WHERE length IS NULL")
     public abstract List<Song> getAllSongsMissingLength();
+
+    @Query("SELECT SUM(length) FROM song WHERE albumId = :albumId")
+    abstract int getTotalAlbumLength(long albumId);
+
+    @Query("SELECT COUNT(*) FROM song WHERE albumId = :albumId AND length IS NULL")
+    abstract int getSongCountWithoutLength(long albumId);
 
     @Query("SELECT * FROM album WHERE id = :id")
     public abstract Album findAlbum(long id);
@@ -135,7 +133,7 @@ public abstract class MusicDao {
     public abstract void updateArtist(Artist artist);
 
     @Update
-    public abstract void updateSong(Song song);
+    abstract void updateSong(Song song);
 
     @Update
     abstract void updateApplicationState(ApplicationState applicationState);
@@ -207,13 +205,33 @@ public abstract class MusicDao {
             song = new Song(songName, songArtistId, albumId, track, file);
             song.length = songLength;
             song.id = insertSong(song);
+
+            updateAlbumLength(albumId);
+
             Observable.just(song).subscribe(handleInsertedSong).dispose();
         }
         return song;
     }
 
+    public void updateSongLength(Song song, int length) {
+        song.length = length;
+        this.updateSong(song);
+
+        updateAlbumLength(song.albumId);
+    }
+
+    @Transaction
+    void updateAlbumLength(long albumId) {
+        if (getSongCountWithoutLength(albumId) == 0) {
+            final Album album = findAlbum(albumId);
+            album.length = getTotalAlbumLength(albumId);
+            updateAlbum(album);
+        }
+    }
+
     /**
      * Inserts a new music path into the DB. It is checked if this path exists.
+     *
      * @param path The music path to insert into the DB.
      * @return true if the path was successfully inserted, false otherwise.
      */
