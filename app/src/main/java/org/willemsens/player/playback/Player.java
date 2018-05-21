@@ -43,8 +43,8 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
 
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+        TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
         this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
         this.dataSourceFactory = new DefaultDataSourceFactory(context,
                 Util.getUserAgent(context, context.getString(R.string.app_name)), null);

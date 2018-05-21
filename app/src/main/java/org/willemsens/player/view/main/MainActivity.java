@@ -34,8 +34,6 @@ import org.willemsens.player.filescanning.Mp3ScanningService;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
-import org.willemsens.player.persistence.entities.Album;
-import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.main.album.AlbumFragment;
@@ -206,7 +204,7 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    private void setNowPlayingFragment(Song song, PlayStatus playStatus) {
+    private void addNowPlayingFragment() {
         final FragmentManager manager = getSupportFragmentManager();
         NowPlayingFragment nowPlayingFragment = (NowPlayingFragment) manager.findFragmentById(R.id.now_playing_bar_container);
         if (nowPlayingFragment == null) {
@@ -348,9 +346,7 @@ public class MainActivity extends AppCompatActivity
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();
             } else {
-                final Album album = musicDao.getCurrentAlbum();
-                final Song song = musicDao.findSong(album.id, album.currentTrack == null ? 1 : album.currentTrack);
-                setNowPlayingFragment(song, playStatus);
+                addNowPlayingFragment();
             }
         }
     }
