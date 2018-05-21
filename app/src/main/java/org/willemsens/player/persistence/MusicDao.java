@@ -95,10 +95,16 @@ public abstract class MusicDao {
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
     public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
-    @Query("SELECT so.* FROM song so, applicationstate ap WHERE so.id = ap.value AND ap.property = 'APPSTATE_CURRENT_SONG_ID'")
+    @Query("SELECT so.* FROM song so, album al, applicationstate ap WHERE so.albumId = al.id AND so.track = al.currentTrack AND al.id = ap.value AND ap.property = 'APPSTATE_CURRENT_ALBUM_ID'")
     public abstract LiveData<Song> getCurrentSong();
 
-    @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName FROM applicationstate ap LEFT JOIN song so ON ap.value = so.id LEFT JOIN album al ON so.albumId = al.id LEFT JOIN artist ar ON so.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id WHERE ap.property = 'APPSTATE_CURRENT_SONG_ID'")
+    @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName"
+            + " FROM applicationstate ap"
+            + " LEFT JOIN album al ON ap.value = al.id"
+            + " LEFT JOIN song so ON al.currentTrack = so.track AND al.id = so.albumId"
+            + " LEFT JOIN artist ar ON so.artistId = ar.id"
+            + " LEFT OUTER JOIN image im ON al.imageId = im.id"
+            + " WHERE ap.property = 'APPSTATE_CURRENT_ALBUM_ID'")
     public abstract LiveData<SongWithAlbumInfo> getCurrentSongWithAlbumInfo();
 
     @Query("SELECT ar.id, ar.name, im.imageData FROM artist ar LEFT OUTER JOIN image im ON ar.imageId = im.id ORDER BY ar.name")
