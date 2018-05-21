@@ -34,6 +34,7 @@ import org.willemsens.player.filescanning.Mp3ScanningService;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
 import org.willemsens.player.playback.PlayStatus;
@@ -343,11 +344,12 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: runOnUiThread(new Runnable() {    ?
-            final Song song = musicDao.getCurrentSong_NonLive();
             final PlayStatus playStatus = musicDao.getCurrentPlayStatus_NON_Live();
             if (playStatus == STOPPED) {
                 removeNowPlayingFragment();
             } else {
+                final Album album = musicDao.getCurrentAlbum();
+                final Song song = musicDao.findSong(album.id, album.currentTrack == null ? 1 : album.currentTrack);
                 setNowPlayingFragment(song, playStatus);
             }
         }

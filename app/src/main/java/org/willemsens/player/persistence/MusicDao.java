@@ -29,10 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_MILLIS;
+import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_ALBUM_ID;
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_MODE;
 import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_PLAY_STATUS;
-import static org.willemsens.player.persistence.ApplicationStateProperty.APPSTATE_CURRENT_SONG_ID;
 
 @Dao
 public abstract class MusicDao {
@@ -74,6 +73,9 @@ public abstract class MusicDao {
 
     @Query("SELECT * FROM image WHERE id = :id")
     public abstract Image findImage(long id);
+
+    @Query("SELECT * FROM song WHERE albumId = :albumId AND track = :track")
+    public abstract Song findSong(long albumId, int track);
 
     @Query("SELECT * FROM song WHERE albumId = :albumId AND track > :previousTrack ORDER BY track ASC LIMIT 1")
     public abstract Song findNextSong(long albumId, int previousTrack);
@@ -315,37 +317,37 @@ public abstract class MusicDao {
         insertDirectory(directory);
     }
 
-    private Integer getCurrentSongId() {
-        ApplicationState stateSongId = getApplicationState_NON_Live(APPSTATE_CURRENT_SONG_ID.name());
-        if (stateSongId != null) {
-            return Integer.parseInt(stateSongId.value);
+    private Integer getCurrentAlbumId() {
+        ApplicationState stateAlbumId = getApplicationState_NON_Live(APPSTATE_CURRENT_ALBUM_ID.name());
+        if (stateAlbumId != null) {
+            return Integer.parseInt(stateAlbumId.value);
         } else {
             return null;
         }
     }
 
-    public Song getCurrentSong_NonLive() {
-        final Integer songId = getCurrentSongId();
-        return songId == null ? null : findSong(songId);
+    public Album getCurrentAlbum() {
+        final Integer albumId = getCurrentAlbumId();
+        return albumId == null ? null : findAlbum(albumId);
     }
 
-    private void setCurrentSongId(Long songId) {
-        if (songId == null) {
-            deleteApplicationState(APPSTATE_CURRENT_SONG_ID.name());
+    private void setCurrentAlbumId(Long albumId) {
+        if (albumId == null) {
+            deleteApplicationState(APPSTATE_CURRENT_ALBUM_ID.name());
         } else {
-            ApplicationState stateSongId = getApplicationState_NON_Live(APPSTATE_CURRENT_SONG_ID.name());
-            if (stateSongId == null) {
-                stateSongId = new ApplicationState(APPSTATE_CURRENT_SONG_ID.name(), String.valueOf(songId));
-                insertApplicationState(stateSongId);
+            ApplicationState stateAlbumId = getApplicationState_NON_Live(APPSTATE_CURRENT_ALBUM_ID.name());
+            if (stateAlbumId == null) {
+                stateAlbumId = new ApplicationState(APPSTATE_CURRENT_ALBUM_ID.name(), String.valueOf(albumId));
+                insertApplicationState(stateAlbumId);
             } else {
-                stateSongId.value = String.valueOf(songId);
-                updateApplicationState(stateSongId);
+                stateAlbumId.value = String.valueOf(albumId);
+                updateApplicationState(stateAlbumId);
             }
         }
     }
 
-    public void setCurrentSong(Song song) {
-        setCurrentSongId(song == null ? null : song.id);
+    public void setCurrentAlbum(Album album) {
+        setCurrentAlbumId(album == null ? null : album.id);
     }
 
     public PlayStatus getCurrentPlayStatus_NON_Live() {
@@ -404,26 +406,6 @@ public abstract class MusicDao {
                 statePlayMode.value = playMode.name();
                 updateApplicationState(statePlayMode);
             }
-        }
-    }
-
-    public long getCurrentMillis() {
-        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_MILLIS.name());
-        if (statePlayMode != null) {
-            return Long.parseLong(statePlayMode.value);
-        } else {
-            return 0;
-        }
-    }
-
-    public void setCurrentMillis(long millis) {
-        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_MILLIS.name());
-        if (statePlayMode == null) {
-            statePlayMode = new ApplicationState(APPSTATE_CURRENT_MILLIS.name(), String.valueOf(millis));
-            insertApplicationState(statePlayMode);
-        } else {
-            statePlayMode.value = String.valueOf(millis);
-            updateApplicationState(statePlayMode);
         }
     }
 }

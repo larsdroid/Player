@@ -31,6 +31,10 @@ public class Album {
     public Integer length;
     public Long imageId;
 
+    public Integer currentTrack;
+    public Integer currentMillisInTrack;
+    public int playCount = 0;
+
     public Album(@NonNull String name, long artistId) {
         this.name = name;
         this.artistId = artistId;
