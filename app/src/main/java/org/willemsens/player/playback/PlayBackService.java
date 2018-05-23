@@ -120,7 +120,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
                 if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 }
-                this.player.setSong(songId, playerCommand);
+                this.player.startSong(songId, playerCommand);
             } else if (intentAction.equals(PBIT_PLAYER_COMMAND.name())) {
                 final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 this.player.processCommand(playerCommand);
@@ -181,6 +181,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             }
         }
 
+        this.player.persistTrackMillis();
         broadcastPlayerStatus();
     }
 

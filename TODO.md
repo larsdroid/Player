@@ -1,6 +1,3 @@
-* Application state: save previous track position millis
-  * *Current Song* and *current millis* should no longer be stored **globally**,
-    only *current album*
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fetched
 * Album Fragment: toolbar should have some back button of a quick way to
