@@ -5,14 +5,6 @@
   couldn't be/wasn't fetched
 * Album Fragment: toolbar should have some back button of a quick way to
   get back to the music fragment
-* Pick album art Activity
-  * Let the user choose from:
-    * Musicbrainz method 1: default search using album name and artist name
-    * Musicbrainz method 2: search artist ID, then search using album name and artist ID
-      * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
-    * Discogs method
-    * Custom file (JPG/PNG/...) selection
-* "The Zombies" should be sorted at "Z" (not "T")
 * Clean up/remove all unused icons
 * SongWithAlbumInfo -- LiveData: album image data should be a nested Object (currently copying the
   data in each song)
@@ -27,6 +19,7 @@ Notification
 
 Possible features
 --
+* "The Zombies" should be sorted at "Z" (not "T")
 * Trim sections between `[` and `]` from artist and/or album names?
   * Don't trim ending "Disc 1" strings since it's valuable for picking an album to play
 
@@ -36,6 +29,13 @@ File scanning features
 
 Fetching issues for album art
 --
+* Pick album art Activity
+  * Let the user choose from:
+    * Musicbrainz method 1: default search using album name and artist name
+    * Musicbrainz method 2: search artist ID, then search using album name and artist ID
+      * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
+    * Discogs method
+    * Custom file (JPG/PNG/...) selection
 * "Go Tell Fire to the Mountain" by "WU LYF" --> 404 from coverartarchive
 
 Post-release

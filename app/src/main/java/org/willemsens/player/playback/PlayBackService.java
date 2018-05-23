@@ -128,7 +128,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PBIPT_PLAY_MODE.name()));
                 // TODO
             } else if (intentAction.equals(PBIT_SETUP.name())) {
-                // No setup necessary yet.
+                broadcastPlayerStatus();
             } else {
                 Log.e(getClass().getName(), "Invalid intent received in PlayBackService::onStartCommand. Action: '" + intentAction + "'.");
             }
@@ -181,8 +181,11 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             }
         }
 
-        Intent broadcast = new Intent(PBBT_PLAYER_STATUS_UPDATE.name());
-        sendBroadcast(broadcast);
+        broadcastPlayerStatus();
+    }
+
+    private void broadcastPlayerStatus() {
+        sendBroadcast(new Intent(PBBT_PLAYER_STATUS_UPDATE.name()));
     }
 
     @Override

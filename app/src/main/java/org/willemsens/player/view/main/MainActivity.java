@@ -89,22 +89,12 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE,
                 getString(R.string.read_external_storage_required),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        setupAfterPermissionReadExternalStorage();
-                    }
-                });
+                this::setupAfterPermissionReadExternalStorage);
         handlePermission(
                 Manifest.permission.INTERNET,
                 PERMISSION_REQUEST_CODE_INTERNET,
                 getString(R.string.internet_required),
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        setupAfterPermissionInternet();
-                    }
-                });
+                this::setupAfterPermissionInternet);
 
         setupActionBarAndDrawer();
         if (savedInstanceState == null) {
