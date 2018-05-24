@@ -22,7 +22,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:elevation="4dp"
-                    android:theme="@style/PlayerToolBarStyle"/>
+                    android:theme="@style/PlayerToolBarStyle"
+                    app:layout_scrollFlags="scroll|enterAlways"
+                    app:layout_collapseMode="pin"/>
 
             <org.willemsens.player.view.customviews.HeightCalculatedImageView
                     android:id="@+id/album_image"
@@ -36,10 +38,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 
-        </android.support.design.widget.CollapsingToolbarLayout>
+            <View
+                    style="@style/HorizontalDivider"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-        <View
-                style="@style/HorizontalDivider"/>
+        </android.support.design.widget.CollapsingToolbarLayout>
 
     </android.support.design.widget.AppBarLayout>
 
