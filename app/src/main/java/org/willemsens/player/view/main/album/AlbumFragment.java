@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +37,9 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.song_list)
     RecyclerView songList;
+
+    @BindView(R.id.album_toolbar)
+    Toolbar toolbar;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -103,6 +108,26 @@ public class AlbumFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.fragment_album_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        activity.getSupportActionBar().hide();
+        activity.setSupportActionBar(toolbar);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        activity.getSupportActionBar().show();
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        activity.getSupportActionBar().hide();
+        activity.setSupportActionBar(getActivity().findViewById(R.id.main_toolbar));
+        activity.getSupportActionBar().show();
     }
 
     private void observeAlbum() {
