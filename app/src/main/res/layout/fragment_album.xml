@@ -2,20 +2,20 @@
 <android.support.design.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/container"
+        xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/white"
             android:theme="@style/PlayerToolBarStyle">
 
         <android.support.design.widget.CollapsingToolbarLayout
                 android:id="@+id/collapsing_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
                 android:fitsSystemWindows="true"
                 app:expandedTitleTextAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -48,6 +48,82 @@
                     app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
+
+        <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <View
+                    style="@style/HorizontalDivider"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                    android:id="@+id/album_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="ALBUM"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                    android:id="@+id/artist_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ARTIST"
+                    android:layout_margin="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/album_name"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                    android:id="@+id/album_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DATE"
+                    android:layout_margin="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/artist_name"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                    android:id="@+id/album_length"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LENGTH"
+                    android:layout_margin="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/album_date"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                    android:id="@+id/album_plays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PLAYS"
+                    android:layout_margin="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/album_length"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <Button
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:drawableStart="@drawable/ic_play_arrow_white_24dp"
+                    android:id="@+id/button"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/ring"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            <View
+                    style="@style/HorizontalDivider"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </android.support.constraint.ConstraintLayout>
 
     </android.support.design.widget.AppBarLayout>
 
