@@ -1,7 +1,8 @@
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fetched
-* Album Fragment: toolbar should have some back button of a quick way to
-  get back to the music fragment
+* Album Fragment toolbar: collapsed mode:
+  * Background should be primary color
+  * Left margin/padding should be removed
 * Clean up/remove all unused icons
 * SongWithAlbumInfo -- LiveData: album image data should be a nested Object (currently copying the
   data in each song)

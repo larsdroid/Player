@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import butterknife.BindView;
@@ -40,6 +42,9 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.album_toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout collapsingToolbarLayout;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -111,20 +116,32 @@ public class AlbumFragment extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
-        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().hide();
         activity.setSupportActionBar(toolbar);
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activity.getSupportActionBar().show();
     }
+
     @Override
     public void onStop() {
         super.onStop();
 
-        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().hide();
         activity.setSupportActionBar(getActivity().findViewById(R.id.main_toolbar));
         activity.getSupportActionBar().show();
@@ -132,22 +149,21 @@ public class AlbumFragment extends Fragment {
 
     private void observeAlbum() {
         this.viewModel.albumLiveData.observe(this,
-                album -> setActivityTitle());
+                album -> setTitle());
     }
 
     private void observeArtist() {
         this.viewModel.artistLiveData.observe(this,
                 artist -> {
-            setActivityTitle();
-            adapter.setArtist(artist);
-        });
+                    setTitle();
+                    adapter.setArtist(artist);
+                });
     }
 
-    private void setActivityTitle() {
-        if (getActivity() != null
-                && viewModel.artistLiveData.getValue() != null
+    private void setTitle() {
+        if (viewModel.artistLiveData.getValue() != null
                 && viewModel.albumLiveData.getValue() != null) {
-            getActivity().setTitle(viewModel.artistLiveData.getValue().name
+            collapsingToolbarLayout.setTitle(viewModel.artistLiveData.getValue().name
                     + " - " + viewModel.albumLiveData.getValue().name);
         }
     }
