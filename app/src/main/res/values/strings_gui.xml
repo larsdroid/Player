@@ -10,7 +10,12 @@
     <string name="read_external_storage_required">Read External Storage permission allows us to read music files. Please allow this permission in App Settings.</string>
     <string name="internet_required">Internet permission allows us to download album art and artist pictures. Please allow this permission in App Settings.</string>
 
+    <!-- Album fragment -->
+    <string name="time_played">&#160;time played</string>
+    <string name="times_played">&#160;times played</string>
+    <string name="play_album">Play Album</string>
 
+    <!-- Service descriptions -->
     <string name="scanner_service_description">Scans a select number of directories (listed in settings) for music
         files.
     </string>

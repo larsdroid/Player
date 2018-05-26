@@ -33,6 +33,8 @@ import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 
 public class AlbumFragment extends Fragment {
+    private static final boolean SHOW_TITLE_IN_TOOLBAR = false;
+
     private AlbumSongAdapter adapter;
     private AlbumAndSongsViewModel viewModel;
 
@@ -68,6 +70,9 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.album_plays)
     TextView albumPlays;
+
+    @BindView(R.id.times_played)
+    TextView timesPlayed;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -189,6 +194,11 @@ public class AlbumFragment extends Fragment {
                             albumLength.setText(StringFormat.formatToSongLength(album.length));
                         }
                         albumPlays.setText(String.valueOf(album.playCount));
+                        if (album.playCount == 1) {
+                            timesPlayed.setText(R.string.time_played);
+                        } else {
+                            timesPlayed.setText(R.string.times_played);
+                        }
                     }
                 });
     }
@@ -203,10 +213,13 @@ public class AlbumFragment extends Fragment {
     }
 
     private void setTitle() {
-        if (viewModel.artistLiveData.getValue() != null
+        if (SHOW_TITLE_IN_TOOLBAR
+                && viewModel.artistLiveData.getValue() != null
                 && viewModel.albumLiveData.getValue() != null) {
             collapsingToolbarLayout.setTitle(viewModel.artistLiveData.getValue().name
                     + " - " + viewModel.albumLiveData.getValue().name);
+        } else {
+            collapsingToolbarLayout.setTitle(getString(R.string.play_album));
         }
     }
 
