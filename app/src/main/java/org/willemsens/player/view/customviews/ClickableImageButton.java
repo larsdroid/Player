@@ -37,7 +37,7 @@ public class ClickableImageButton extends AppCompatImageButton implements View.O
         }
     }
 
-    public static float convertDpToPixel(float dp){
+    public static float convertDpToPixel(float dp) {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
         float px = dp * (metrics.densityDpi / 160f);
         return Math.round(px);
@@ -64,5 +64,18 @@ public class ClickableImageButton extends AppCompatImageButton implements View.O
         }
 
         return false;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled) {
+            this.getDrawable().clearColorFilter();
+            this.getBackground().clearColorFilter();
+        } else {
+            this.getDrawable().setColorFilter(0xC0CCCCCC, PorterDuff.Mode.SRC_ATOP);
+            this.getBackground().setColorFilter(0xC0CCCCCC, PorterDuff.Mode.SRC_ATOP);
+        }
+
+        super.setEnabled(enabled);
     }
 }

@@ -19,11 +19,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
 import org.willemsens.player.playback.PlayStatus;
+import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.customviews.ClickableImageButton;
 import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
@@ -51,6 +53,21 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.button_play_album)
     ClickableImageButton playAlbum;
+
+    @BindView(R.id.album_name)
+    TextView albumName;
+
+    @BindView(R.id.artist_name)
+    TextView artistName;
+
+    @BindView(R.id.album_year)
+    TextView albumYear;
+
+    @BindView(R.id.album_length)
+    TextView albumLength;
+
+    @BindView(R.id.album_plays)
+    TextView albumPlays;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -160,7 +177,20 @@ public class AlbumFragment extends Fragment {
 
     private void observeAlbum() {
         this.viewModel.albumLiveData.observe(this,
-                album -> setTitle());
+                album -> {
+                    setTitle();
+
+                    if (album != null) {
+                        albumName.setText(album.name);
+                        if (album.yearReleased != null) {
+                            albumYear.setText(String.valueOf(album.yearReleased));
+                        }
+                        if (album.length != null) {
+                            albumLength.setText(StringFormat.formatToSongLength(album.length));
+                        }
+                        albumPlays.setText(String.valueOf(album.playCount));
+                    }
+                });
     }
 
     private void observeArtist() {
@@ -168,6 +198,7 @@ public class AlbumFragment extends Fragment {
                 artist -> {
                     setTitle();
                     adapter.setArtist(artist);
+                    artistName.setText(artist.name);
                 });
     }
 
@@ -203,10 +234,8 @@ public class AlbumFragment extends Fragment {
                 || this.viewModel.currentSongLiveData.getValue().albumId != this.viewModel.albumLiveData.getValue().id
                 || this.viewModel.playStatusLiveData.getValue() != PlayStatus.PLAYING) {
             this.playAlbum.setEnabled(true);
-            Toast.makeText(getContext(), "enabled", Toast.LENGTH_SHORT).show();
         } else {
             this.playAlbum.setEnabled(false);
-            Toast.makeText(getContext(), "disabled", Toast.LENGTH_SHORT).show();
         }
     }
 }
