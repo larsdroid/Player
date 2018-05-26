@@ -10,6 +10,7 @@ import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.PlayStatus;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class AlbumAndSongsViewModel extends AndroidViewModel {
     public final LiveData<List<Song>> songsLiveData;
     public final LiveData<Image> coverArtLiveData;
     public final LiveData<Song> currentSongLiveData;
+    public final LiveData<PlayStatus> playStatusLiveData;
 
     AlbumAndSongsViewModel(@NonNull Application application, long albumId) {
         super(application);
@@ -31,5 +33,6 @@ public class AlbumAndSongsViewModel extends AndroidViewModel {
         this.songsLiveData = musicDao.getAllSongs(albumId);
         this.coverArtLiveData = musicDao.getImageForAlbum(albumId);
         this.currentSongLiveData = musicDao.getCurrentSong();
+        this.playStatusLiveData = musicDao.getCurrentPlayStatus();
     }
 }

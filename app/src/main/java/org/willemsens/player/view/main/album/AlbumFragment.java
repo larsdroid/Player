@@ -23,6 +23,7 @@ import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
+import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.customviews.ClickableImageButton;
 import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
@@ -94,6 +95,7 @@ public class AlbumFragment extends Fragment {
         observeSongs();
         observeCoverArt();
         observeCurrentSong();
+        observePlayStatus();
 
         this.playAlbum.setOnClickListener(event -> {
             Toast.makeText(getContext(), "JOS", Toast.LENGTH_SHORT).show();
@@ -184,6 +186,27 @@ public class AlbumFragment extends Fragment {
 
     private void observeCurrentSong() {
         this.viewModel.currentSongLiveData.observe(this,
-                currentSong -> adapter.setHighlightedSong(currentSong));
+                currentSong -> {
+                    checkAlbumPlayable();
+                    adapter.setHighlightedSong(currentSong);
+                });
+    }
+
+    private void observePlayStatus() {
+        this.viewModel.playStatusLiveData.observe(this, playStatus -> checkAlbumPlayable());
+    }
+
+    private void checkAlbumPlayable() {
+        if (this.viewModel.playStatusLiveData.getValue() == null
+                || this.viewModel.currentSongLiveData.getValue() == null
+                || this.viewModel.albumLiveData.getValue() == null
+                || this.viewModel.currentSongLiveData.getValue().albumId != this.viewModel.albumLiveData.getValue().id
+                || this.viewModel.playStatusLiveData.getValue() != PlayStatus.PLAYING) {
+            this.playAlbum.setEnabled(true);
+            Toast.makeText(getContext(), "enabled", Toast.LENGTH_SHORT).show();
+        } else {
+            this.playAlbum.setEnabled(false);
+            Toast.makeText(getContext(), "disabled", Toast.LENGTH_SHORT).show();
+        }
     }
 }
