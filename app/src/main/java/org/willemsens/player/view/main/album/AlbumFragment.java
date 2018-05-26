@@ -19,9 +19,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
+import org.willemsens.player.view.customviews.ClickableImageButton;
 import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
 
@@ -45,6 +47,9 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.collapsing_toolbar)
     CollapsingToolbarLayout collapsingToolbarLayout;
+
+    @BindView(R.id.button_play_album)
+    ClickableImageButton playAlbum;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -89,6 +94,10 @@ public class AlbumFragment extends Fragment {
         observeSongs();
         observeCoverArt();
         observeCurrentSong();
+
+        this.playAlbum.setOnClickListener(event -> {
+            Toast.makeText(getContext(), "JOS", Toast.LENGTH_SHORT).show();
+        });
 
         return view;
     }

@@ -2,7 +2,7 @@
 <android.support.design.widget.CoordinatorLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -106,44 +106,16 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <FrameLayout
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/circle"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:elevation="2dp" android:id="@+id/frameLayout3">
-
-                <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_play_arrow_white_48dp"/>
-
-            </FrameLayout>
-
-            <ImageView
+            <org.willemsens.player.view.customviews.ClickableImageButton
+                    android:id="@+id/button_play_album"
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center"
                     android:background="@drawable/circle"
-                    android:elevation="2dp"
                     android:src="@drawable/ic_play_arrow_white_48dp"
-                    app:layout_constraintEnd_toStartOf="@+id/frameLayout3"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_margin="8dp"/>
-
-            <Button
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:drawableStart="@drawable/ic_play_arrow_white_24dp"
-                    android:id="@+id/button"
                     android:layout_margin="8dp"
-                    android:background="@drawable/circle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
             <View
                     style="@style/HorizontalDivider"
