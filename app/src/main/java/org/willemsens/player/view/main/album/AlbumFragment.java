@@ -13,16 +13,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.customviews.ClickableImageButton;
@@ -73,6 +77,9 @@ public class AlbumFragment extends Fragment {
 
     @BindView(R.id.times_played)
     TextView timesPlayed;
+
+    @BindView(R.id.album_progress)
+    ProgressBar albumProgress;
 
     public static AlbumFragment newInstance(final long albumId) {
         final AlbumFragment theInstance = new AlbumFragment();
@@ -184,26 +191,60 @@ public class AlbumFragment extends Fragment {
     }
 
     private void observeAlbum() {
-        this.viewModel.albumLiveData.observe(this,
-                album -> {
-                    setTitle();
+        this.viewModel.albumLiveData.observe(this, this::showAlbumInfo);
+    }
 
-                    if (album != null) {
-                        albumName.setText(album.name);
-                        if (album.yearReleased != null) {
-                            albumYear.setText(String.valueOf(album.yearReleased));
-                        }
-                        if (album.length != null) {
-                            albumLength.setText(StringFormat.formatToSongLength(album.length));
-                        }
-                        albumPlays.setText(String.valueOf(album.playCount));
-                        if (album.playCount == 1) {
-                            timesPlayed.setText(R.string.time_played);
-                        } else {
-                            timesPlayed.setText(R.string.times_played);
-                        }
-                    }
-                });
+    private void showAlbumInfo(Album album) {
+        setTitle();
+
+        if (album != null) {
+            albumName.setText(album.name);
+            if (album.yearReleased != null) {
+                albumYear.setText(String.valueOf(album.yearReleased));
+            }
+            if (album.length != null) {
+                albumLength.setText(StringFormat.formatToSongLength(album.length));
+            }
+            albumPlays.setText(String.valueOf(album.playCount));
+            if (album.playCount == 1) {
+                timesPlayed.setText(R.string.time_played);
+            } else {
+                timesPlayed.setText(R.string.times_played);
+            }
+
+            updateAlbumProgress();
+        }
+    }
+
+    private void updateAlbumProgress() {
+        if (this.viewModel.albumLiveData.getValue() != null
+                && this.viewModel.songsLiveData.getValue() != null
+                && this.viewModel.albumLiveData.getValue().currentTrack != null
+                && this.viewModel.albumLiveData.getValue().length != null) {
+            double currentMillisInAlbum = 0.0;
+            boolean foundCurrentSong = false;
+
+            final Album album = this.viewModel.albumLiveData.getValue();
+
+            for (Song song : this.viewModel.songsLiveData.getValue()) {
+                if (song.track == album.currentTrack) {
+                    foundCurrentSong = true;
+                    currentMillisInAlbum += album.currentMillisInTrack == null ? 0 : album.currentMillisInTrack / 1000;
+                    break;
+                } else {
+                    currentMillisInAlbum += song.length;
+                }
+            }
+
+            if (!foundCurrentSong) {
+                Log.e(getClass().getName(), "Current track in album was not found within album!");
+                albumProgress.setProgress(0);
+            } else {
+                albumProgress.setProgress((int) (currentMillisInAlbum * 100.0 / album.length));
+            }
+        } else {
+            albumProgress.setProgress(0);
+        }
     }
 
     private void observeArtist() {
@@ -228,7 +269,10 @@ public class AlbumFragment extends Fragment {
 
     private void observeSongs() {
         this.viewModel.songsLiveData.observe(this,
-                songs -> adapter.setSongs(songs));
+                songs -> {
+                    adapter.setSongs(songs);
+                    updateAlbumProgress();
+                });
     }
 
     private void observeCurrentSong() {
