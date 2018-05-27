@@ -17,10 +17,10 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import org.willemsens.player.R;
-import org.willemsens.player.persistence.entities.Album;
-import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Song;
 
 import java.io.File;
 
@@ -46,6 +46,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
         this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context, trackSelector);
+        this.exoPlayer.addListener(this);
         this.dataSourceFactory = new DefaultDataSourceFactory(context,
                 Util.getUserAgent(context, context.getString(R.string.app_name)), null);
 
@@ -195,7 +196,13 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                     } else {
                         this.musicDao.setCurrentPlayStatus(STOPPED);
                         this.onUpdateListener.onUpdate();
+
+                        currentAlbum.currentTrack = null;
+                        currentAlbum.currentMillisInTrack = null;
                     }
+
+                    currentAlbum.playCount++;
+                    musicDao.updateAlbum(currentAlbum);
                 } else {
                     startSong(currentAlbum, nextSong);
                 }
@@ -205,7 +212,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
 
     void persistTrackMillis() {
         final Album album = this.musicDao.getCurrentAlbum();
-        album.currentMillisInTrack = (int)this.exoPlayer.getCurrentPosition();
+        album.currentMillisInTrack = (int) this.exoPlayer.getCurrentPosition();
         this.musicDao.updateAlbum(album);
     }
 
