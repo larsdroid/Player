@@ -24,7 +24,7 @@
             <android.support.v7.widget.Toolbar
                     android:id="@+id/album_toolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
+                    android:layout_height="?android:attr/actionBarSize"
                     android:elevation="4dp"
                     android:theme="@style/PlayerToolBarStyle"
                     app:layout_scrollFlags="scroll|enterAlways"

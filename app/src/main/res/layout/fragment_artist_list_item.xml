@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/grid_cell_text_padding"
-                android:textAppearance="?attr/textAppearanceListItem"
+                android:textAppearance="?android:attr/textAppearanceListItem"
                 android:maxLines="1"
                 android:textSize="@dimen/grid_font_size"
                 tools:text="Artist Name abcdefghi jklmnopqrst uvw" />

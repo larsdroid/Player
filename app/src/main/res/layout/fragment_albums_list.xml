@@ -5,6 +5,6 @@
     android:name="org.willemsens.player.albums.AlbumsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layoutManager="LinearLayoutManager"
+    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".view.main.music.albums.AlbumsFragment"
     tools:listitem="@layout/fragment_album_list_item" />
