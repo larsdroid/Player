@@ -21,12 +21,14 @@ import org.willemsens.player.playback.notification.NotificationType;
 import org.willemsens.player.view.main.MainActivity;
 
 import static org.willemsens.player.playback.PlayBackBroadcastType.PBBT_PLAYER_STATUS_UPDATE;
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_ALBUM_ID;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_SONG_ID;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_DISMISS;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SETUP;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_ALBUM_ID;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_SONG_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
@@ -121,6 +123,13 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 }
                 this.player.startSong(songId, playerCommand);
+            } else if (intentAction.equals(PBIT_SET_ALBUM_ID.name())) {
+                final long albumId = intent.getLongExtra(PBIPT_ALBUM_ID.name(), -1);
+                PlayerCommand playerCommand = null;
+                if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
+                    playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
+                }
+                this.player.startOrContinueAlbum(albumId, playerCommand);
             } else if (intentAction.equals(PBIT_PLAYER_COMMAND.name())) {
                 final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 this.player.processCommand(playerCommand);

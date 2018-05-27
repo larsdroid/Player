@@ -3,12 +3,14 @@ package org.willemsens.player.playback;
 import android.content.Context;
 import android.content.Intent;
 
+import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_ALBUM_ID;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentPayloadType.PBIPT_SONG_ID;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_DISMISS;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_PLAYER_COMMAND;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SETUP;
+import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_ALBUM_ID;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_PLAY_MODE;
 import static org.willemsens.player.playback.PlayBackIntentType.PBIT_SET_SONG_ID;
 
@@ -33,6 +35,12 @@ public class PlayBackIntentBuilder {
     public PlayBackIntentBuilder setSong(long songId) {
         this.intent.setAction(PBIT_SET_SONG_ID.name());
         this.intent.putExtra(PBIPT_SONG_ID.name(), songId);
+        return this;
+    }
+
+    public PlayBackIntentBuilder setAlbum(long albumId) {
+        this.intent.setAction(PBIT_SET_ALBUM_ID.name());
+        this.intent.putExtra(PBIPT_ALBUM_ID.name(), albumId);
         return this;
     }
 

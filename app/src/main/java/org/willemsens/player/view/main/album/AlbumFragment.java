@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import org.willemsens.player.R;
@@ -37,6 +36,7 @@ public class AlbumFragment extends Fragment {
 
     private AlbumSongAdapter adapter;
     private AlbumAndSongsViewModel viewModel;
+    private OnPlayAlbumListener listener;
 
     @BindView(R.id.album_image)
     HeightCalculatedImageView albumImage;
@@ -103,6 +103,7 @@ public class AlbumFragment extends Fragment {
         }
 
         Context context = view.getContext();
+        this.listener = (OnPlayAlbumListener) context;
         this.songList.setLayoutManager(new LinearLayoutManager(context));
         if (this.adapter == null) {
             this.adapter = new AlbumSongAdapter(context);
@@ -120,7 +121,9 @@ public class AlbumFragment extends Fragment {
         observePlayStatus();
 
         this.playAlbum.setOnClickListener(event -> {
-            Toast.makeText(getContext(), "JOS", Toast.LENGTH_SHORT).show();
+            if (viewModel.albumLiveData.getValue() != null) {
+                listener.playAlbum(viewModel.albumLiveData.getValue().id);
+            }
         });
 
         return view;
@@ -250,5 +253,9 @@ public class AlbumFragment extends Fragment {
         } else {
             this.playAlbum.setEnabled(false);
         }
+    }
+
+    public interface OnPlayAlbumListener {
+        void playAlbum(long albumId);
     }
 }

@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity
         implements OnSongClickedListener,
         OnArtistClickedListener,
         OnAlbumClickedListener,
+        AlbumFragment.OnPlayAlbumListener,
         OnSettingsFragmentListener,
         NavigationView.OnNavigationItemSelectedListener {
     private static final int PERMISSION_REQUEST_CODE_READ_EXTERNAL_STORAGE = 1;
@@ -256,6 +257,14 @@ public class MainActivity extends AppCompatActivity
     public void songClicked(long songId) {
         new PlayBackIntentBuilder(this)
                 .setSong(songId)
+                .setPlayerCommand(PLAY)
+                .buildAndSubmit();
+    }
+
+    @Override
+    public void playAlbum(long albumId) {
+        new PlayBackIntentBuilder(this)
+                .setAlbum(albumId)
                 .setPlayerCommand(PLAY)
                 .buildAndSubmit();
     }

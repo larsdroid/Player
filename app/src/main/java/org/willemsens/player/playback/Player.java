@@ -114,6 +114,22 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         startSong(album, song);
     }
 
+    void startOrContinueAlbum(final long albumId, final PlayerCommand playerCommand) {
+        if (playerCommand == PLAY) {
+            this.musicDao.setCurrentPlayStatus(PLAYING);
+        } else {
+            Log.e(getClass().getName(), "Invalid PlayerCommand received in Player::startSong");
+        }
+        final Album album = this.musicDao.findAlbum(albumId);
+        final Song song;
+        if (album.currentTrack != null) {
+            song = this.musicDao.findSong(albumId, album.currentTrack);
+        } else {
+            song = this.musicDao.findFirstSong(albumId);
+        }
+        setCurrentSong(album, song, true, false);
+    }
+
     void processCommand(final PlayerCommand playerCommand) {
         switch (playerCommand) {
             case PREVIOUS:
