@@ -56,8 +56,6 @@ public class FileScannerService extends IntentService {
                 final int fileColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
                 do {
-                    Log.d("FileScannerService", musicCursor.getString(fileColumn));
-
                     final File file = new File(musicCursor.getString(fileColumn));
                     try {
                         final File canonicalFile = file.getCanonicalFile();

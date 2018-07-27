@@ -1,3 +1,25 @@
+* `MainActivity::onNavigationItemSelected`
+
+Most urgent
+--
+* Implement 'repeat one', 'repeat all' and 'shuffle'
+* When the Activity is terminated, pressing the notification should open the acticity
+  **in album view with the correct album selected and scrolled to the correct song**.
+  This will have to be implemented manually, there's no way to put info into the Intent
+  and open the correct Fragment.
+* Pick album art Activity
+  * Let the user choose from:
+    * Musicbrainz method 1: default search using album name and artist name
+    * Musicbrainz method 2: search artist ID, then search using album name and artist ID
+      * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
+    * Discogs method
+    * Custom file (JPG/PNG/...) selection
+
+Less urgent
+--
+* Implement "times played" counter per album. The UI displays are
+  already present on the `AlbumFragment`. When an album is finished
+  playing, the counter should go up (`Player::onPlayerStateChanged`)
 * Add a placeholder image to use for albums and artists for which the art
   couldn't be/wasn't fetched
 * Album Fragment toolbar: collapsed mode:
@@ -9,8 +31,6 @@
 
 Notification
 --
-* When the Activity is terminated, pressing the notification should open the acticity
- **in album view with the correct album selected and scrolled to the correct song**
 * Notification display: show progressbar instead of album cover in case
   the art wasn't fetched yet
   * Is it possible to use LiveData for the notification?
@@ -27,13 +47,6 @@ File scanning features
 
 Fetching issues for album art
 --
-* Pick album art Activity
-  * Let the user choose from:
-    * Musicbrainz method 1: default search using album name and artist name
-    * Musicbrainz method 2: search artist ID, then search using album name and artist ID
-      * Preferred method for: "High Life" by "Brian Eno/Karl Hyde"
-    * Discogs method
-    * Custom file (JPG/PNG/...) selection
 * "Go Tell Fire to the Mountain" by "WU LYF" --> 404 from coverartarchive
 
 Post-release

@@ -46,9 +46,7 @@ class AudioFileReader {
             final Artist albumArtist = getAlbumArtist(audioFile, musicDao);
             final Album album = getAlbum(audioFile, musicDao, albumArtist);
             final Artist songArtist = getSongArtist(audioFile, musicDao, albumArtist);
-            final Song song = getSong(audioFile, musicDao, album, songArtist);
-
-            Log.v(AudioFileReader.class.getName(), "SONG: " + song);
+            getSong(audioFile, musicDao, album, songArtist);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(AudioFileReader.class.getName(), e.getMessage());

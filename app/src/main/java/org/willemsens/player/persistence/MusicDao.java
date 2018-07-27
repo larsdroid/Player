@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
+import org.jaudiotagger.audio.generic.AudioFileReader;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.ApplicationState;
 import org.willemsens.player.persistence.entities.Artist;
@@ -190,6 +191,8 @@ public abstract class MusicDao {
         if (artist == null) {
             artist = new Artist(artistName);
             artist.id = insertArtist(artist);
+            Log.v(AudioFileReader.class.getName(), "ARTIST CREATED: " + artist);
+
             Observable.just(artist).subscribe(handleInsertedArtist).dispose();
         }
         return artist;
@@ -201,6 +204,8 @@ public abstract class MusicDao {
             album = new Album(albumName, artistId);
             album.yearReleased = albumYear;
             album.id = insertAlbum(album);
+            Log.v(AudioFileReader.class.getName(), "ALBUM CREATED: " + album);
+
             Observable.just(album).subscribe(handleInsertedAlbum).dispose();
         }
         return album;
@@ -213,6 +218,7 @@ public abstract class MusicDao {
             song = new Song(songName, songArtistId, albumId, track, file);
             song.length = songLength;
             song.id = insertSong(song);
+            Log.v(AudioFileReader.class.getName(), "SONG CREATED: " + song);
 
             updateAlbumLength(albumId);
 

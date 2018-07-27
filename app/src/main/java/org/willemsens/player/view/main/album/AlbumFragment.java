@@ -205,12 +205,16 @@ public class AlbumFragment extends Fragment {
             if (album.length != null) {
                 albumLength.setText(StringFormat.formatToSongLength(album.length));
             }
+
+            /*
+            TODO: implement this feature
             albumPlays.setText(String.valueOf(album.playCount));
             if (album.playCount == 1) {
                 timesPlayed.setText(R.string.time_played);
             } else {
                 timesPlayed.setText(R.string.times_played);
             }
+            */
 
             updateAlbumProgress();
         }

@@ -20,7 +20,6 @@ import org.willemsens.player.R;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.entities.helpers.AlbumWithImageAndArtist;
-import org.willemsens.player.util.StringFormat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,9 +89,6 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
         @BindView(R.id.album_list_artist)
         TextView albumArtist;
 
-        @BindView(R.id.album_list_length)
-        TextView albumLength;
-
         @BindView(R.id.album_list_year)
         TextView albumYear;
 
@@ -119,7 +115,6 @@ public class AlbumRecyclerViewAdapter extends RecyclerView.Adapter<AlbumRecycler
             this.album = album;
 
             this.albumName.setText(album.name);
-            this.albumLength.setText(StringFormat.formatToSongLength(album.length));
             this.albumYear.setText(album.yearReleased == null ? "" : String.valueOf(album.yearReleased));
             this.albumArtist.setText(album.artistName);
 
