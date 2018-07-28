@@ -20,9 +20,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -231,22 +235,35 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (currentMenuItem == null || currentMenuItem != item.getItemId()) {
+        if (currentMenuItem == null || currentMenuItem != item.getItemId()
+                || item.getItemId() == R.id.nav_about || item.getItemId() == R.id.nav_contact) {
             switch (item.getItemId()) {
                 case R.id.nav_music_library:
                     setMusicFragment(true);
+                    currentMenuItem = item.getItemId();
                     break;
                 case R.id.nav_settings:
                     setSettingsFragment();
+                    currentMenuItem = item.getItemId();
                     break;
                 case R.id.nav_about:
-                    // TODO
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage(getString(R.string.app_name)
+                            + " " + getString(R.string.version)
+                            + " " + getString(R.string.app_version)
+                            + "\n" + getString(R.string.about));
+                    builder.setPositiveButton(android.R.string.ok, null).create().show();
                     break;
                 case R.id.nav_contact:
-                    // TODO
+                    AlertDialog.Builder builderContact = new AlertDialog.Builder(this);
+                    builderContact.setMessage(getString(R.string.contact));
+                    builderContact.setMessage(Html.fromHtml(
+                            "<a href=\"" + getString(R.string.contact) + "\">" + getString(R.string.contact) + "</a>"));
+                    AlertDialog dialog = builderContact.setPositiveButton(android.R.string.ok, null).create();
+                    dialog.show();
+                    ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
                     break;
             }
-            currentMenuItem = item.getItemId();
         }
 
         drawer.closeDrawer(GravityCompat.START);
