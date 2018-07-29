@@ -1,7 +1,13 @@
-![logotype_horizontal](/images/logo/Logotype_horizontal.png)
+![feature_graphic](/images/logo/feature_graphic.png)
 
 Album Player
 ============
+
+<a href="https://play.google.com/store/apps/details?id=org.willemsens.player">
+    <img alt="Get it on Google Play"
+        height="80"
+        src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" />
+</a>
 
 *Album Player* is an Android music player app that puts the emphasis on the album.
 The app encourages you to play music album by album. It keeps track of
@@ -21,8 +27,8 @@ as a whole, so this app tries to take care of that ;)
 
 ![/images/albums.png](/images/screenshot/albums.png)
 
+![/images/album1.png](/images/screenshot/album1.png)
+
+![/images/album2.png](/images/screenshot/album2.png)
+
 ![/images/artists.png](/images/screenshot/artists.png)
-
-![/images/songs.png](/images/screenshot/songs.png)
-
-![/images/album.png](/images/screenshot/album.png)
