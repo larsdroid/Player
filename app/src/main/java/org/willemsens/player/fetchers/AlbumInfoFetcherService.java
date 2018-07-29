@@ -3,13 +3,14 @@ package org.willemsens.player.fetchers;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.crashlytics.android.Crashlytics;
 import org.willemsens.player.exceptions.NetworkClientException;
 import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
 import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Image;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 
 import java.util.List;
 
@@ -61,8 +62,10 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 image.url = coverImageUrl;
                 return getMusicDao().insertImage(image);
             } catch (NetworkClientException e) {
+                Crashlytics.logException(e);
                 return generateAlbumArt(album);
             } catch (NetworkServerException e) {
+                Crashlytics.logException(e);
                 return null;
             }
         } else {
@@ -101,6 +104,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 broadcastAlbumChange(album);
             }
         } catch (NetworkClientException e) {
+            Crashlytics.logException(e);
             if (album.imageId == null) {
                 long newImageId = generateAlbumArt(album);
                 this.getMusicDao().updateAlbum(album.id, newImageId);
@@ -108,7 +112,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 broadcastAlbumChange(album);
             }
         } catch (NetworkServerException e) {
-            // Ignore
+            Crashlytics.logException(e);
         }
 
         waitRateLimit();
