@@ -212,8 +212,10 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
 
     void persistTrackMillis() {
         final Album album = this.musicDao.getCurrentAlbum();
-        album.currentMillisInTrack = (int) this.exoPlayer.getCurrentPosition();
-        this.musicDao.updateAlbum(album);
+        if (album != null) {
+            album.currentMillisInTrack = (int) this.exoPlayer.getCurrentPosition();
+            this.musicDao.updateAlbum(album);
+        }
     }
 
     void release() {
