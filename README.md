@@ -1,5 +1,3 @@
-![feature_graphic](/images/logo/feature_graphic.png)
-
 Album Player
 ============
 
