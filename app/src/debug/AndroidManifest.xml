@@ -6,5 +6,7 @@
         <service
                 android:name=".playback.PlayBackService"
                 tools:remove="android:process"/>
+
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
     </application>
 </manifest>
