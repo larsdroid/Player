@@ -10,7 +10,7 @@ import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Image;
-import org.willemsens.player.util.FabricLogging;
+import org.willemsens.player.util.ExceptionHandling;
 
 import java.util.List;
 
@@ -62,10 +62,10 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 image.url = coverImageUrl;
                 return getMusicDao().insertImage(image);
             } catch (NetworkClientException e) {
-                FabricLogging.logExceptionToFabric(e);
+                ExceptionHandling.submitException(e);
                 return generateAlbumArt(album);
             } catch (NetworkServerException e) {
-                FabricLogging.logExceptionToFabric(e);
+                ExceptionHandling.submitException(e);
                 return null;
             }
         } else {
@@ -104,7 +104,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 broadcastAlbumChange(album);
             }
         } catch (NetworkClientException e) {
-            FabricLogging.logExceptionToFabric(e);
+            ExceptionHandling.submitException(e);
 
             if (album.imageId == null) {
                 long newImageId = generateAlbumArt(album);
@@ -113,7 +113,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 broadcastAlbumChange(album);
             }
         } catch (NetworkServerException e) {
-            FabricLogging.logExceptionToFabric(e);
+            ExceptionHandling.submitException(e);
         }
 
         waitRateLimit();
