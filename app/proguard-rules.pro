@@ -35,4 +35,4 @@
 -dontwarn javax.swing.**
 -dontwarn javax.imageio.**
 -dontwarn java.awt.**
--dontwarn sun.security.**
+-dontwarn sun.**
