@@ -14,7 +14,7 @@ import org.acra.annotation.AcraMailSender;
 
 @AcraCore(buildConfigClass = BuildConfig.class)
 @AcraMailSender(mailTo = "lars@willemsens.org")
-@AcraLimiter
+@AcraLimiter(failedReportLimit = 10, period = 10)
 public class PlayerApplication extends Application {
     @Override
     public void onCreate() {
