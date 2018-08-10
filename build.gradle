@@ -23,6 +23,9 @@ allprojects {
         maven {
             url "https://dl.bintray.com/larsdroid/mp3-vbr-length"
         }
+        maven {
+            url "https://dl.bintray.com/ijabz/maven"
+        }
     }
 }
 
