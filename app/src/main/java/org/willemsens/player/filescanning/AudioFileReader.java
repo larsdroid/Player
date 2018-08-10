@@ -8,14 +8,15 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
+import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.entities.Song;
-import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
-import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,12 +70,19 @@ class AudioFileReader {
         final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
         String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
 
-        final Integer albumYear;
+        Integer albumYear;
         if (yearString != null && !yearString.isEmpty()) {
-            if (yearString.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            if (yearString.matches("\\d{4}-\\d{2}-\\d{2}") || yearString.matches("\\d{4}-\\d{2}")) {
                 yearString = yearString.substring(0, 4);
             }
             albumYear = Integer.parseInt(yearString);
+            if (albumYear < 100) {
+                if (albumYear <= Calendar.getInstance().get(Calendar.YEAR) - 2000) {
+                    albumYear += 2000;
+                } else {
+                    albumYear += 1900;
+                }
+            }
         } else {
             albumYear = null;
         }
