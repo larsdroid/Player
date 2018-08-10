@@ -1,7 +1,5 @@
 package org.willemsens.player.util;
 
-import org.acra.ACRA;
-
 public class ExceptionHandling {
     public static void submitException(Exception e) {
         /*Writer writer = new StringWriter();
@@ -16,6 +14,8 @@ public class ExceptionHandling {
         // Crashlytics.logException(e);
 
         // OR handleSilentException
-        ACRA.getErrorReporter().handleException(e);
+        //ACRA.getErrorReporter().handleException(e);
+
+        throw new RuntimeException(e);
     }
 }
