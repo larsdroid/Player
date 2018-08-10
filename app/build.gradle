@@ -104,7 +104,7 @@ dependencies {
     implementation(group: 'com.jakewharton', name: 'butterknife', version: butterknifeVersion)
     annotationProcessor(group: 'com.jakewharton', name: 'butterknife-compiler', version: butterknifeVersion)
 
-    compile(group: 'com.crashlytics.sdk.android', name: 'answers', version: fabricAnswersVersion) {
+    implementation(group: 'com.crashlytics.sdk.android', name: 'answers', version: fabricAnswersVersion) {
         transitive = true
     }
 
