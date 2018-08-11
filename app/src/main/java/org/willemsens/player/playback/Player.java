@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import org.willemsens.player.R;
+import org.willemsens.player.exceptions.PlayerException;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
@@ -57,8 +58,15 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     }
 
     private void setCurrentAlbum(Album album) {
-        final Song song = this.musicDao.findSong(album.id, album.currentTrack == null ? 1 : album.currentTrack);
-        setCurrentSong(album, song, false, false);
+        int track = album.currentTrack == null ? 1 : album.currentTrack;
+        final Song song = this.musicDao.findSong(album.id, track);
+        if (song != null) {
+            setCurrentSong(album, song, false, false);
+        } else {
+            throw new PlayerException("Couldn't find track " + track + " of album " + album.name
+                    + " (year " + album.yearReleased + "). [album.currentTrack = " + album.currentTrack + "]");
+        }
+
     }
 
     private void startSong(Album album, Song song) {

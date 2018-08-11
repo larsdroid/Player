@@ -25,6 +25,8 @@ public class FileScannerService extends IntentService {
     private MusicDao musicDao;
     private AudioFileReader audioFileReader;
 
+    private static final int MAX_RECURSIVE_CALLS = 5;
+
     public FileScannerService() {
         super(FileScannerService.class.getName());
     }
@@ -75,11 +77,13 @@ public class FileScannerService extends IntentService {
     }
 
     private void scanCustomDirectories() {
+        // TODO: make this non-recursive. Android only allows just a few methods on the stack...
+        // TODO: users with a couple of subdirectories are being blocked by this
         for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
                 File root = new File(dir.path).getCanonicalFile();
                 if (root.isDirectory()) {
-                    processDirectory(root);
+                    processDirectory(root, MAX_RECURSIVE_CALLS);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }
@@ -89,13 +93,13 @@ public class FileScannerService extends IntentService {
         }
     }
 
-    private void processDirectory(File currentRoot) throws IOException {
+    private void processDirectory(File currentRoot, int recursiveCallsAllowed) throws IOException {
         final File[] files = currentRoot.listFiles();
         if (files != null) {
             for (File file : files) {
                 final File canonicalFile = file.getCanonicalFile();
-                if (canonicalFile.isDirectory()) {
-                    processDirectory(canonicalFile);
+                if (canonicalFile.isDirectory() && !canonicalFile.equals(currentRoot) && recursiveCallsAllowed > 0) {
+                    processDirectory(canonicalFile, recursiveCallsAllowed - 1);
                 } else {
                     processSingleFile(canonicalFile);
                 }
