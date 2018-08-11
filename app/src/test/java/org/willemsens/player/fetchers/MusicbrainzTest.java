@@ -6,11 +6,11 @@ import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
 import static org.junit.Assert.assertEquals;
 
 public class MusicbrainzTest {
-    private static final String ARTIST_NAME = "Wilco";
-    private static final String ARTIST_ID = "9e53f84d-ef44-4c16-9677-5fd4d78cbd7d";
-    private static final String ALBUM_NAME = "Summerteeth";
-    private static final String ALBUM_IMAGE_URI = "http://coverartarchive.org/release/312cb54d-9c3c-4181-8f13-1345d87f5810/9752090182-500.jpg";
-    private static final Integer ALBUM_YEAR = 1999;
+    private static final String ARTIST_NAME = "…And You Will Know Us by the Trail of Dead";
+    private static final String ARTIST_ID = "9c1ff574-2ae4-4fea-881f-83293d0d5881";
+    private static final String ALBUM_NAME = "Source Tags & Codes";
+    private static final String ALBUM_IMAGE_URI = "http://coverartarchive.org/release/e129e1b3-d9b1-4cd2-9c93-586867fbbe4f/4703734914-500.jpg";
+    private static final Integer ALBUM_YEAR = 1995;
 
     @Test
     public void testFetchArtistId() throws Exception {

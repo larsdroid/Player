@@ -94,7 +94,7 @@ public abstract class InfoFetcher {
             }
         } catch (IOException e) {
             Log.e(getClass().getName(), e.getMessage());
-            throw new NetworkClientException(e.getMessage());
+            throw new NetworkClientException(e.getMessage(), e);
         }
     }
 

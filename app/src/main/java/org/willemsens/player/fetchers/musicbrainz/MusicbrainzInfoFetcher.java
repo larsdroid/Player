@@ -72,16 +72,18 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                         .addPathSegment(release.getId())
                         .build();
 
-                try {
+                //try {
                     json = fetch(url);
                     ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
 
                     return new AlbumInfo(
                             imagesReponse.getFirstLargeThumbnail(),
                             releasesResponse.getOldestReleaseYear());
-                } catch (NetworkClientException e) {
+                //} catch (NetworkClientException e) {
                     // Ignore and try the next one...
-                }
+                    // TODO: actually ignore this exception. Currently throwing to see why things are failing...
+                    // TODO: or better yet: the fetch method shouldn't be throwing when no art was found.
+                //}
             }
         }
 
