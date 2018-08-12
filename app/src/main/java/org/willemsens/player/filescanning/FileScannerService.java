@@ -8,12 +8,14 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import org.willemsens.player.persistence.entities.Directory;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Directory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A background service that checks all music files within a directory (recursively) and creates or
@@ -24,8 +26,6 @@ public class FileScannerService extends IntentService {
 
     private MusicDao musicDao;
     private AudioFileReader audioFileReader;
-
-    private static final int MAX_RECURSIVE_CALLS = 5;
 
     public FileScannerService() {
         super(FileScannerService.class.getName());
@@ -83,7 +83,7 @@ public class FileScannerService extends IntentService {
             try {
                 File root = new File(dir.path).getCanonicalFile();
                 if (root.isDirectory()) {
-                    processDirectory(root, MAX_RECURSIVE_CALLS);
+                    processDirectory(root);
                 } else {
                     Log.e(getClass().getName(), root.getAbsolutePath() + " is not a directory.");
                 }
@@ -93,17 +93,28 @@ public class FileScannerService extends IntentService {
         }
     }
 
-    private void processDirectory(File currentRoot, int recursiveCallsAllowed) throws IOException {
-        final File[] files = currentRoot.listFiles();
-        if (files != null) {
+    private void processDirectory(File currentRoot) throws IOException {
+        final List<File> filesToProcess = new ArrayList<>();
+        final List<File> directoriesToProcess = new ArrayList<>();
+        directoriesToProcess.add(currentRoot);
+
+        for (int i = 0; i < directoriesToProcess.size(); i++) {
+            File directory = directoriesToProcess.get(i);
+
+            final File[] files = directory.listFiles();
             for (File file : files) {
                 final File canonicalFile = file.getCanonicalFile();
-                if (canonicalFile.isDirectory() && !canonicalFile.equals(currentRoot) && recursiveCallsAllowed > 0) {
-                    processDirectory(canonicalFile, recursiveCallsAllowed - 1);
-                } else {
-                    processSingleFile(canonicalFile);
+
+                if (canonicalFile.isDirectory() && !directoriesToProcess.contains(canonicalFile)) {
+                    directoriesToProcess.add(canonicalFile);
+                } else if (!filesToProcess.contains(canonicalFile)) {
+                    filesToProcess.add(canonicalFile);
                 }
             }
+        }
+
+        for (File file : filesToProcess) {
+            processSingleFile(file);
         }
     }
 
