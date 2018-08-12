@@ -1,6 +1,7 @@
 package org.willemsens.player;
 
 import android.app.Application;
+import android.os.StrictMode;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.core.CrashlyticsCore;
@@ -23,8 +24,8 @@ public class PlayerApplication extends Application {
             Fabric.with(this, new Answers());
         }
 
-        // It looks like Fabric / Crashlytics sockets aren't being tagged as they should so strict mode can't be enabled.
-        //   https://github.com/square/okhttp/issues/3537
-        // StrictMode.enableDefaults();
+        if (BuildConfig.DEBUG) {
+            StrictMode.enableDefaults();
+        }
     }
 }
