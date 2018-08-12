@@ -3,7 +3,6 @@ package org.willemsens.player.filescanning;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import com.mpatric.mp3agic.Mp3File;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
@@ -44,46 +43,11 @@ class AudioFileReader {
 
     void readSong(File file) {
         try {
-            final Album album;
-            final Artist songArtist;
-            final String songName;
-            final Integer trackLength;
-            final String trackString;
-
-            // Disabling separate MP3 file handling! (API 26 is too much, if this works we can go back to API 21)
-            if (file.toString().endsWith(".mp3333****************")) {
-                // TODO: verify: false here doesn't trigger a full scan?
-                final Mp3File mp3file = new Mp3File(file.toString(), false);
-                final Artist albumArtist = getAlbumArtist(mp3file, musicDao);
-                // TODO: create a FileWrapper (for Mp3File and AudioFile) with 'getAlbum', 'getYear', ... methods
-                // TODO: ... this will remove the need for checking v1 and v2 all the time, and more...
-                final String albumName = mp3file.hasId3v2Tag() ? mp3file.getId3v2Tag().getAlbum() : (mp3file.hasId3v1Tag() ? mp3file.getId3v1Tag().getAlbum() : null);
-                final String yearString = mp3file.hasId3v2Tag() ? mp3file.getId3v2Tag().getYear() : (mp3file.hasId3v1Tag() ? mp3file.getId3v1Tag().getYear() : null);
-                album = getAlbum(musicDao, albumArtist, albumName, yearString);
-                songArtist = getSongArtist(mp3file, musicDao, albumArtist);
-                songName = mp3file.hasId3v2Tag() ? mp3file.getId3v2Tag().getTitle() : (mp3file.hasId3v1Tag() ? mp3file.getId3v1Tag().getTitle() : null);
-                // TODO: verify if this 'getLengthInSeconds' is actually working without the full scan
-                trackLength = mp3file.isVbr() ? null : (int) mp3file.getLengthInSeconds();
-                trackString = mp3file.hasId3v2Tag() ? mp3file.getId3v2Tag().getTrack() : (mp3file.hasId3v1Tag() ? mp3file.getId3v1Tag().getTrack() : null);
-            } else {
-                final AudioFile audioFile = AudioFileIO.read(file);
-                final Artist albumArtist = getAlbumArtist(audioFile, musicDao);
-                final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
-                final String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
-                album = getAlbum(musicDao, albumArtist, albumName, yearString);
-                songArtist = getSongArtist(audioFile, musicDao, albumArtist);
-                songName = audioFile.getTag().getFirst(FieldKey.TITLE);
-                trackLength = audioFile.getAudioHeader().getTrackLength();
-                trackString = audioFile.getTag().getFirst(FieldKey.TRACK);
-            }
-
-            // TODO: '-1' will actually mess things up here. To be fixed.
-            // TODO: possible solution: downstream '-1' could be replaced by the amount of existing songs in the album + 1
-            // TODO: possible (try-this-first) solution: retrieve digits from the song filename.
-            // The regex is needed because sometimes the track is stored as "4/10" or something.
-            final int track = trackString != null && !trackString.isEmpty() ? Integer.parseInt(trackString.split("[^0-9]+")[0]) : -1;
-
-            getSong(file, musicDao, album, songArtist, songName, trackLength, track);
+            final AudioFile audioFile = AudioFileIO.read(file);
+            final Artist albumArtist = getAlbumArtist(audioFile, musicDao);
+            final Album album = getAlbum(audioFile, musicDao, albumArtist);
+            final Artist songArtist = getSongArtist(audioFile, musicDao, albumArtist);
+            getSong(audioFile, musicDao, album, songArtist);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(AudioFileReader.class.getName(), e.getMessage());
@@ -102,19 +66,10 @@ class AudioFileReader {
         return musicDao.findOrCreateArtist(albumArtistName, this::handleArtistInsertion);
     }
 
-    private Artist getAlbumArtist(Mp3File mp3File, MusicDao musicDao) {
-        String albumArtistName = mp3File.hasId3v2Tag() ? mp3File.getId3v2Tag().getAlbumArtist() : null;
-        if (albumArtistName == null || albumArtistName.trim().isEmpty()) {
-            albumArtistName = mp3File.hasId3v2Tag() ? mp3File.getId3v2Tag().getArtist() : (mp3File.hasId3v1Tag() ? mp3File.getId3v1Tag().getArtist() : null);
-        }
-        if (albumArtistName == null || albumArtistName.trim().isEmpty()) {
-            throw new RuntimeException("Albums's artist is mandatory! File: '" + mp3File.getFilename() + "'");
-        }
+    private Album getAlbum(AudioFile audioFile, MusicDao musicDao, Artist albumArtist) {
+        final String albumName = audioFile.getTag().getFirst(FieldKey.ALBUM);
+        String yearString = audioFile.getTag().getFirst(FieldKey.YEAR);
 
-        return musicDao.findOrCreateArtist(albumArtistName, this::handleArtistInsertion);
-    }
-
-    private Album getAlbum(MusicDao musicDao, Artist albumArtist, String albumName, String yearString) {
         Integer albumYear;
         if (yearString != null && !yearString.isEmpty()) {
             if (yearString.matches("\\d{4}-\\d{2}-\\d{2}") || yearString.matches("\\d{4}-\\d{2}")) {
@@ -144,19 +99,24 @@ class AudioFileReader {
         }
     }
 
-    private Artist getSongArtist(Mp3File mp3File, MusicDao musicDao, Artist albumArtist) {
-        String songArtistName = mp3File.hasId3v2Tag() ? mp3File.getId3v2Tag().getArtist() : (mp3File.hasId3v1Tag() ? mp3File.getId3v1Tag().getArtist() : null);
-        if (songArtistName == null || songArtistName.trim().isEmpty()) {
-            return albumArtist;
+    private Song getSong(AudioFile audioFile, MusicDao musicDao, Album album, Artist songArtist) throws IOException {
+        final String songName = audioFile.getTag().getFirst(FieldKey.TITLE);
+        final Integer songLength;
+        if (audioFile.getFile().toString().endsWith(".mp3")) {
+            songLength = null;
         } else {
-            return musicDao.findOrCreateArtist(songArtistName, this::handleArtistInsertion);
+            songLength = audioFile.getAudioHeader().getTrackLength();
         }
-    }
+        final String songTrack = audioFile.getTag().getFirst(FieldKey.TRACK);
 
-    private Song getSong(File file, MusicDao musicDao, Album album, Artist songArtist,
-                         String songName, Integer trackLength, int track) throws IOException {
+        // TODO: '-1' will actually mess things up here. To be fixed.
+        // TODO: possible solution: downstream '-1' could be replaced by the amount of existing songs in the album + 1
+        // TODO: possible (try-this-first) solution: retrieve digits from the song filename.
+        // The regex is needed because sometimes the track is stored as "4/10" or something.
+        final int track = songTrack != null && !songTrack.isEmpty() ? Integer.parseInt(songTrack.split("[^0-9]+")[0]) : -1;
+
         return musicDao.findOrCreateSong(songName, songArtist.id, album.id, track,
-                file.getCanonicalPath(), trackLength, this::handleSongInsertion);
+                audioFile.getFile().getCanonicalPath(), songLength, this::handleSongInsertion);
     }
 
     private void handleArtistInsertion(Artist artist) {
