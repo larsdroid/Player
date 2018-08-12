@@ -17,6 +17,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_
 
 public class ArtistInfoFetcherService extends InfoFetcherService {
     private final InfoFetcher infoFetcher;
+    private boolean stopProcessing = false;
 
     public ArtistInfoFetcherService() {
         super(ArtistInfoFetcherService.class.getName());
@@ -31,7 +32,9 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
                 || intent.getAction().equals(MLBT_ARTISTS_INSERTED.name())) {
             // Scan all artists for missing information that can be fetched.
             final List<Artist> artists = getMusicDao().getAllArtistsMissingImage();
-            for (Artist artist : artists) {
+            int i = 0;
+            while (i < artists.size() && !stopProcessing) {
+                final Artist artist = artists.get(i++);
                 fetchArtist(artist, imageDownloader);
             }
         } else if (intent.getAction().equals(MLBT_ARTIST_INSERTED.name())) {
@@ -75,5 +78,11 @@ public class ArtistInfoFetcherService extends InfoFetcherService {
 
     private void updateArtist(Artist artist) {
         getMusicDao().updateArtist(artist);
+    }
+
+    @Override
+    public void onDestroy() {
+        stopProcessing = true;
+        super.onDestroy();
     }
 }

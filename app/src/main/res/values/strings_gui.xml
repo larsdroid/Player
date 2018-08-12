@@ -9,6 +9,7 @@
     <string name="version">version</string>
     <string name="about">Created by Lars Willemsens\nReleased under the MIT license</string>
     <string name="contact">https://github.com/larsdroid</string>
+    <string name="wait_while_clear">Please wait while the music library cache is being cleared.</string>
 
     <string name="read_external_storage_required">Read External Storage permission allows us to read music files. Please allow this permission in App Settings.</string>
     <string name="internet_required">Internet permission allows us to download album art and artist pictures. Please allow this permission in App Settings.</string>

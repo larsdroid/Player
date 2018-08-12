@@ -12,6 +12,7 @@ import org.willemsens.player.persistence.MusicDao;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.willemsens.player.filescanning.Mp3ScanningPayloadType.MP3PT_SONG_ID;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_SONG_ID;
@@ -24,6 +25,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_
  */
 public class Mp3ScanningService extends IntentService {
     private MusicDao musicDao;
+    private boolean stopProcessing = false;
 
     public Mp3ScanningService() {
         super(Mp3ScanningService.class.getName());
@@ -65,8 +67,17 @@ public class Mp3ScanningService extends IntentService {
     }
 
     private void scanMp3Files() {
-        for (Song song : this.musicDao.getAllSongsMissingLength()) {
+        int i = 0;
+        final List<Song> songsToProcess = this.musicDao.getAllSongsMissingLength();
+        while (i < songsToProcess.size() && !stopProcessing) {
+            final Song song = songsToProcess.get(i++);
             scanMp3File(song);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        stopProcessing = true;
+        super.onDestroy();
     }
 }

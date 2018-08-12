@@ -1,6 +1,8 @@
 package org.willemsens.player.view.main;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,11 +27,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import org.willemsens.player.R;
 import org.willemsens.player.fetchers.AlbumInfoFetcherService;
 import org.willemsens.player.fetchers.ArtistInfoFetcherService;
@@ -318,20 +327,81 @@ public class MainActivity extends AppCompatActivity
         final Intent albumFetcherIntent = new Intent(this, AlbumInfoFetcherService.class);
         stopService(albumFetcherIntent);
 
-        this.musicDao.deleteAllMusic();
+        final Consumer<Void> servicesStoppedCallback = voidObject -> {
+            this.musicDao.deleteAllMusic();
 
-        MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
-        builder.setType(MLBT_ALBUMS_DELETED)
-                .buildAndSubmitBroadcast();
-        builder.setType(MLBT_ARTISTS_DELETED)
-                .buildAndSubmitBroadcast();
-        builder.setType(MLBT_SONGS_DELETED)
-                .buildAndSubmitBroadcast();
+            MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
+            builder.setType(MLBT_ALBUMS_DELETED)
+                    .buildAndSubmitBroadcast();
+            builder.setType(MLBT_ARTISTS_DELETED)
+                    .buildAndSubmitBroadcast();
+            builder.setType(MLBT_SONGS_DELETED)
+                    .buildAndSubmitBroadcast();
 
-        startService(albumFetcherIntent);
-        startService(artistFetcherIntent);
-        startService(fileScannerIntent);
-        startService(mp3ScanningIntent);
+            startService(albumFetcherIntent);
+            startService(artistFetcherIntent);
+            startService(fileScannerIntent);
+            startService(mp3ScanningIntent);
+        };
+
+        waitUntilAllServicesAreStopped(servicesStoppedCallback);
+    }
+
+    private void waitUntilAllServicesAreStopped(Consumer<Void> servicesStoppedCallback) {
+        ProgressDialog dialog = ProgressDialog.show(this, "",
+                getString(R.string.wait_while_clear), true);
+        dialog.show();
+
+        Observable<String> observable = Observable.create(subscriber -> {
+            while (isServiceRunning(Mp3ScanningService.class)
+                    || isServiceRunning(FileScannerService.class)
+                    || isServiceRunning(ArtistInfoFetcherService.class)
+                    || isServiceRunning(AlbumInfoFetcherService.class)) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    subscriber.onError(e);
+                }
+            }
+            subscriber.onComplete();
+        });
+
+        observable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(String s) {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                        try {
+                            servicesStoppedCallback.accept(null);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

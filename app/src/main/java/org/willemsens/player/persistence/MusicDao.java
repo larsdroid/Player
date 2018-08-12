@@ -238,8 +238,13 @@ public abstract class MusicDao {
     void updateAlbumLength(long albumId) {
         if (getSongCountWithoutLength(albumId) == 0) {
             final Album album = findAlbum(albumId);
-            album.length = getTotalAlbumLength(albumId);
-            updateAlbum(album);
+            // Null check mandatory since a long-running background service can (for a very brief period of time)
+            // have a reference to old data while it is being asked to stop the instant that the music library is
+            // being reset/cleared.
+            if (album != null) {
+                album.length = getTotalAlbumLength(albumId);
+                updateAlbum(album);
+            }
         }
     }
 

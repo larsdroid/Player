@@ -9,6 +9,7 @@ import org.willemsens.player.fetchers.imagegenerators.ImageGenerator;
 import org.willemsens.player.fetchers.musicbrainz.MusicbrainzInfoFetcher;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.util.ExceptionHandling;
 
@@ -25,6 +26,7 @@ import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_
  */
 public class AlbumInfoFetcherService extends InfoFetcherService {
     private final InfoFetcher infoFetcher;
+    private boolean stopProcessing = false;
 
     public AlbumInfoFetcherService() {
         super(AlbumInfoFetcherService.class.getName());
@@ -39,7 +41,9 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 || intent.getAction().equals(MLBT_ALBUMS_INSERTED.name())) {
             // Scan all albums for missing information that can be fetched.
             final List<Album> albums = getMusicDao().getAllAlbumsMissingInfo();
-            for (Album album : albums) {
+            int i = 0;
+            while (i < albums.size() && !stopProcessing) {
+                final Album album = albums.get(i++);
                 fetchAlbum(album, imageDownloader);
             }
         } else if (intent.getAction().equals(MLBT_ALBUM_INSERTED.name())) {
@@ -47,7 +51,11 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
             final long albumId = intent.getLongExtra(MLBPT_ALBUM_ID.name(), -1);
             if (albumId != -1) {
                 final Album album = getMusicDao().findAlbum(albumId);
-                fetchAlbum(album, imageDownloader);
+                // Null check mandatory since this service can have a reference to old data
+                // at the instant the music library is being cleared.
+                if (album != null) {
+                    fetchAlbum(album, imageDownloader);
+                }
             }
         }
     }
@@ -80,7 +88,15 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
 
     private void fetchAlbum(Album album, ImageDownloader imageDownloader) {
         try {
-            final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(getMusicDao().findArtist(album.artistId).name, album.name);
+            final Artist artist = getMusicDao().findArtist(album.artistId);
+
+            // Null check mandatory since a this service can (for a very brief period of time)
+            // have a reference to old data while it is being asked to stop the instant that
+            // the music library is being reset/cleared.
+            if (artist == null) {
+                return;
+            }
+            final AlbumInfo albumInfo = infoFetcher.fetchAlbumInfo(artist.name, album.name);
 
             Long newImageId = fetchAlbumArt(album, imageDownloader, albumInfo);
 
@@ -113,7 +129,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 broadcastAlbumChange(album);
             }
         } catch (NetworkServerException e) {
-            ExceptionHandling.submitException(e);
+            // Ignore
         }
 
         waitRateLimit();
@@ -125,5 +141,11 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
                 .setType(MLBT_ALBUM_UPDATED)
                 .setAlbum(album)
                 .buildAndSubmitBroadcast();
+    }
+
+    @Override
+    public void onDestroy() {
+        stopProcessing = true;
+        super.onDestroy();
     }
 }

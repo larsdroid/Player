@@ -26,6 +26,7 @@ public class FileScannerService extends IntentService {
 
     private MusicDao musicDao;
     private AudioFileReader audioFileReader;
+    private boolean stopProcessing = false;
 
     public FileScannerService() {
         super(FileScannerService.class.getName());
@@ -65,7 +66,7 @@ public class FileScannerService extends IntentService {
                     } catch (IOException e) {
                         Log.e("FileScannerService", e.getMessage());
                     }
-                } while (musicCursor.moveToNext());
+                } while (!stopProcessing && musicCursor.moveToNext());
             }
             musicCursor.close();
         }
@@ -77,8 +78,6 @@ public class FileScannerService extends IntentService {
     }
 
     private void scanCustomDirectories() {
-        // TODO: make this non-recursive. Android only allows just a few methods on the stack...
-        // TODO: users with a couple of subdirectories are being blocked by this
         for (Directory dir : this.musicDao.getAllDirectories()) {
             try {
                 File root = new File(dir.path).getCanonicalFile();
@@ -98,11 +97,13 @@ public class FileScannerService extends IntentService {
         final List<File> directoriesToProcess = new ArrayList<>();
         directoriesToProcess.add(currentRoot);
 
-        for (int i = 0; i < directoriesToProcess.size(); i++) {
+        for (int i = 0; i < directoriesToProcess.size() && !stopProcessing; i++) {
             File directory = directoriesToProcess.get(i);
 
             final File[] files = directory.listFiles();
-            for (File file : files) {
+            int j = 0;
+            while (j < files.length && !stopProcessing) {
+                final File file = files[j++];
                 final File canonicalFile = file.getCanonicalFile();
 
                 if (canonicalFile.isDirectory() && !directoriesToProcess.contains(canonicalFile)) {
@@ -113,7 +114,9 @@ public class FileScannerService extends IntentService {
             }
         }
 
-        for (File file : filesToProcess) {
+        int i = 0;
+        while (i < filesToProcess.size() && !stopProcessing) {
+            final File file = filesToProcess.get(i++);
             processSingleFile(file);
         }
     }
@@ -138,5 +141,11 @@ public class FileScannerService extends IntentService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        stopProcessing = true;
+        super.onDestroy();
     }
 }
