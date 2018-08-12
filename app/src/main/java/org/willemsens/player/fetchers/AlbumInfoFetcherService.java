@@ -53,7 +53,7 @@ public class AlbumInfoFetcherService extends InfoFetcherService {
     }
 
     private Long fetchAlbumArt(Album album, ImageDownloader imageDownloader, @NonNull AlbumInfo albumInfo) {
-        if (album.imageId == null) {
+        if (album.imageId == null && albumInfo.getCoverImageUrl() != null) {
             try {
                 final String coverImageUrl = albumInfo.getCoverImageUrl();
                 final byte[] imageData = imageDownloader.downloadImage(coverImageUrl);

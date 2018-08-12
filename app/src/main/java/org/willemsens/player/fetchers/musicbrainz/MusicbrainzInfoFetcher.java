@@ -74,11 +74,13 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
 
                 //try {
                     json = fetch(url);
-                    ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
+                    if (json != null) {
+                        ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
 
-                    return new AlbumInfo(
-                            imagesReponse.getFirstLargeThumbnail(),
-                            releasesResponse.getOldestReleaseYear());
+                        return new AlbumInfo(
+                                imagesReponse.getFirstLargeThumbnail(),
+                                releasesResponse.getOldestReleaseYear());
+                    }
                 //} catch (NetworkClientException e) {
                     // Ignore and try the next one...
                     // TODO: actually ignore this exception. Currently throwing to see why things are failing...
@@ -87,7 +89,9 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
             }
         }
 
-        throw new NetworkClientException("No album info found for artist '" + artistName + "' album '" + albumName + "'.");
+        return new AlbumInfo(
+                null,
+                releasesResponse.getOldestReleaseYear());
     }
 
     @Override

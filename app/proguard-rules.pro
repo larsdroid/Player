@@ -36,3 +36,8 @@
 -dontwarn javax.imageio.**
 -dontwarn java.awt.**
 -dontwarn sun.**
+
+# https://stackoverflow.com/questions/49519316/crashlyticscore-expected-method-missing-registeronmeasurementeventlistener
+
+-keep class com.google.android.gms.measurement.AppMeasurement { *; }
+-keep class com.google.android.gms.measurement.AppMeasurement$OnEventListener { *; }

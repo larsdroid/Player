@@ -12,9 +12,11 @@ public class ReleasesResponse {
 
     public Integer getOldestReleaseYear() {
         Integer year = null;
-        for (Release release : releases) {
-            if (year == null || (release.getYear() != null && release.getYear() < year)) {
-                year = release.getYear();
+        if (releases != null) {
+            for (Release release : releases) {
+                if (year == null || (release.getYear() != null && release.getYear() < year)) {
+                    year = release.getYear();
+                }
             }
         }
         return year;
