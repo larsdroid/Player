@@ -13,16 +13,3 @@ public enum MusicLibraryBroadcastType {
     MLBT_SONG_UPDATED,
     MLBT_SONGS_DELETED
 }
-/*
-filter.addAction(MLBT_SONGS_INSERTED.name());
-        filter.addAction(MLBT_SONG_INSERTED.name());
-        filter.addAction(MLBT_SONG_UPDATED.name());
-        filter.addAction(MLBT_SONGS_DELETED.name());
-        filter.addAction(MLBT_ARTISTS_INSERTED.name());
-        filter.addAction(MLBT_ARTIST_INSERTED.name());
-        filter.addAction(MLBT_ARTISTS_DELETED.name());
-        filter.addAction(MLBT_ALBUMS_INSERTED.name());
-        filter.addAction(MLBT_ALBUM_INSERTED.name());
-        filter.addAction(MLBT_ALBUM_UPDATED.name());
-        filter.addAction(MLBT_ALBUMS_DELETED.name());
-*/
