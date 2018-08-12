@@ -50,7 +50,8 @@ class AudioFileReader {
             final Integer trackLength;
             final String trackString;
 
-            if (file.toString().endsWith(".mp3")) {
+            // Disabling separate MP3 file handling! (API 26 is too much, if this works we can go back to API 21)
+            if (file.toString().endsWith(".mp3333****************")) {
                 // TODO: verify: false here doesn't trigger a full scan?
                 final Mp3File mp3file = new Mp3File(file.toString(), false);
                 final Artist albumArtist = getAlbumArtist(mp3file, musicDao);
