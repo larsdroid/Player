@@ -7,6 +7,7 @@ import org.willemsens.player.exceptions.NetworkServerException;
 import org.willemsens.player.fetchers.AlbumInfo;
 import org.willemsens.player.fetchers.ArtistInfo;
 import org.willemsens.player.fetchers.InfoFetcher;
+import org.willemsens.player.fetchers.UnparsedResponse;
 import org.willemsens.player.fetchers.discogs.dto.ArtistDetail;
 import org.willemsens.player.fetchers.discogs.dto.ArtistsResponse;
 import org.willemsens.player.fetchers.discogs.dto.Release;
@@ -42,9 +43,9 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .addQueryParameter("q", sanitizeSearchString(artistName))
                 .build();
 
-        final String json = fetch(url);
+        final UnparsedResponse unparsedResponse = fetch(url);
         final ArtistsResponse searchResponse = getGson().fromJson(
-                json,
+                unparsedResponse.getJson(),
                 ArtistsResponse.class);
         final Long artistId = searchResponse.getFirstArtistID();
 
@@ -70,9 +71,9 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .addQueryParameter("q", sanitizeSearchString(albumName))
                 .build();
 
-        String json = fetch(url);
+        UnparsedResponse unparsedResponse = fetch(url);
         final ReleasesResponse releasesResponse = getGson().fromJson(
-                json,
+                unparsedResponse.getJson(),
                 ReleasesResponse.class);
         final Release[] releases = releasesResponse.getReleases();
 
@@ -87,20 +88,20 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                         .addQueryParameter("secret", SECRET)
                         .build();
 
-                try {
-                    json = fetch(url);
-                    final ReleaseDetail releaseDetail = getGson().fromJson(json, ReleaseDetail.class);
+                unparsedResponse = fetch(url);
+                if (unparsedResponse.getHttpStatusCode() != 404) {
+                    final ReleaseDetail releaseDetail = getGson().fromJson(unparsedResponse.getJson(), ReleaseDetail.class);
 
                     return new AlbumInfo(
                             releaseDetail.getFirstImageURL(),
                             releasesResponse.getOldestReleaseYear());
-                } catch (NetworkClientException e) {
-                    // Ignore and try the next one...
                 }
             }
         }
 
-        throw new NetworkClientException("No album info found for artist '" + artistName + "' album '" + albumName + "'.");
+        return new AlbumInfo(
+                null,
+                releasesResponse.getOldestReleaseYear());
     }
 
     @Override
@@ -115,11 +116,11 @@ public class DiscogsInfoFetcher extends InfoFetcher {
                 .addQueryParameter("secret", SECRET)
                 .build();
 
-        final String json = fetch(url);
-        final ArtistDetail artistDetail = getGson().fromJson(json, ArtistDetail.class);
+        final UnparsedResponse unparsedResponse = fetch(url);
+        final ArtistDetail artistDetail = getGson().fromJson(unparsedResponse.getJson(), ArtistDetail.class);
         final String imageURL = artistDetail.getFirstImageURL();
         if (imageURL != null) {
-                return new ArtistInfo(imageURL);
+            return new ArtistInfo(imageURL);
         }
 
         throw new NetworkClientException("No artist info found for artist ID '" + artistId + "'.");

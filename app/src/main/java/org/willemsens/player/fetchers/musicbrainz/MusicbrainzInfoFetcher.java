@@ -8,6 +8,7 @@ import org.willemsens.player.exceptions.PlayerException;
 import org.willemsens.player.fetchers.AlbumInfo;
 import org.willemsens.player.fetchers.ArtistInfo;
 import org.willemsens.player.fetchers.InfoFetcher;
+import org.willemsens.player.fetchers.UnparsedResponse;
 import org.willemsens.player.fetchers.musicbrainz.dto.ArtistsResponse;
 import org.willemsens.player.fetchers.musicbrainz.dto.ImagesReponse;
 import org.willemsens.player.fetchers.musicbrainz.dto.Release;
@@ -37,9 +38,9 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .addPathSegment("artist")
                 .addQueryParameter("query", "artist:" + sanitizeSearchString(artistName))
                 .build();
-        final String json = fetch(url);
+        final UnparsedResponse unparsedResponse = fetch(url);
         final ArtistsResponse artistsResponse = getGson().fromJson(
-                json,
+                unparsedResponse.getJson(),
                 ArtistsResponse.class);
         return artistsResponse.getFirstArtistID();
     }
@@ -57,9 +58,9 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                 .addQueryParameter("query", "release:" + sanitizeAlbumSearchString(albumName) + " AND artist:" + sanitizeSearchString(artistName))
                 .build();
 
-        String json = fetch(url);
+        UnparsedResponse unparsedResponse = fetch(url);
         final ReleasesResponse releasesResponse = getGson().fromJson(
-                json,
+                unparsedResponse.getJson(),
                 ReleasesResponse.class);
         final Release[] releases = releasesResponse.getReleases();
 
@@ -72,20 +73,14 @@ public class MusicbrainzInfoFetcher extends InfoFetcher {
                         .addPathSegment(release.getId())
                         .build();
 
-                //try {
-                    json = fetch(url);
-                    if (json != null) {
-                        ImagesReponse imagesReponse = getGson().fromJson(json, ImagesReponse.class);
+                unparsedResponse = fetch(url);
+                if (unparsedResponse.getHttpStatusCode() != 404) {
+                    ImagesReponse imagesReponse = getGson().fromJson(unparsedResponse.getJson(), ImagesReponse.class);
 
-                        return new AlbumInfo(
-                                imagesReponse.getFirstLargeThumbnail(),
-                                releasesResponse.getOldestReleaseYear());
-                    }
-                //} catch (NetworkClientException e) {
-                    // Ignore and try the next one...
-                    // TODO: actually ignore this exception. Currently throwing to see why things are failing...
-                    // TODO: or better yet: the fetch method shouldn't be throwing when no art was found.
-                //}
+                    return new AlbumInfo(
+                            imagesReponse.getFirstLargeThumbnail(),
+                            releasesResponse.getOldestReleaseYear());
+                }
             }
         }
 

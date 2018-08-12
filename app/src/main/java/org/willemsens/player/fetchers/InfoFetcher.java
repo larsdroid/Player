@@ -78,18 +78,17 @@ public abstract class InfoFetcher {
         return this.gson;
     }
 
-    // TODO: let this return a 'Response' object (new class) with a json and a response code in it.
-    // TODO: @NonNull
-    protected String fetch(HttpUrl url) throws NetworkClientException, NetworkServerException {
+    @NonNull
+    protected UnparsedResponse fetch(HttpUrl url) throws NetworkClientException, NetworkServerException {
         try (Response response = httpClient.newCall(getRequest(url)).execute()) {
             if (response.isSuccessful()) {
-                return response.body().string();
+                return new UnparsedResponse(response.code(), response.body().string());
             }
 
             final String errorMessage = "HTTP error '" + response.code() + "' for URL '" + url + "'.";
             Log.e(getClass().getName(), errorMessage);
             if (response.code() == 404) {
-                return null;
+                return new UnparsedResponse(response.code(), null);
             } if (response.code() >= 400 && response.code() < 500) {
                 throw new NetworkClientException(errorMessage);
             } else { // Assuming 500
