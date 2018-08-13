@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 import com.squareup.otto.Bus;
-import org.willemsens.player.playback.PlayStatus;
 
 public class PlayBackEventBus extends BroadcastReceiver {
     private static volatile Bus bus;
@@ -23,14 +22,14 @@ public class PlayBackEventBus extends BroadcastReceiver {
         getInstance().unregister(o);
     }
 
-    public static void postAcrossProcess(PlayStatus playStatus, Context context) {
+    public static void postAcrossProcess(Parcelable parcelable, Context context) {
         Intent intent = new Intent(context, PlayBackEventBus.class);
-        intent.putExtra(PAYLOAD, (Parcelable) playStatus);
+        intent.putExtra(PAYLOAD, parcelable);
         context.sendBroadcast(intent);
     }
 
-    public static void postWithinSameProcess(PlayStatus playStatus) {
-        getInstance().post(playStatus);
+    public static void postWithinSameProcess(Parcelable parcelable) {
+        getInstance().post(parcelable);
     }
 
     private static Bus getInstance() {
@@ -46,7 +45,7 @@ public class PlayBackEventBus extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        PlayStatus playStatus = intent.getParcelableExtra(PAYLOAD);
-        PlayBackEventBus.postWithinSameProcess(playStatus);
+        Parcelable parcelable = intent.getParcelableExtra(PAYLOAD);
+        PlayBackEventBus.postWithinSameProcess(parcelable);
     }
 }

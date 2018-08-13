@@ -28,7 +28,7 @@ import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
-import org.willemsens.player.playback.PlayStatus;
+import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.customviews.ClickableImageButton;
@@ -295,12 +295,12 @@ public class AlbumFragment extends Fragment {
     }
 
     @Subscribe
-    public void handleCurrentPlayStatus(PlayStatus playStatus) {
+    public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
         // TODO: Fix this, on the 'release' build it's not working due to the livedata not working across processes.
         if (this.viewModel.currentSongLiveData.getValue() == null
                 || this.viewModel.albumLiveData.getValue() == null
                 || this.viewModel.currentSongLiveData.getValue().albumId != this.viewModel.albumLiveData.getValue().id
-                || playStatus != PLAYING) {
+                || message.getPlayStatus() != PLAYING) {
             this.playAlbum.setEnabled(true);
         } else {
             this.playAlbum.setEnabled(false);

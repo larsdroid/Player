@@ -22,6 +22,7 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
@@ -117,7 +118,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
 
     private void setCurrentPlayStatus(PlayStatus playStatus) {
         this.musicDao.setCurrentPlayStatus(playStatus);
-        PlayBackEventBus.postAcrossProcess(playStatus, this.context);
+        PlayBackEventBus.postAcrossProcess(new CurrentPlayStatusMessage(playStatus), this.context);
     }
 
     void startSong(final long songId, final PlayerCommand playerCommand) {

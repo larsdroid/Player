@@ -17,7 +17,7 @@ import butterknife.OnClick;
 import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
-import org.willemsens.player.playback.PlayStatus;
+import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
@@ -123,8 +123,8 @@ public class NowPlayingFragment extends Fragment {
     }
 
     @Subscribe
-    public void handleCurrentPlayStatus(PlayStatus playStatus) {
-        switch (playStatus) {
+    public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
+        switch (message.getPlayStatus()) {
             case PLAYING:
                 playPauseStopButton.setImageResource(R.drawable.ic_pause_white_48dp);
                 break;
