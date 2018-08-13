@@ -3,10 +3,10 @@ package org.willemsens.player.playback.eventbus;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class CurrentAlbumMessage implements Parcelable {
+public class AlbumUpdatedMessage implements Parcelable {
     private final long albumId;
 
-    public CurrentAlbumMessage(long albumId) {
+    public AlbumUpdatedMessage(long albumId) {
         this.albumId = albumId;
     }
 
@@ -24,18 +24,18 @@ public class CurrentAlbumMessage implements Parcelable {
         dest.writeLong(this.albumId);
     }
 
-    public static final Parcelable.Creator<CurrentAlbumMessage> CREATOR
-            = new Parcelable.Creator<CurrentAlbumMessage>() {
-        public CurrentAlbumMessage createFromParcel(Parcel in) {
-            return new CurrentAlbumMessage(in);
+    public static final Parcelable.Creator<AlbumUpdatedMessage> CREATOR
+            = new Parcelable.Creator<AlbumUpdatedMessage>() {
+        public AlbumUpdatedMessage createFromParcel(Parcel in) {
+            return new AlbumUpdatedMessage(in);
         }
 
-        public CurrentAlbumMessage[] newArray(int size) {
-            return new CurrentAlbumMessage[size];
+        public AlbumUpdatedMessage[] newArray(int size) {
+            return new AlbumUpdatedMessage[size];
         }
     };
 
-    private CurrentAlbumMessage(Parcel in) {
+    private AlbumUpdatedMessage(Parcel in) {
         this.albumId = in.readLong();
     }
 }

@@ -9,6 +9,8 @@ import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.playback.eventbus.AlbumUpdatedMessage;
+import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +56,11 @@ public class Mp3ScanningService extends IntentService {
             // This takes a while!!
             final Mp3Info mp3Info = Mp3Info.of(new File(song.file));
 
-            this.musicDao.updateSongLength(song, mp3Info.getSeconds());
+            final boolean isAlbumUpdated = this.musicDao.updateSongLength(song, mp3Info.getSeconds());
+            // TODO: event bus notify song change
+            if (isAlbumUpdated) {
+                PlayBackEventBus.postWithinSameProcess(new AlbumUpdatedMessage(song.albumId));
+            }
 
             MusicLibraryBroadcastBuilder builder = new MusicLibraryBroadcastBuilder(this);
             builder

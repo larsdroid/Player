@@ -19,7 +19,7 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
-import org.willemsens.player.playback.eventbus.CurrentAlbumMessage;
+import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
@@ -102,7 +102,7 @@ public class NowPlayingFragment extends Fragment {
     }
 
     @Subscribe
-    public void handleCurrentAlbum(CurrentAlbumMessage message) {
+    public void handleCurrentAlbum(CurrentAlbumOrSongMessage message) {
         // TODO: move this off the main thread
         final SongWithAlbumInfo song = this.musicDao.getSongWithAlbumInfo(message.getAlbumId());
 

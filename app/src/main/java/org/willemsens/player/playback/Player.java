@@ -22,8 +22,9 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.eventbus.AlbumUpdatedMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
-import org.willemsens.player.playback.eventbus.CurrentAlbumMessage;
+import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
@@ -86,7 +87,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         if (resetToStartOfSong) {
             album.currentMillisInTrack = 0;
         }
-        updateApplicationState(album);
+        updateApplicationState(album, true);
 
         MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(Uri.fromFile(new File(song.file)));
@@ -120,10 +121,16 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         PlayBackEventBus.postAcrossProcess(new CurrentPlayStatusMessage(playStatus), this.context);
     }
 
-    private void updateApplicationState(Album album) {
-        this.musicDao.setCurrentAlbum(album);
+    private void updateApplicationState(Album album, boolean newCurrentAlbumOrSong) {
+        if (newCurrentAlbumOrSong) {
+            this.musicDao.setCurrentAlbum(album);
+        }
         this.musicDao.updateAlbum(album);
-        PlayBackEventBus.postAcrossProcess(new CurrentAlbumMessage(album.id), this.context);
+        if (newCurrentAlbumOrSong) {
+            PlayBackEventBus.postAcrossProcess(new CurrentAlbumOrSongMessage(album.id), this.context);
+        } else {
+            PlayBackEventBus.postAcrossProcess(new AlbumUpdatedMessage(album.id), this.context);
+        }
     }
 
     void startSong(final long songId, final PlayerCommand playerCommand) {
@@ -223,7 +230,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                     }
 
                     currentAlbum.playCount++;
-                    musicDao.updateAlbum(currentAlbum);
+                    updateApplicationState(currentAlbum, false);
                 } else {
                     startSong(currentAlbum, nextSong);
                 }
@@ -235,7 +242,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         final Album album = this.musicDao.getCurrentAlbum();
         if (album != null) {
             album.currentMillisInTrack = (int) this.exoPlayer.getCurrentPosition();
-            this.musicDao.updateAlbum(album);
+            updateApplicationState(album, false);
         }
     }
 

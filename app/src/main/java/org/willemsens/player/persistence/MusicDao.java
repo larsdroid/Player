@@ -84,7 +84,7 @@ public abstract class MusicDao {
     public abstract Song findPreviousSong(long albumId, int followingTrack);
 
     @Query("SELECT * FROM album WHERE id = :id")
-    public abstract LiveData<Album> getAlbum(long id);
+    public abstract Album getAlbum(long id);
 
     @Query("SELECT ar.* FROM artist ar, album al WHERE ar.id = al.artistId AND al.id = :albumId")
     public abstract LiveData<Artist> getArtistForAlbum(long albumId);
@@ -96,7 +96,7 @@ public abstract class MusicDao {
     public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
     @Query("SELECT so.* FROM song so, album al, applicationstate ap WHERE so.albumId = al.id AND so.track = al.currentTrack AND al.id = ap.value AND ap.property = 'APPSTATE_CURRENT_ALBUM_ID'")
-    public abstract LiveData<Song> getCurrentSong();
+    public abstract Song getCurrentSong();
 
     @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName"
             + " FROM album al"
@@ -225,15 +225,26 @@ public abstract class MusicDao {
         return song;
     }
 
-    public void updateSongLength(Song song, int length) {
+    /**
+     * Returns 'true' if the song's album was updated as well.
+     * @param song The song to update.
+     * @param length The new song length.
+     * @return 'true' if the song's album was updated as well.
+     */
+    public boolean updateSongLength(Song song, int length) {
         song.length = length;
         this.updateSong(song);
 
-        updateAlbumLength(song.albumId);
+        return updateAlbumLength(song.albumId);
     }
 
+    /**
+     * Returns 'true' if the album was updated.
+     * @param albumId The id of the album to update.
+     * @return 'true' if the album was updated.
+     */
     @Transaction
-    void updateAlbumLength(long albumId) {
+    boolean updateAlbumLength(long albumId) {
         if (getSongCountWithoutLength(albumId) == 0) {
             final Album album = findAlbum(albumId);
             // Null check mandatory since a long-running background service can (for a very brief period of time)
@@ -242,8 +253,10 @@ public abstract class MusicDao {
             if (album != null) {
                 album.length = getTotalAlbumLength(albumId);
                 updateAlbum(album);
+                return true;
             }
         }
+        return false;
     }
 
     @Query("UPDATE album SET imageId = :imageId WHERE id = :albumId")

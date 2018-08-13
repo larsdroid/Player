@@ -13,6 +13,8 @@ import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Artist;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.eventbus.AlbumUpdatedMessage;
+import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
 import java.io.IOException;
@@ -115,8 +117,15 @@ class AudioFileReader {
         // The regex is needed because sometimes the track is stored as "4/10" or something.
         final int track = songTrack != null && !songTrack.isEmpty() ? Integer.parseInt(songTrack.split("[^0-9]+")[0]) : -1;
 
-        return musicDao.findOrCreateSong(songName, songArtist.id, album.id, track,
+        // TODO: for clarification: rename 'findOrCreateSong' to 'createSong'??? Can it be that the song already exists???
+        final Song song = musicDao.findOrCreateSong(songName, songArtist.id, album.id, track,
                 audioFile.getFile().getCanonicalPath(), songLength, this::handleSongInsertion);
+        // TODO: send event bus song created message
+        if (songLength != null) {
+            // The album's length is only updated in case all song lengths are known (non-null).
+            PlayBackEventBus.postWithinSameProcess(new AlbumUpdatedMessage(album.id));
+        }
+        return song;
     }
 
     private void handleArtistInsertion(Artist artist) {
