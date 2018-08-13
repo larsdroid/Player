@@ -1,6 +1,5 @@
 package org.willemsens.player.view.main.music.nowplaying;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -16,7 +15,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
+import org.willemsens.player.playback.eventbus.CurrentAlbumMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
@@ -46,7 +49,7 @@ public class NowPlayingFragment extends Fragment {
     @BindView(R.id.button_next)
     ImageView nextButton;
 
-    private NowPlayingViewModel viewModel;
+    private MusicDao musicDao;
 
     public static NowPlayingFragment newInstance() {
         return new NowPlayingFragment();
@@ -81,9 +84,7 @@ public class NowPlayingFragment extends Fragment {
 
         albumCover.setImageDrawable(null);
 
-        this.viewModel = ViewModelProviders.of(this).get(NowPlayingViewModel.class);
-
-        observeCurrentSong();
+        this.musicDao = AppDatabase.getAppDatabase(getActivity().getApplication()).musicDao();
 
         return view;
     }
@@ -100,26 +101,28 @@ public class NowPlayingFragment extends Fragment {
         super.onStop();
     }
 
-    private void observeCurrentSong() {
-        this.viewModel.songLiveData.observe(this, song -> {
-            if (song != null && song.albumImageData != null) {
-                final Bitmap bitmap = BitmapFactory.decodeByteArray(
-                        song.albumImageData, 0, song.albumImageData.length);
-                albumCover.setImageBitmap(bitmap);
-            } else {
-                albumCover.setImageDrawable(null);
-            }
+    @Subscribe
+    public void handleCurrentAlbum(CurrentAlbumMessage message) {
+        // TODO: move this off the main thread
+        final SongWithAlbumInfo song = this.musicDao.getSongWithAlbumInfo(message.getAlbumId());
 
-            if (song != null) {
-                trackNumber.setText(String.valueOf(song.track));
-                songName.setText(song.name);
-                albumName.setText(song.albumName);
-            } else {
-                trackNumber.setText("--");
-                songName.setText("");
-                albumName.setText("");
-            }
-        });
+        if (song != null && song.albumImageData != null) {
+            final Bitmap bitmap = BitmapFactory.decodeByteArray(
+                    song.albumImageData, 0, song.albumImageData.length);
+            albumCover.setImageBitmap(bitmap);
+        } else {
+            albumCover.setImageDrawable(null);
+        }
+
+        if (song != null) {
+            trackNumber.setText(String.valueOf(song.track));
+            songName.setText(song.name);
+            albumName.setText(song.albumName);
+        } else {
+            trackNumber.setText("--");
+            songName.setText("");
+            albumName.setText("");
+        }
     }
 
     @Subscribe

@@ -99,13 +99,12 @@ public abstract class MusicDao {
     public abstract LiveData<Song> getCurrentSong();
 
     @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName"
-            + " FROM applicationstate ap"
-            + " LEFT JOIN album al ON ap.value = al.id"
+            + " FROM album al"
             + " LEFT JOIN song so ON al.currentTrack = so.track AND al.id = so.albumId"
             + " LEFT JOIN artist ar ON so.artistId = ar.id"
             + " LEFT OUTER JOIN image im ON al.imageId = im.id"
-            + " WHERE ap.property = 'APPSTATE_CURRENT_ALBUM_ID'")
-    public abstract LiveData<SongWithAlbumInfo> getCurrentSongWithAlbumInfo();
+            + " WHERE al.id = :albumId")
+    public abstract SongWithAlbumInfo getSongWithAlbumInfo(long albumId);
 
     @Query("SELECT ar.id, ar.name, im.imageData FROM artist ar LEFT OUTER JOIN image im ON ar.imageId = im.id ORDER BY ar.name")
     public abstract LiveData<List<ArtistWithImage>> getAllArtistsWithImages();
