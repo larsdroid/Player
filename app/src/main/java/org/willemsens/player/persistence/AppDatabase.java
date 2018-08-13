@@ -24,7 +24,7 @@ import org.willemsens.player.persistence.entities.Song;
         exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
-    private static AppDatabase INSTANCE;
+    private static volatile AppDatabase INSTANCE;
 
     public abstract MusicDao musicDao();
 

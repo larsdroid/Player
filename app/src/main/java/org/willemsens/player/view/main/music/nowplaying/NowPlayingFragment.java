@@ -14,8 +14,11 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
+import org.willemsens.player.playback.PlayStatus;
+import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
@@ -81,9 +84,20 @@ public class NowPlayingFragment extends Fragment {
         this.viewModel = ViewModelProviders.of(this).get(NowPlayingViewModel.class);
 
         observeCurrentSong();
-        observeCurrentPlayStatus();
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        PlayBackEventBus.register(this);
+    }
+
+    @Override
+    public void onStop() {
+        PlayBackEventBus.unregister(this);
+        super.onStop();
     }
 
     private void observeCurrentSong() {
@@ -108,18 +122,17 @@ public class NowPlayingFragment extends Fragment {
         });
     }
 
-    private void observeCurrentPlayStatus() {
-        this.viewModel.playStatusLiveData.observe(this, playStatus -> {
-            switch (playStatus) {
-                case PLAYING:
-                    playPauseStopButton.setImageResource(R.drawable.ic_pause_white_48dp);
-                    break;
-                case STOPPED:
-                    playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-                    break;
-                case PAUSED:
-                    playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-            }
-        });
+    @Subscribe
+    public void handleCurrentPlayStatus(PlayStatus playStatus) {
+        switch (playStatus) {
+            case PLAYING:
+                playPauseStopButton.setImageResource(R.drawable.ic_pause_white_48dp);
+                break;
+            case STOPPED:
+                playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                break;
+            case PAUSED:
+                playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+        }
     }
 }

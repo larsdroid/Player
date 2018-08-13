@@ -1,7 +1,6 @@
 package org.willemsens.player.persistence;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Transformations;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -374,17 +373,6 @@ public abstract class MusicDao {
         } else {
             return PlayStatus.STOPPED;
         }
-    }
-
-    public LiveData<PlayStatus> getCurrentPlayStatus() {
-        LiveData<ApplicationState> statePlayStatus = getApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
-        return Transformations.map(statePlayStatus, playStatus -> {
-            if (playStatus != null) {
-                return PlayStatus.valueOf(playStatus.value);
-            } else {
-                return PlayStatus.STOPPED;
-            }
-        });
     }
 
     public void setCurrentPlayStatus(PlayStatus playStatus) {

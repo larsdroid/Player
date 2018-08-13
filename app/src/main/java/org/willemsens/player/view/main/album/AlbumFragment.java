@@ -24,16 +24,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.PlayStatus;
+import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.customviews.ClickableImageButton;
 import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
+import static org.willemsens.player.playback.PlayStatus.PLAYING;
 
 public class AlbumFragment extends Fragment {
     private static final boolean SHOW_TITLE_IN_TOOLBAR = false;
@@ -125,7 +128,6 @@ public class AlbumFragment extends Fragment {
         observeSongs();
         observeCoverArt();
         observeCurrentSong();
-        observePlayStatus();
 
         this.playAlbum.setOnClickListener(event -> {
             if (viewModel.albumLiveData.getValue() != null) {
@@ -181,13 +183,21 @@ public class AlbumFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        PlayBackEventBus.register(this);
+    }
+
+    @Override
     public void onStop() {
-        super.onStop();
+        PlayBackEventBus.unregister(this);
 
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().hide();
         activity.setSupportActionBar(getActivity().findViewById(R.id.main_toolbar));
         activity.getSupportActionBar().show();
+
+        super.onStop();
     }
 
     private void observeAlbum() {
@@ -281,22 +291,16 @@ public class AlbumFragment extends Fragment {
 
     private void observeCurrentSong() {
         this.viewModel.currentSongLiveData.observe(this,
-                currentSong -> {
-                    checkAlbumPlayable();
-                    adapter.setHighlightedSong(currentSong);
-                });
+                currentSong -> adapter.setHighlightedSong(currentSong));
     }
 
-    private void observePlayStatus() {
-        this.viewModel.playStatusLiveData.observe(this, playStatus -> checkAlbumPlayable());
-    }
-
-    private void checkAlbumPlayable() {
-        if (this.viewModel.playStatusLiveData.getValue() == null
-                || this.viewModel.currentSongLiveData.getValue() == null
+    @Subscribe
+    public void handleCurrentPlayStatus(PlayStatus playStatus) {
+        // TODO: Fix this, on the 'release' build it's not working due to the livedata not working across processes.
+        if (this.viewModel.currentSongLiveData.getValue() == null
                 || this.viewModel.albumLiveData.getValue() == null
                 || this.viewModel.currentSongLiveData.getValue().albumId != this.viewModel.albumLiveData.getValue().id
-                || this.viewModel.playStatusLiveData.getValue() != PlayStatus.PLAYING) {
+                || playStatus != PLAYING) {
             this.playAlbum.setEnabled(true);
         } else {
             this.playAlbum.setEnabled(false);

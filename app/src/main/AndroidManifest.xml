@@ -48,7 +48,11 @@
                 android:name=".playback.PlayBackService"
                 android:description="@string/music_playing_service_description"
                 android:exported="false"
-                android:process=":AlbumPlayBack" />
+                android:process=":AlbumPlayBack"/>
+
+        <receiver
+                android:name=".playback.eventbus.PlayBackEventBus"
+                android:exported="true"/>
     </application>
 
 </manifest>

@@ -22,6 +22,7 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
 
@@ -33,12 +34,14 @@ import static org.willemsens.player.playback.PlayerCommand.PLAY;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
 
 public class Player extends com.google.android.exoplayer2.Player.DefaultEventListener {
+    private final Context context;
     private final MusicDao musicDao;
     private final SimpleExoPlayer exoPlayer;
     private final OnUpdateListener onUpdateListener;
     private final DataSource.Factory dataSourceFactory;
 
     Player(Context context, OnUpdateListener onUpdateListener) {
+        this.context = context;
         this.onUpdateListener = onUpdateListener;
 
         this.musicDao = AppDatabase.getAppDatabase(context).musicDao();
@@ -116,6 +119,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         final Song song = this.musicDao.findSong(songId);
         if (playerCommand == PLAY) {
             this.musicDao.setCurrentPlayStatus(PLAYING);
+            PlayBackEventBus.postAcrossProcess(PLAYING, this.context);
         } else {
             Log.e(getClass().getName(), "Invalid PlayerCommand received in Player::startSong");
         }
@@ -126,6 +130,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     void startOrContinueAlbum(final long albumId, final PlayerCommand playerCommand) {
         if (playerCommand == PLAY) {
             this.musicDao.setCurrentPlayStatus(PLAYING);
+            PlayBackEventBus.postAcrossProcess(PLAYING, this.context);
         } else {
             Log.e(getClass().getName(), "Invalid PlayerCommand received in Player::startSong");
         }
@@ -163,14 +168,17 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 final Album currentAlb = this.musicDao.getCurrentAlbum();
                 if (this.musicDao.getCurrentPlayStatus_NON_Live() == STOPPED && currentAlb != null) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
+                    PlayBackEventBus.postAcrossProcess(PLAYING, this.context);
                     final Song song = this.musicDao.findSong(currentAlb.id, currentAlb.currentTrack == null ? 1 : currentAlb.currentTrack);
                     startSong(currentAlb, song); // Not optimal to reload this song, I guess...
                 } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PAUSED) {
                     this.musicDao.setCurrentPlayStatus(PLAYING);
+                    PlayBackEventBus.postAcrossProcess(PLAYING, this.context);
                     this.exoPlayer.setPlayWhenReady(true);
                     this.onUpdateListener.onUpdate();
                 } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
+                    PlayBackEventBus.postAcrossProcess(PAUSED, this.context);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
@@ -178,6 +186,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
             case PAUSE:
                 if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
                     this.musicDao.setCurrentPlayStatus(PAUSED);
+                    PlayBackEventBus.postAcrossProcess(PAUSED, this.context);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
@@ -203,7 +212,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                         startSong(currentAlbum, nextSong);
                     } else {
                         this.musicDao.setCurrentPlayStatus(STOPPED);
-                        this.onUpdateListener.onUpdate();
+                        PlayBackEventBus.postAcrossProcess(STOPPED, this.context);
 
                         currentAlbum.currentTrack = null;
                         currentAlbum.currentMillisInTrack = null;
@@ -229,6 +238,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     void release() {
         if (getPlayStatus() == PLAYING) {
             this.musicDao.setCurrentPlayStatus(PAUSED);
+            PlayBackEventBus.postAcrossProcess(PAUSED, this.context);
         }
         persistTrackMillis();
         this.exoPlayer.release();
