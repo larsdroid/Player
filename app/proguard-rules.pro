@@ -50,3 +50,15 @@
     @com.squareup.otto.Subscribe public *;
     @com.squareup.otto.Produce public *;
 }
+
+# Gson
+-keepattributes Signature
+#-keepattributes *Annotation*
+
+# Application classes that will be serialized/deserialized over Gson
+-keep class org.willemsens.player.fetchers.musicbrainz.dto.** { *; }
+-keep class org.willemsens.player.fetchers.discogs.dto.** { *; }
+
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
