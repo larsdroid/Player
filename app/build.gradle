@@ -63,7 +63,7 @@ android {
             buildConfigField "boolean", "USE_CRASHLYTICS", "true"
             buildConfigField "boolean", "USE_ANSWERS", "true"
             ext.enableCrashlytics = true
-            minifyEnabled false // true not needed since open source
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
