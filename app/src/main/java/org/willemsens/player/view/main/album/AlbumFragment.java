@@ -36,6 +36,7 @@ import org.willemsens.player.util.StringFormat;
 import org.willemsens.player.view.customviews.ClickableImageButton;
 import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
+import org.willemsens.player.view.main.MainActivity;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
@@ -196,10 +197,11 @@ public class AlbumFragment extends Fragment {
     public void onStop() {
         PlayBackEventBus.unregister(this);
 
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        MainActivity activity = (MainActivity) getActivity();
         activity.getSupportActionBar().hide();
         activity.setSupportActionBar(getActivity().findViewById(R.id.main_toolbar));
         activity.getSupportActionBar().show();
+        activity.setupActionBarAndDrawer();
 
         super.onStop();
     }
