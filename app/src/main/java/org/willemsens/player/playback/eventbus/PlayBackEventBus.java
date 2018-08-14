@@ -28,7 +28,7 @@ public class PlayBackEventBus extends BroadcastReceiver {
         context.sendBroadcast(intent);
     }
 
-    public static void postWithinSameProcess(Parcelable parcelable) {
+    private static void postWithinSameProcess(Parcelable parcelable) {
         getInstance().post(parcelable);
     }
 
