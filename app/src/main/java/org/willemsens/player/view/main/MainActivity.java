@@ -1,6 +1,7 @@
 package org.willemsens.player.view.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -27,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +36,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -47,7 +50,6 @@ import org.willemsens.player.musiclibrary.MusicLibraryBroadcastBuilder;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
-import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.view.main.album.AlbumFragment;
 import org.willemsens.player.view.main.music.MusicFragment;
 import org.willemsens.player.view.main.music.SubFragmentType;
@@ -57,6 +59,8 @@ import org.willemsens.player.view.main.music.nowplaying.NowPlayingFragment;
 import org.willemsens.player.view.main.music.songs.OnSongClickedListener;
 import org.willemsens.player.view.main.settings.OnSettingsFragmentListener;
 import org.willemsens.player.view.main.settings.SettingsFragment;
+
+import java.util.Objects;
 
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ALBUMS_DELETED;
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastType.MLBT_ARTISTS_DELETED;
@@ -269,7 +273,8 @@ public class MainActivity extends AppCompatActivity
                             "<a href=\"" + getString(R.string.contact) + "\">" + getString(R.string.contact) + "</a>"));
                     AlertDialog dialog = builderContact.setPositiveButton(android.R.string.ok, null).create();
                     dialog.show();
-                    ((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+                    TextView message = dialog.findViewById(android.R.id.message);
+                    Objects.requireNonNull(message).setMovementMethod(LinkMovementMethod.getInstance());
                     break;
             }
         }
@@ -395,7 +400,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean isServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+        for (ActivityManager.RunningServiceInfo service : Objects.requireNonNull(manager).getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
                 return true;
             }
@@ -425,14 +430,22 @@ public class MainActivity extends AppCompatActivity
 
     private class PlayBackStatusReceiver extends BroadcastReceiver {
         @Override
+        @SuppressLint("CheckResult")
         public void onReceive(Context context, Intent intent) {
-            // TODO: runOnUiThread(new Runnable() {    ?
-            final PlayStatus playStatus = musicDao.getCurrentPlayStatus_NON_Live();
-            if (playStatus == STOPPED) {
-                removeNowPlayingFragment();
-            } else {
-                addNowPlayingFragment();
-            }
+            Single.fromCallable(() ->
+                    new Pair<>(
+                            musicDao.getCurrentPlayStatus_NON_Live(),
+                            musicDao.getCurrentAlbum())
+            )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(pair -> {
+                        if (pair.second == null || pair.first == STOPPED) {
+                            removeNowPlayingFragment();
+                        } else {
+                            addNowPlayingFragment();
+                        }
+                    });
         }
     }
 
@@ -440,7 +453,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             final String intentAction = intent.getAction();
-            if (intentAction.equals(AudioManager.ACTION_HEADSET_PLUG)) {
+            if (intentAction != null && intentAction.equals(AudioManager.ACTION_HEADSET_PLUG)) {
                 boolean isPluggedIn = intent.getIntExtra("state", 0) == 1;
                 if (!isPluggedIn) {
                     new PlayBackIntentBuilder(MainActivity.this)

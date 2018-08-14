@@ -1,5 +1,6 @@
 package org.willemsens.player.view.main.music.nowplaying;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,14 +15,21 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.squareup.otto.Subscribe;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import org.willemsens.player.R;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.PlayBackIntentBuilder;
+import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
+
+import java.util.Objects;
 
 import static org.willemsens.player.playback.PlayerCommand.NEXT;
 import static org.willemsens.player.playback.PlayerCommand.PREVIOUS;
@@ -84,9 +92,28 @@ public class NowPlayingFragment extends Fragment {
 
         albumCover.setImageDrawable(null);
 
-        this.musicDao = AppDatabase.getAppDatabase(getActivity().getApplication()).musicDao();
+        this.musicDao = AppDatabase.getAppDatabase(Objects.requireNonNull(getActivity()).getApplication()).musicDao();
+
+        initAlbum();
+        initPlayStatus();
 
         return view;
+    }
+
+    @SuppressLint("CheckResult")
+    private void initAlbum() {
+        Maybe.fromCallable(() -> this.musicDao.getCurrentAlbum())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(album -> showCurrentAlbum(album.id));
+    }
+
+    @SuppressLint("CheckResult")
+    private void initPlayStatus() {
+        Single.fromCallable(() -> this.musicDao.getCurrentPlayStatus_NON_Live())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showCurrentPlayStatus);
     }
 
     @Override
@@ -103,9 +130,10 @@ public class NowPlayingFragment extends Fragment {
 
     @Subscribe
     public void handleCurrentAlbum(CurrentAlbumOrSongMessage message) {
-        // TODO: move this off the main thread
-        final SongWithAlbumInfo song = this.musicDao.getSongWithAlbumInfo(message.getAlbumId());
+        showCurrentAlbum(message.getAlbumId());
+    }
 
+    private void showCurrentSong(SongWithAlbumInfo song) {
         if (song != null && song.albumImageData != null) {
             final Bitmap bitmap = BitmapFactory.decodeByteArray(
                     song.albumImageData, 0, song.albumImageData.length);
@@ -125,9 +153,16 @@ public class NowPlayingFragment extends Fragment {
         }
     }
 
-    @Subscribe
-    public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
-        switch (message.getPlayStatus()) {
+    @SuppressLint("CheckResult")
+    private void showCurrentAlbum(long albumId) {
+        Maybe.fromCallable(() -> this.musicDao.getSongWithAlbumInfo(albumId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::showCurrentSong);
+    }
+
+    private void showCurrentPlayStatus(PlayStatus playStatus) {
+        switch (playStatus) {
             case PLAYING:
                 playPauseStopButton.setImageResource(R.drawable.ic_pause_white_48dp);
                 break;
@@ -137,5 +172,10 @@ public class NowPlayingFragment extends Fragment {
             case PAUSED:
                 playPauseStopButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
         }
+    }
+
+    @Subscribe
+    public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
+        showCurrentPlayStatus(message.getPlayStatus());
     }
 }
