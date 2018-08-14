@@ -37,6 +37,8 @@
 -dontwarn java.awt.**
 -dontwarn sun.**
 
+-keep class org.jaudiotagger.** { *; }
+
 # https://stackoverflow.com/questions/49519316/crashlyticscore-expected-method-missing-registeronmeasurementeventlistener
 
 -keep class com.google.android.gms.measurement.AppMeasurement { *; }
