@@ -1,5 +1,6 @@
 package org.willemsens.player.view.main.album;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -25,9 +26,16 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.squareup.otto.Subscribe;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import org.willemsens.player.R;
+import org.willemsens.player.persistence.AppDatabase;
+import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.playback.eventbus.AlbumProgressUpdatedMessage;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
@@ -38,6 +46,8 @@ import org.willemsens.player.view.customviews.HeightCalculatedImageView;
 import org.willemsens.player.view.customviews.HeightCalculatedProgressBar;
 import org.willemsens.player.view.main.MainActivity;
 
+import java.util.Objects;
+
 import static org.willemsens.player.musiclibrary.MusicLibraryBroadcastPayloadType.MLBPT_ALBUM_ID;
 import static org.willemsens.player.playback.PlayStatus.PLAYING;
 
@@ -47,6 +57,7 @@ public class AlbumFragment extends Fragment {
     private AlbumSongAdapter adapter;
     private AlbumAndSongsViewModel viewModel;
     private OnPlayAlbumListener listener;
+    private MusicDao musicDao;
 
     private long albumId; // The ID of the album that this fragment is displaying.
 
@@ -128,6 +139,10 @@ public class AlbumFragment extends Fragment {
 
         this.albumImage.setVisibility(View.INVISIBLE);
         this.progressBar.setVisibility(View.GONE);
+
+        this.musicDao = AppDatabase.getAppDatabase(Objects.requireNonNull(getActivity()).getApplication()).musicDao();
+
+        initCurrentSongAndPlayStatus();
 
         observeAlbum();
         observeArtist();
@@ -265,15 +280,6 @@ public class AlbumFragment extends Fragment {
                 });
     }
 
-    @Subscribe
-    public void handleCurrentAlbumOrSong(CurrentAlbumOrSongMessage message) {
-        if (this.albumId == message.getAlbumId()) {
-            adapter.setHighlightedSong(message.getSongId());
-        } else {
-            adapter.setHighlightedSong(null);
-        }
-    }
-
     private void showAlbumInfo(Album album) {
         setTitle();
 
@@ -299,6 +305,34 @@ public class AlbumFragment extends Fragment {
     }
 
     @Subscribe
+    public void handleCurrentAlbumOrSong(CurrentAlbumOrSongMessage message) {
+        applyCurrentAlbumOrSong(message.getAlbumId(), message.getSongId());
+    }
+
+    private void applyCurrentAlbumOrSong(long albumId, long songId) {
+        if (this.albumId == albumId) {
+            adapter.setHighlightedSong(songId);
+        } else {
+            adapter.setHighlightedSong(null);
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    private void initCurrentSongAndPlayStatus() {
+        // TODO: No multiple 'observeOn' calls? Are all DAO interactions running on IO thread now? Probably not!
+        Maybe.fromCallable(() -> this.musicDao.getCurrentAlbum())
+                .map(currentAlbum -> this.musicDao.getSongWithAlbumInfo(currentAlbum.id))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(songWithAlbumInfo -> {
+                    applyCurrentAlbumOrSong(songWithAlbumInfo.albumId, songWithAlbumInfo.id);
+                    return Observable.empty();
+                })
+                .map(empty -> this.musicDao.findCurrentPlayStatus())
+                .subscribe(this::applyCurrentPlayStatus);
+    }
+
+    @Subscribe
     public void handleAlbumProgressUpdated(AlbumProgressUpdatedMessage message) {
         if (this.albumId == message.getAlbumId()) {
             final Album album = this.viewModel.albumLiveData.getValue();
@@ -308,9 +342,12 @@ public class AlbumFragment extends Fragment {
 
     @Subscribe
     public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
-        // TODO: Fix this, on the 'release' build it's not working due to the livedata not working across processes.
+        applyCurrentPlayStatus(message.getPlayStatus());
+    }
+
+    private void applyCurrentPlayStatus(PlayStatus playStatus) {
         if (!adapter.isSongHighlighted()
-                || message.getPlayStatus() != PLAYING) {
+                || playStatus != PLAYING) {
             this.playAlbum.setEnabled(true);
         } else {
             this.playAlbum.setEnabled(false);

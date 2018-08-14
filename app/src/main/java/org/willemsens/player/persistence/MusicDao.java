@@ -364,7 +364,7 @@ public abstract class MusicDao {
         setCurrentAlbumId(album == null ? null : album.id);
     }
 
-    public PlayStatus getCurrentPlayStatus_NON_Live() {
+    public PlayStatus findCurrentPlayStatus() {
         ApplicationState statePlayStatus = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_STATUS.name());
         if (statePlayStatus != null) {
             return PlayStatus.valueOf(statePlayStatus.value);

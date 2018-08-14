@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Single.fromCallable(() ->
                     new Pair<>(
-                            musicDao.getCurrentPlayStatus_NON_Live(),
+                            musicDao.findCurrentPlayStatus(),
                             musicDao.getCurrentAlbum())
             )
                     .subscribeOn(Schedulers.io())

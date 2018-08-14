@@ -105,7 +105,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
     }
 
     PlayStatus getPlayStatus() {
-        return this.musicDao.getCurrentPlayStatus_NON_Live();
+        return this.musicDao.findCurrentPlayStatus();
     }
 
     Song getSong() {
@@ -187,22 +187,22 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                 break;
             case STOP_PLAY_PAUSE:
                 final Album currentAlb = this.musicDao.getCurrentAlbum();
-                if (this.musicDao.getCurrentPlayStatus_NON_Live() == STOPPED && currentAlb != null) {
+                if (this.musicDao.findCurrentPlayStatus() == STOPPED && currentAlb != null) {
                     this.updateAppStatePlayStatus(PLAYING);
                     final Song song = this.musicDao.findSong(currentAlb.id, currentAlb.currentTrack == null ? 1 : currentAlb.currentTrack);
                     startSong(currentAlb, song); // Not optimal to reload this song, I guess...
-                } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PAUSED) {
+                } else if (this.musicDao.findCurrentPlayStatus() == PAUSED) {
                     this.updateAppStatePlayStatus(PLAYING);
                     this.exoPlayer.setPlayWhenReady(true);
                     this.onUpdateListener.onUpdate();
-                } else if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
+                } else if (this.musicDao.findCurrentPlayStatus() == PLAYING) {
                     this.updateAppStatePlayStatus(PAUSED);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();
                 }
                 break;
             case PAUSE:
-                if (this.musicDao.getCurrentPlayStatus_NON_Live() == PLAYING) {
+                if (this.musicDao.findCurrentPlayStatus() == PLAYING) {
                     this.updateAppStatePlayStatus(PAUSED);
                     this.exoPlayer.setPlayWhenReady(false);
                     this.onUpdateListener.onUpdate();

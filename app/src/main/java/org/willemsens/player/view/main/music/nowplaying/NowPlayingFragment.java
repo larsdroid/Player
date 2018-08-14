@@ -110,7 +110,7 @@ public class NowPlayingFragment extends Fragment {
 
     @SuppressLint("CheckResult")
     private void initPlayStatus() {
-        Single.fromCallable(() -> this.musicDao.getCurrentPlayStatus_NON_Live())
+        Single.fromCallable(() -> this.musicDao.findCurrentPlayStatus())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::showCurrentPlayStatus);
