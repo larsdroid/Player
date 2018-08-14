@@ -23,14 +23,14 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
     private final Context context;
     private final OnSongClickedListener listener;
     private List<Song> songs;
-    private Song highlightedSong;
+    private Long highlightedSongId;
     private Artist artist;
 
     AlbumSongAdapter(Context context) {
         this.context = context;
         this.listener = (OnSongClickedListener) context;
         this.songs = new ArrayList<>();
-        this.highlightedSong = null;
+        this.highlightedSongId = null;
     }
 
     public void setSongs(List<Song> songs) {
@@ -38,12 +38,31 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
         this.notifyDataSetChanged();
     }
 
-    public void setHighlightedSong(Song highlightedSong) {
-        final Song previouslyHightlighted = this.highlightedSong;
-        this.highlightedSong = highlightedSong;
+    public void setHighlightedSong(Long songId) {
+        final Long previouslyHightlightedId = this.highlightedSongId;
+        this.highlightedSongId = songId;
 
-        this.notifyItemChanged(this.songs.indexOf(previouslyHightlighted));
-        this.notifyItemChanged(this.songs.indexOf(this.highlightedSong));
+        notifyItemWithSongId(previouslyHightlightedId);
+        notifyItemWithSongId(this.highlightedSongId);
+    }
+
+    public boolean isSongHighlighted() {
+        return this.highlightedSongId != null;
+    }
+
+    private void notifyItemWithSongId(Long songId) {
+        if (songId != null) {
+            int index = 0;
+            for (Song song : this.songs) {
+                if (song.id == songId) {
+                    break;
+                }
+                index++;
+            }
+            if (index < this.songs.size()) {
+                this.notifyItemChanged(index);
+            }
+        }
     }
 
     public void setArtist(Artist artist) {
@@ -106,7 +125,7 @@ public class AlbumSongAdapter extends RecyclerView.Adapter<AlbumSongAdapter.Song
             }
             this.songLength.setText(StringFormat.formatToSongLength(song.length));
 
-            if (highlightedSong != null && highlightedSong.id == song.id) {
+            if (highlightedSongId != null && highlightedSongId == song.id) {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
                 this.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorBackground));

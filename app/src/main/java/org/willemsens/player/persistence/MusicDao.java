@@ -84,7 +84,7 @@ public abstract class MusicDao {
     public abstract Song findPreviousSong(long albumId, int followingTrack);
 
     @Query("SELECT * FROM album WHERE id = :id")
-    public abstract Album getAlbum(long id);
+    public abstract LiveData<Album> getAlbum(long id);
 
     @Query("SELECT ar.* FROM artist ar, album al WHERE ar.id = al.artistId AND al.id = :albumId")
     public abstract LiveData<Artist> getArtistForAlbum(long albumId);
@@ -209,7 +209,7 @@ public abstract class MusicDao {
         return album;
     }
 
-    public Song findOrCreateSong(@NonNull String songName, long songArtistId, long albumId, int track, @NonNull String file,
+    public void findOrCreateSong(@NonNull String songName, long songArtistId, long albumId, int track, @NonNull String file,
                                  Integer songLength, Consumer<Song> handleInsertedSong) {
         Song song = findSong(file);
         if (song == null) {
@@ -222,29 +222,17 @@ public abstract class MusicDao {
 
             Observable.just(song).subscribe(handleInsertedSong).dispose();
         }
-        return song;
     }
 
-    /**
-     * Returns 'true' if the song's album was updated as well.
-     * @param song The song to update.
-     * @param length The new song length.
-     * @return 'true' if the song's album was updated as well.
-     */
-    public boolean updateSongLength(Song song, int length) {
+    public void updateSongLength(Song song, int length) {
         song.length = length;
         this.updateSong(song);
 
-        return updateAlbumLength(song.albumId);
+        updateAlbumLength(song.albumId);
     }
 
-    /**
-     * Returns 'true' if the album was updated.
-     * @param albumId The id of the album to update.
-     * @return 'true' if the album was updated.
-     */
     @Transaction
-    boolean updateAlbumLength(long albumId) {
+    void updateAlbumLength(long albumId) {
         if (getSongCountWithoutLength(albumId) == 0) {
             final Album album = findAlbum(albumId);
             // Null check mandatory since a long-running background service can (for a very brief period of time)
@@ -253,10 +241,8 @@ public abstract class MusicDao {
             if (album != null) {
                 album.length = getTotalAlbumLength(albumId);
                 updateAlbum(album);
-                return true;
             }
         }
-        return false;
     }
 
     @Query("UPDATE album SET imageId = :imageId WHERE id = :albumId")

@@ -26,11 +26,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.squareup.otto.Subscribe;
 import org.willemsens.player.R;
-import org.willemsens.player.persistence.AppDatabase;
-import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
-import org.willemsens.player.playback.eventbus.AlbumUpdatedMessage;
+import org.willemsens.player.playback.eventbus.AlbumProgressUpdatedMessage;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
@@ -48,9 +46,8 @@ public class AlbumFragment extends Fragment {
     private AlbumSongAdapter adapter;
     private AlbumAndSongsViewModel viewModel;
     private OnPlayAlbumListener listener;
-    private MusicDao musicDao;
-    private Album album;
-    private Song currentSong; // Could be a song not on this album!
+
+    private long albumId; // The ID of the album that this fragment is displaying.
 
     @BindView(R.id.album_image)
     HeightCalculatedImageView albumImage;
@@ -113,13 +110,9 @@ public class AlbumFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_album, container, false);
         ButterKnife.bind(this, view);
 
-        this.musicDao = AppDatabase.getAppDatabase(getActivity().getApplication()).musicDao();
-
         Bundle arguments = getArguments();
         if (arguments != null) {
-            final long albumId = arguments.getLong(MLBPT_ALBUM_ID.name());
-            this.album = this.musicDao.getAlbum(albumId);
-            this.currentSong = this.musicDao.getCurrentSong();
+            this.albumId = arguments.getLong(MLBPT_ALBUM_ID.name());
 
             this.viewModel = ViewModelProviders.of(this, new AlbumAndSongsViewModelFactory(getActivity().getApplication(), albumId)).get(AlbumAndSongsViewModel.class);
         }
@@ -135,13 +128,18 @@ public class AlbumFragment extends Fragment {
         this.albumImage.setVisibility(View.INVISIBLE);
         this.progressBar.setVisibility(View.GONE);
 
+        observeAlbum();
         observeArtist();
         observeSongs();
         observeCoverArt();
 
-        this.playAlbum.setOnClickListener(event -> listener.playAlbum(this.album.id));
+        this.playAlbum.setOnClickListener(event -> listener.playAlbum(this.albumId));
 
         return view;
+    }
+
+    private void observeAlbum() {
+        this.viewModel.albumLiveData.observe(this, this::showAlbumInfo);
     }
 
     private void observeCoverArt() {
@@ -206,21 +204,17 @@ public class AlbumFragment extends Fragment {
         super.onStop();
     }
 
-    private void showAlbumInfo(Album album) {
-
-    }
-
-    private void updateAlbumProgress() {
+    private void updateAlbumProgress(Integer currentTrack, Integer currentMillisInTrack, Integer length) {
         if (this.viewModel.songsLiveData.getValue() != null
-                && this.album.currentTrack != null
-                && this.album.length != null) {
+                && currentTrack != null
+                && length != null) {
             double currentMillisInAlbum = 0.0;
             boolean foundCurrentSong = false;
 
             for (Song song : this.viewModel.songsLiveData.getValue()) {
-                if (song.track == album.currentTrack) {
+                if (song.track == currentTrack) {
                     foundCurrentSong = true;
-                    currentMillisInAlbum += album.currentMillisInTrack == null ? 0 : album.currentMillisInTrack / 1000;
+                    currentMillisInAlbum += currentMillisInTrack == null ? 0 : currentMillisInTrack / 1000;
                     break;
                 } else {
                     currentMillisInAlbum += song.length;
@@ -231,7 +225,7 @@ public class AlbumFragment extends Fragment {
                 Log.e(getClass().getName(), "Current track in album was not found within album!");
                 albumProgress.setProgress(0);
             } else {
-                albumProgress.setProgress((int) (currentMillisInAlbum * 100.0 / album.length));
+                albumProgress.setProgress((int) (currentMillisInAlbum * 100.0 / length));
             }
         } else {
             albumProgress.setProgress(0);
@@ -249,9 +243,10 @@ public class AlbumFragment extends Fragment {
 
     private void setTitle() {
         if (SHOW_TITLE_IN_TOOLBAR
-                && viewModel.artistLiveData.getValue() != null) {
+                && viewModel.artistLiveData.getValue() != null
+                && viewModel.albumLiveData.getValue() != null) {
             collapsingToolbarLayout.setTitle(viewModel.artistLiveData.getValue().name
-                    + " - " + album.name);
+                    + " - " + viewModel.albumLiveData.getValue().name);
         } else {
             collapsingToolbarLayout.setTitle(getString(R.string.play_album));
         }
@@ -261,31 +256,26 @@ public class AlbumFragment extends Fragment {
         this.viewModel.songsLiveData.observe(this,
                 songs -> {
                     adapter.setSongs(songs);
-                    updateAlbumProgress();
+                    if (viewModel.albumLiveData.getValue() != null) {
+                        final Album album = viewModel.albumLiveData.getValue();
+                        updateAlbumProgress(album.currentTrack, album.currentMillisInTrack, album.length);
+                    }
                 });
     }
 
     @Subscribe
     public void handleCurrentAlbumOrSong(CurrentAlbumOrSongMessage message) {
-        if (this.album.id == message.getAlbumId()) {
-            // TODO: check if this is needed. It seems like 'handleAlbumUpdated' always gets triggered as well when this one triggers.
-            // TODO: move this off the main thread
-            this.album = this.musicDao.getAlbum(message.getAlbumId());
-            this.currentSong = this.musicDao.getCurrentSong();
-            adapter.setHighlightedSong(currentSong);
-            // TODO: check if this is needed. It seems like 'handleAlbumUpdated' always gets triggered as well when this one triggers.
-            updateAlbumProgress();
+        if (this.albumId == message.getAlbumId()) {
+            adapter.setHighlightedSong(message.getSongId());
+        } else {
+            adapter.setHighlightedSong(null);
         }
     }
 
-    @Subscribe
-    public void handleAlbumUpdated(AlbumUpdatedMessage message) {
-        if (this.album.id == message.getAlbumId()) {
-            // TODO: move this off the main thread
-            this.album = this.musicDao.getAlbum(message.getAlbumId());
+    private void showAlbumInfo(Album album) {
+        setTitle();
 
-            setTitle();
-
+        if (album != null) {
             albumName.setText(album.name);
             if (album.yearReleased != null) {
                 albumYear.setText(String.valueOf(album.yearReleased));
@@ -303,16 +293,21 @@ public class AlbumFragment extends Fragment {
                 timesPlayed.setText(R.string.times_played);
             }
             */
+        }
+    }
 
-            updateAlbumProgress();
+    @Subscribe
+    public void handleAlbumProgressUpdated(AlbumProgressUpdatedMessage message) {
+        if (this.albumId == message.getAlbumId()) {
+            final Album album = this.viewModel.albumLiveData.getValue();
+            updateAlbumProgress(message.getCurrentTrack(), message.getCurrentMillisInTrack(), album == null ? null : album.length);
         }
     }
 
     @Subscribe
     public void handleCurrentPlayStatus(CurrentPlayStatusMessage message) {
         // TODO: Fix this, on the 'release' build it's not working due to the livedata not working across processes.
-        if (currentSong == null
-                || currentSong.albumId != album.id
+        if (!adapter.isSongHighlighted()
                 || message.getPlayStatus() != PLAYING) {
             this.playAlbum.setEnabled(true);
         } else {

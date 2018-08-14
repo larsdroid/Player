@@ -5,13 +5,19 @@ import android.os.Parcelable;
 
 public class CurrentAlbumOrSongMessage implements Parcelable {
     private final long albumId;
+    private final long songId;
 
-    public CurrentAlbumOrSongMessage(long albumId) {
+    public CurrentAlbumOrSongMessage(long albumId, long songId) {
         this.albumId = albumId;
+        this.songId = songId;
     }
 
     public long getAlbumId() {
         return albumId;
+    }
+
+    public long getSongId() {
+        return songId;
     }
 
     @Override
@@ -22,6 +28,7 @@ public class CurrentAlbumOrSongMessage implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(this.albumId);
+        dest.writeLong(this.songId);
     }
 
     public static final Parcelable.Creator<CurrentAlbumOrSongMessage> CREATOR
@@ -37,5 +44,6 @@ public class CurrentAlbumOrSongMessage implements Parcelable {
 
     private CurrentAlbumOrSongMessage(Parcel in) {
         this.albumId = in.readLong();
+        this.songId = in.readLong();
     }
 }
