@@ -319,7 +319,6 @@ public class AlbumFragment extends Fragment {
 
     @SuppressLint("CheckResult")
     private void initCurrentSongAndPlayStatus() {
-        // TODO: No multiple 'observeOn' calls? Are all DAO interactions running on IO thread now? Probably not!
         Maybe.fromCallable(() -> this.musicDao.getCurrentAlbum())
                 .map(currentAlbum -> this.musicDao.getSongWithAlbumInfo(currentAlbum.id))
                 .subscribeOn(Schedulers.io())
@@ -328,7 +327,9 @@ public class AlbumFragment extends Fragment {
                     applyCurrentAlbumOrSong(songWithAlbumInfo.albumId, songWithAlbumInfo.id);
                     return Observable.empty();
                 })
+                .observeOn(Schedulers.io())
                 .map(empty -> this.musicDao.findCurrentPlayStatus())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::applyCurrentPlayStatus);
     }
 
