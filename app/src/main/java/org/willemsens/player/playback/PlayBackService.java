@@ -243,7 +243,7 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
 
     @Override
     public void onDestroy() {
-        this.player.release();
+        runOnIOThread(this.player::release);
         super.onDestroy();
     }
 }
