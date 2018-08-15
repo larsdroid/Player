@@ -89,7 +89,8 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
             album.currentMillisInTrack = 0;
         }
         updateAppStateCurrentAlbum(album);
-        updateAppStateAlbumProgress(album);
+        // Don't update the album, it was just updated:
+        updateAppStateAlbumProgress(album, false);
 
         MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(Uri.fromFile(new File(song.file)));
@@ -125,12 +126,15 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
 
     private void updateAppStateCurrentAlbum(Album album) {
         this.musicDao.setCurrentAlbum(album);
+        this.musicDao.updateAlbum(album);
         final SongWithAlbumInfo songWithAlbumInfo = musicDao.getSongWithAlbumInfo(album.id);
         PlayBackEventBus.postAcrossProcess(new CurrentAlbumOrSongMessage(songWithAlbumInfo), this.context);
     }
 
-    private void updateAppStateAlbumProgress(Album album) {
-        this.musicDao.updateAlbum(album);
+    private void updateAppStateAlbumProgress(Album album, boolean updateAlbum) {
+        if (updateAlbum) {
+            this.musicDao.updateAlbum(album);
+        }
         PlayBackEventBus.postAcrossProcess(
                 new AlbumProgressUpdatedMessage(
                         album.id,
@@ -236,7 +240,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
                         currentAlbum.currentTrack = null;
                         currentAlbum.currentMillisInTrack = null;
 
-                        updateAppStateAlbumProgress(currentAlbum);
+                        updateAppStateAlbumProgress(currentAlbum, true);
                     }
                 } else {
                     startSong(currentAlbum, nextSong);
@@ -249,7 +253,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         final Album album = this.musicDao.getCurrentAlbum();
         if (album != null) {
             album.currentMillisInTrack = (int) this.exoPlayer.getCurrentPosition();
-            updateAppStateAlbumProgress(album);
+            updateAppStateAlbumProgress(album, true);
         }
     }
 
