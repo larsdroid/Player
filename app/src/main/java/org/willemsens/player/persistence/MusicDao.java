@@ -121,9 +121,6 @@ public abstract class MusicDao {
     @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName FROM song so LEFT JOIN album al ON so.albumId = al.id LEFT JOIN artist ar ON so.artistId = ar.id LEFT OUTER JOIN image im ON al.imageId = im.id ORDER BY ar.name, al.yearReleased, al.id, so.track")
     public abstract LiveData<List<SongWithAlbumInfo>> getAllSongsWithAlbumInfo();
 
-    @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
-    abstract LiveData<ApplicationState> getApplicationState(String property);
-
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC LIMIT 1")
     public abstract Song findFirstSong(long albumId);
 
@@ -131,7 +128,7 @@ public abstract class MusicDao {
     public abstract Song findLastSong(long albumId);
 
     @Query("SELECT * FROM applicationstate WHERE property = :property LIMIT 1")
-    abstract ApplicationState getApplicationState_NON_Live(String property);
+    abstract ApplicationState findApplicationState(String property);
 
     @Update
     public abstract void updateAlbum(Album album);
@@ -332,7 +329,7 @@ public abstract class MusicDao {
     }
 
     private Integer getCurrentAlbumId() {
-        ApplicationState stateAlbumId = getApplicationState_NON_Live(APPSTATE_CURRENT_ALBUM_ID.name());
+        ApplicationState stateAlbumId = findApplicationState(APPSTATE_CURRENT_ALBUM_ID.name());
         if (stateAlbumId != null) {
             return Integer.parseInt(stateAlbumId.value);
         } else {
@@ -349,7 +346,7 @@ public abstract class MusicDao {
         if (albumId == null) {
             deleteApplicationState(APPSTATE_CURRENT_ALBUM_ID.name());
         } else {
-            ApplicationState stateAlbumId = getApplicationState_NON_Live(APPSTATE_CURRENT_ALBUM_ID.name());
+            ApplicationState stateAlbumId = findApplicationState(APPSTATE_CURRENT_ALBUM_ID.name());
             if (stateAlbumId == null) {
                 stateAlbumId = new ApplicationState(APPSTATE_CURRENT_ALBUM_ID.name(), String.valueOf(albumId));
                 insertApplicationState(stateAlbumId);
@@ -365,7 +362,7 @@ public abstract class MusicDao {
     }
 
     public PlayStatus findCurrentPlayStatus() {
-        ApplicationState statePlayStatus = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_STATUS.name());
+        ApplicationState statePlayStatus = findApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
         if (statePlayStatus != null) {
             return PlayStatus.valueOf(statePlayStatus.value);
         } else {
@@ -377,7 +374,7 @@ public abstract class MusicDao {
         if (playStatus == null) {
             deleteApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
         } else {
-            ApplicationState statePlayStatus = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_STATUS.name());
+            ApplicationState statePlayStatus = findApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name());
             if (statePlayStatus == null) {
                 statePlayStatus = new ApplicationState(APPSTATE_CURRENT_PLAY_STATUS.name(), playStatus.name());
                 insertApplicationState(statePlayStatus);
@@ -389,7 +386,7 @@ public abstract class MusicDao {
     }
 
     public PlayMode getCurrentPlayMode() {
-        ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_MODE.name());
+        ApplicationState statePlayMode = findApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
         if (statePlayMode != null) {
             return PlayMode.valueOf(statePlayMode.value);
         } else {
@@ -401,7 +398,7 @@ public abstract class MusicDao {
         if (playMode == null) {
             deleteApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
         } else {
-            ApplicationState statePlayMode = getApplicationState_NON_Live(APPSTATE_CURRENT_PLAY_MODE.name());
+            ApplicationState statePlayMode = findApplicationState(APPSTATE_CURRENT_PLAY_MODE.name());
             if (statePlayMode == null) {
                 statePlayMode = new ApplicationState(APPSTATE_CURRENT_PLAY_MODE.name(), playMode.name());
                 insertApplicationState(statePlayMode);
