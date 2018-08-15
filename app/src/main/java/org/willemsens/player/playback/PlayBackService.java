@@ -1,5 +1,6 @@
 package org.willemsens.player.playback;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,11 +11,16 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.schedulers.Schedulers;
 import org.willemsens.player.R;
-import org.willemsens.player.persistence.entities.Album;
-import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
+import org.willemsens.player.persistence.entities.Album;
+import org.willemsens.player.persistence.entities.Image;
 import org.willemsens.player.playback.notification.NotificationBarBig;
 import org.willemsens.player.playback.notification.NotificationBarSmall;
 import org.willemsens.player.playback.notification.NotificationType;
@@ -52,10 +58,15 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
     }
 
     @Override
+    @SuppressLint("CheckResult")
     public void onCreate() {
         super.onCreate();
 
-        this.player = new Player(this, this);
+        Single.fromCallable(() -> new Player(this, this))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(player -> this.player = player);
+
         this.musicDao = AppDatabase.getAppDatabase(this).musicDao();
 
         initNotificationBars();
@@ -122,17 +133,17 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
                 if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 }
-                this.player.startSong(songId, playerCommand);
+                handleSetSong(songId, playerCommand);
             } else if (intentAction.equals(PBIT_SET_ALBUM_ID.name())) {
                 final long albumId = intent.getLongExtra(PBIPT_ALBUM_ID.name(), -1);
                 PlayerCommand playerCommand = null;
                 if (intent.hasExtra(PBIPT_PLAYER_COMMAND.name())) {
                     playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
                 }
-                this.player.startOrContinueAlbum(albumId, playerCommand);
+                handleSetAlbum(albumId, playerCommand);
             } else if (intentAction.equals(PBIT_PLAYER_COMMAND.name())) {
                 final PlayerCommand playerCommand = PlayerCommand.valueOf(intent.getStringExtra(PBIPT_PLAYER_COMMAND.name()));
-                this.player.processCommand(playerCommand);
+                handlePlayerCommand(playerCommand);
             } else if (intentAction.equals(PBIT_SET_PLAY_MODE.name())) {
                 PlayMode playMode = PlayMode.valueOf(intent.getStringExtra(PBIPT_PLAY_MODE.name()));
                 // TODO
@@ -143,6 +154,38 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             }
         }
         return START_NOT_STICKY;
+    }
+
+    private void handleSetSong(long songId, PlayerCommand playerCommand) {
+        runOnIOThread(() -> {
+            if (this.player != null) {
+                this.player.startSong(songId, playerCommand);
+            }
+        });
+    }
+
+    private void handleSetAlbum(long albumId, PlayerCommand playerCommand) {
+        runOnIOThread(() -> {
+            if (this.player != null) {
+                this.player.startOrContinueAlbum(albumId, playerCommand);
+            }
+        });
+    }
+
+    private void handlePlayerCommand(PlayerCommand playerCommand) {
+        runOnIOThread(() -> {
+            if (this.player != null) {
+                this.player.processCommand(playerCommand);
+            }
+        });
+    }
+
+    private void runOnIOThread(Action action) {
+        Observable.fromCallable(() -> {
+            action.run();
+            return Observable.empty();
+        }).subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
     private Notification createNotification() {

@@ -5,6 +5,7 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
+import org.willemsens.player.BuildConfig;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.ApplicationState;
 import org.willemsens.player.persistence.entities.Artist;
@@ -32,12 +33,16 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE =
-                            Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "app-database")
-                                    // allow queries on the main thread.
-                                    // TODO: Don't do this on a real app! See PersistenceBasicSample for an example.
-                                    .allowMainThreadQueries()
-                                    .build();
+                    if (BuildConfig.DEBUG) {
+                        INSTANCE =
+                                Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "app-database")
+                                        .build();
+                    } else {
+                        INSTANCE =
+                                Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "app-database")
+                                        .allowMainThreadQueries()
+                                        .build();
+                    }
                 }
             }
         }

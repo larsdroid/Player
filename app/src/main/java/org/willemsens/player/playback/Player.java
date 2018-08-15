@@ -23,8 +23,8 @@ import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
 import org.willemsens.player.playback.eventbus.AlbumProgressUpdatedMessage;
-import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
+import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
 import org.willemsens.player.playback.eventbus.PlayBackEventBus;
 
 import java.io.File;
