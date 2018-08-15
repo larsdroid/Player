@@ -1,5 +1,3 @@
-* `MainActivity::onNavigationItemSelected`
-
 Most urgent
 --
 * Implement 'repeat one', 'repeat all' and 'shuffle'
