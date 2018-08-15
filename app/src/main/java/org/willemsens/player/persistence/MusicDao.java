@@ -95,9 +95,6 @@ public abstract class MusicDao {
     @Query("SELECT * FROM song WHERE albumId = :albumId ORDER BY track ASC")
     public abstract LiveData<List<Song>> getAllSongs(long albumId);
 
-    @Query("SELECT so.* FROM song so, album al, applicationstate ap WHERE so.albumId = al.id AND so.track = al.currentTrack AND al.id = ap.value AND ap.property = 'APPSTATE_CURRENT_ALBUM_ID'")
-    public abstract Song getCurrentSong();
-
     @Query("SELECT so.id, so.name, so.track, so.length, al.id AS albumId, al.name AS albumName, im.imageData AS albumImageData, ar.id AS artistId, ar.name AS artistName"
             + " FROM album al"
             + " LEFT JOIN song so ON al.currentTrack = so.track AND al.id = so.albumId"
