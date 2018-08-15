@@ -2,22 +2,17 @@ package org.willemsens.player.playback.eventbus;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 
 public class CurrentAlbumOrSongMessage implements Parcelable {
-    private final long albumId;
-    private final long songId;
+    private final SongWithAlbumInfo song;
 
-    public CurrentAlbumOrSongMessage(long albumId, long songId) {
-        this.albumId = albumId;
-        this.songId = songId;
+    public CurrentAlbumOrSongMessage(SongWithAlbumInfo song) {
+        this.song = song;
     }
 
-    public long getAlbumId() {
-        return albumId;
-    }
-
-    public long getSongId() {
-        return songId;
+    public SongWithAlbumInfo getSong() {
+        return song;
     }
 
     @Override
@@ -27,8 +22,7 @@ public class CurrentAlbumOrSongMessage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.albumId);
-        dest.writeLong(this.songId);
+        dest.writeParcelable(this.song, 0);
     }
 
     public static final Parcelable.Creator<CurrentAlbumOrSongMessage> CREATOR
@@ -43,7 +37,6 @@ public class CurrentAlbumOrSongMessage implements Parcelable {
     };
 
     private CurrentAlbumOrSongMessage(Parcel in) {
-        this.albumId = in.readLong();
-        this.songId = in.readLong();
+        this.song = in.readParcelable(SongWithAlbumInfo.class.getClassLoader());
     }
 }

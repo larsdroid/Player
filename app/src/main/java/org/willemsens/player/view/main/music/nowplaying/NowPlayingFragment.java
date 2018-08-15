@@ -103,9 +103,10 @@ public class NowPlayingFragment extends Fragment {
     @SuppressLint("CheckResult")
     private void initAlbum() {
         Maybe.fromCallable(() -> this.musicDao.getCurrentAlbum())
+                .map(album -> this.musicDao.getSongWithAlbumInfo(album.id))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(album -> showCurrentAlbum(album.id));
+                .subscribe(this::showCurrentSong);
     }
 
     @SuppressLint("CheckResult")
@@ -130,7 +131,7 @@ public class NowPlayingFragment extends Fragment {
 
     @Subscribe
     public void handleCurrentAlbum(CurrentAlbumOrSongMessage message) {
-        showCurrentAlbum(message.getAlbumId());
+        showCurrentSong(message.getSong());
     }
 
     private void showCurrentSong(SongWithAlbumInfo song) {
@@ -151,14 +152,6 @@ public class NowPlayingFragment extends Fragment {
             songName.setText("");
             albumName.setText("");
         }
-    }
-
-    @SuppressLint("CheckResult")
-    private void showCurrentAlbum(long albumId) {
-        Maybe.fromCallable(() -> this.musicDao.getSongWithAlbumInfo(albumId))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::showCurrentSong);
     }
 
     private void showCurrentPlayStatus(PlayStatus playStatus) {

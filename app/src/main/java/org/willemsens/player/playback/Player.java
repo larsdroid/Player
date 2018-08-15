@@ -22,6 +22,7 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.eventbus.AlbumProgressUpdatedMessage;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
 import org.willemsens.player.playback.eventbus.CurrentPlayStatusMessage;
@@ -87,7 +88,7 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         if (resetToStartOfSong) {
             album.currentMillisInTrack = 0;
         }
-        updateAppStateCurrentAlbum(album, song);
+        updateAppStateCurrentAlbum(album);
         updateAppStateAlbumProgress(album);
 
         MediaSource musicSource = new ExtractorMediaSource.Factory(dataSourceFactory)
@@ -122,9 +123,10 @@ public class Player extends com.google.android.exoplayer2.Player.DefaultEventLis
         PlayBackEventBus.postAcrossProcess(new CurrentPlayStatusMessage(playStatus), this.context);
     }
 
-    private void updateAppStateCurrentAlbum(Album album, Song song) {
+    private void updateAppStateCurrentAlbum(Album album) {
         this.musicDao.setCurrentAlbum(album);
-        PlayBackEventBus.postAcrossProcess(new CurrentAlbumOrSongMessage(album.id, song.id), this.context);
+        final SongWithAlbumInfo songWithAlbumInfo = musicDao.getSongWithAlbumInfo(album.id);
+        PlayBackEventBus.postAcrossProcess(new CurrentAlbumOrSongMessage(songWithAlbumInfo), this.context);
     }
 
     private void updateAppStateAlbumProgress(Album album) {

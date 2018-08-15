@@ -35,6 +35,7 @@ import org.willemsens.player.persistence.AppDatabase;
 import org.willemsens.player.persistence.MusicDao;
 import org.willemsens.player.persistence.entities.Album;
 import org.willemsens.player.persistence.entities.Song;
+import org.willemsens.player.persistence.entities.helpers.SongWithAlbumInfo;
 import org.willemsens.player.playback.PlayStatus;
 import org.willemsens.player.playback.eventbus.AlbumProgressUpdatedMessage;
 import org.willemsens.player.playback.eventbus.CurrentAlbumOrSongMessage;
@@ -306,12 +307,12 @@ public class AlbumFragment extends Fragment {
 
     @Subscribe
     public void handleCurrentAlbumOrSong(CurrentAlbumOrSongMessage message) {
-        applyCurrentAlbumOrSong(message.getAlbumId(), message.getSongId());
+        applyCurrentAlbumOrSong(message.getSong());
     }
 
-    private void applyCurrentAlbumOrSong(long albumId, long songId) {
-        if (this.albumId == albumId) {
-            adapter.setHighlightedSong(songId);
+    private void applyCurrentAlbumOrSong(SongWithAlbumInfo song) {
+        if (this.albumId == song.albumId) {
+            adapter.setHighlightedSong(song.id);
         } else {
             adapter.setHighlightedSong(null);
         }
@@ -324,7 +325,7 @@ public class AlbumFragment extends Fragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(songWithAlbumInfo -> {
-                    applyCurrentAlbumOrSong(songWithAlbumInfo.albumId, songWithAlbumInfo.id);
+                    applyCurrentAlbumOrSong(songWithAlbumInfo);
                     return Observable.empty();
                 })
                 .observeOn(Schedulers.io())
