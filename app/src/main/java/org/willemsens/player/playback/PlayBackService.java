@@ -223,9 +223,12 @@ public class PlayBackService extends Service implements Player.OnUpdateListener 
             stopSelf();
         } else {
             final Album album = this.musicDao.findAlbum(this.player.getSong().albumId);
-            final Image albumCover = this.musicDao.findImage(album.imageId);
-            this.notificationBarSmall.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
-            this.notificationBarBig.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
+            if (album != null) {
+                final Image albumCover = this.musicDao.findImage(album.imageId);
+                this.notificationBarSmall.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
+                this.notificationBarBig.update(this.player.getSong(), album, albumCover, this.player.getPlayStatus());
+            } // Songs without album are not of interest to this app...
+
             if (this.player.getPlayStatus() == PLAYING) {
                 startForeground(NotificationType.MUSIC_PLAYING.getCode(), createNotification());
             } else {

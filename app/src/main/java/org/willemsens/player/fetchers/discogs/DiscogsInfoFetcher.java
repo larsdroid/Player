@@ -118,9 +118,11 @@ public class DiscogsInfoFetcher extends InfoFetcher {
 
         final UnparsedResponse unparsedResponse = fetch(url);
         final ArtistDetail artistDetail = getGson().fromJson(unparsedResponse.getJson(), ArtistDetail.class);
-        final String imageURL = artistDetail.getFirstImageURL();
-        if (imageURL != null) {
-            return new ArtistInfo(imageURL);
+        if (artistDetail != null) {
+            final String imageURL = artistDetail.getFirstImageURL();
+            if (imageURL != null) {
+                return new ArtistInfo(imageURL);
+            }
         }
 
         throw new NetworkClientException("No artist info found for artist ID '" + artistId + "'.");
