@@ -342,7 +342,9 @@ class SongRecyclerViewAdapter extends RecyclerView.Adapter<SongRecyclerViewAdapt
         @Override
         public void publishResults(CharSequence charSequence, FilterResults filterResults) {
             songs.clear();
-            songs.addAll((List<SongWithAlbumInfo>)filterResults.values);
+            if (filterResults.values != null) {
+                songs.addAll((List<SongWithAlbumInfo>) filterResults.values);
+            }
             notifyDataSetChanged();
         }
     }
